@@ -7,4 +7,3 @@ module.exports = {
       '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     },
   };
-  
