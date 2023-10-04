@@ -38,7 +38,7 @@ test("renders the Login component with login error", async () => {
   fireEvent.click(submitButton);
 
   await waitFor(() => {
-    const errorPopup = screen.getByText("login message fail", { exact: false });
+    const errorPopup = screen.getByText("login failed", { exact: false });
     expect(errorPopup).toBeInTheDocument();
   });
 });
@@ -117,7 +117,7 @@ test("renders the Login component username and password error message", async ()
   const passwordInput = await screen.findByLabelText("Password");
 
   fireEvent.change(emailInput, { target: { value: "admin" } });
-  fireEvent.change(passwordInput, { target: { value: "1234567" } });
+  fireEvent.change(passwordInput, { target: { value: "12345678" } });
 
   const submitButton = screen.getByText("Login");
   fireEvent.click(submitButton);
@@ -128,5 +128,33 @@ test("renders the Login component username and password error message", async ()
       { exact: false }
     );
     expect(errormessage).toBeInTheDocument();
+  });
+});
+
+test("renders the Login component invalid credentials", async () => {
+  jest.setTimeout(2000);
+
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () =>
+        Promise.resolve({
+          non_field_errors: ["Invalid credentials"],
+        }),
+    })
+  );
+  render(<Login />);
+
+  const emailInput = await screen.findByLabelText("Username");
+  const passwordInput = await screen.findByLabelText("Password");
+
+  fireEvent.change(emailInput, { target: { value: "admii" } });
+  fireEvent.change(passwordInput, { target: { value: "Admin@18" } });
+
+  const submitButton = screen.getByText("Login");
+  fireEvent.click(submitButton);
+
+  await waitFor(() => {
+    const errorMessage = screen.getByText("Invalid credentials");
+    expect(errorMessage).toBeInTheDocument();
   });
 });

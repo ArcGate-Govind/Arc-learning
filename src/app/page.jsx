@@ -8,7 +8,7 @@ import { removeUserSession, setUserSession } from "../utils/common";
 
 const ErroMessage = (message) => {
   return (
-    <div className=" m-0 m-auto">
+    <div className=" m-auto">
       <p className="text-red-600 text-sm mt-2">{message.message}</p>
     </div>
   );
@@ -46,6 +46,11 @@ const Login = () => {
         )
         .required("This field is required"),
       password: Yup.string()
+        .oneOf([Yup.ref("password"), null])
+        .matches(
+          /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/,
+          "Password must be at least 8 characters long, uppercase and lowercase letters,one numeric character and special character"
+        )
         .min(
           8,
           "Password must be at least 8 characters long, uppercase and lowercase letters,one numeric character and special character"
@@ -57,7 +62,7 @@ const Login = () => {
       let username = values.username;
       let password = values.password;
       await fetch(
-        "https://ee46-2409-4052-715-924e-c4b0-f551-bfe3-be57.ngrok-free.app/api/v1/login/",
+        "https://f3bf-2409-4052-2e08-a054-4d97-65a4-32e7-b086.ngrok-free.app/api/v1/login/",
         {
           method: "POST",
           headers: {
@@ -80,7 +85,7 @@ const Login = () => {
         })
         .catch((error) => {
           removeUserSession();
-          handleShowErroMessage("login message fail", "/");
+          handleShowErroMessage("login failed", "/");
           // console.error("Login error:", error);
         });
     },
@@ -88,6 +93,7 @@ const Login = () => {
   const handleShowErroMessage = (message, path) => {
     setShowMessage(message);
     setshowErroMessage(true);
+    router.push(path);
   };
   const handleOpenPopup = (message, path) => {
     setShowMessage(message);
@@ -102,7 +108,7 @@ const Login = () => {
     <section className="relative flex flex-col items-center justify-center min-h-screen">
       <div className="login_back-ground absolute inset-0"></div>
       <div className="bg-white  sm:w-1/2 md:w-1/3 lg:w-1/3 p-6 md:p-12 rounded-lg shadow-lg relative z-1">
-        {showErroMessage && <ErroMessage message={showMessage} />}
+        {!showPopup && showErroMessage && <ErroMessage message={showMessage} />}
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-sm font-medium">
@@ -153,7 +159,7 @@ const Login = () => {
         </form>
       </div>
 
-      {showPopup && <Popup message={showMessage} />}
+      {!showErroMessage && showPopup && <Popup message={showMessage} />}
     </section>
   );
 };
