@@ -1,24 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
 function middleware(req) {
-  const verify = req.cookies.get("refreshtoken")?.value
-  const  pathname = req.nextUrl.pathname;
+  const verify = req.cookies.get("refreshtoken")?.value;
+  const pathname = req.nextUrl.pathname;
   // console.log("pathsnameurl",pathname)
   // console.log("verify",verify)
 
-  if(verify == undefined && pathname !='/'){
-    console.log("Redirecting to login form")
-    return NextResponse.redirect(new URL('/', req.url));
-  }
-  else  if(verify != undefined && pathname =='/'){
+  if (verify == undefined && pathname != "/") {
+    console.log("Redirecting to login form");
+    return NextResponse.redirect(new URL("/", req.url));
+  } else if (verify != undefined && pathname == "/") {
     // console.log("Redirecting to login form")
     return NextResponse.redirect(new URL("/adminpanel", req.url));
   }
 }
 
-export default middleware
-
+export default middleware;
 
 export const config = {
-  matcher: ["/","/adminpanel"],
+  matcher: ["/", "/adminpanel"],
 };

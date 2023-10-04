@@ -44,7 +44,7 @@ test("renders the Login component with login error", async () => {
 });
 
 test("renders the Login component Successfully", async () => {
-  jest.setTimeout(15000); 
+  jest.setTimeout(15000);
 
   render(<Login />);
 

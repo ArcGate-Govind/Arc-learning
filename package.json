@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "coverage":"coverage"
+    "coverage": "coverage"
   },
   "dependencies": {
     "@babel/preset-env": "^7.22.20",

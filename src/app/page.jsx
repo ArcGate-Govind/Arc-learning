@@ -1,12 +1,12 @@
 "use client";
-import React from 'react';
+import React from "react";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import { removeUserSession, setUserSession } from "../utils/common";
 
-const ErroMessage = ( message ) => {
+const ErroMessage = (message) => {
   return (
     <div className=" m-0 m-auto">
       <p className="text-red-600 text-sm mt-2">{message.message}</p>
@@ -106,7 +106,7 @@ const Login = () => {
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-sm font-medium">
-            Username
+              Username
             </label>
             <input
               type="text"
