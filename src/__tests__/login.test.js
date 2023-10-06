@@ -2,6 +2,7 @@ import React from "react";
 import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Login from "../../src/app/page";
+import { Password_Error_Message, Username_Error_Message } from "../../globals";
 
 // Mock the useRouter function
 jest.mock("next/navigation", () => ({
@@ -96,11 +97,11 @@ test("renders the Login component username and password validation", async () =>
 
   await waitFor(() => {
     const usernameValidation = screen.getByText(
-      "Username must contain only small letters, numbers, and underscores and 5 to 20 characters long",
+      Username_Error_Message,
       { exact: false }
     );
     const passwordValidation = screen.getByText(
-      "Password must be at least 8 characters long, uppercase and lowercase letters,one numeric character and special character",
+      Password_Error_Message,
       { exact: false }
     );
     expect(usernameValidation).toBeInTheDocument();
@@ -124,7 +125,7 @@ test("renders the Login component username and password error message", async ()
 
   await waitFor(() => {
     const errormessage = screen.getByText(
-      "Password must be at least 8 characters long, uppercase and lowercase letters,one numeric character and special character",
+      Password_Error_Message,
       { exact: false }
     );
     expect(errormessage).toBeInTheDocument();
