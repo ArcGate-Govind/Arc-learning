@@ -8,3 +8,5 @@ export const Username_Error_Message =
 
 export const Password_Error_Message =
   "Password must be at least 8 characters long, uppercase and lowercase letters,one numeric character and special character";
+
+  export const Login_Failed_Message ="Login failed"

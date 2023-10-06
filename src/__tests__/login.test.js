@@ -2,7 +2,7 @@ import React from "react";
 import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Login from "../../src/app/page";
-import { Password_Error_Message, Username_Error_Message } from "../../globals";
+import { Login_Failed_Message, Password_Error_Message, Username_Error_Message } from "../../globals";
 
 // Mock the useRouter function
 jest.mock("next/navigation", () => ({
@@ -39,7 +39,7 @@ test("renders the Login component with login error", async () => {
   fireEvent.click(submitButton);
 
   await waitFor(() => {
-    const errorPopup = screen.getByText("login failed", { exact: false });
+    const errorPopup = screen.getByText(Login_Failed_Message, { exact: false });
     expect(errorPopup).toBeInTheDocument();
   });
 });

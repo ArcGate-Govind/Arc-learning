@@ -8,6 +8,7 @@ import { removeUserSession, setUserSession } from "../utils/common";
 import {
   API_URL,
   Error_Message,
+  Login_Failed_Message,
   Password_Error_Message,
   Username_Error_Message,
 } from "../../globals";
@@ -81,7 +82,7 @@ const Login = () => {
         })
         .catch((error) => {
           removeUserSession();
-          handleShowErroMessage("login failed", "/");
+          handleShowErroMessage(Login_Failed_Message, "/");
           // console.error("Login error:", error);
         });
     },
