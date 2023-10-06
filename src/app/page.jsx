@@ -5,20 +5,26 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import { removeUserSession, setUserSession } from "../utils/common";
-import { API_URL } from "../../globals";
-const ErroMessage = (message) => {
+import {
+  API_URL,
+  Error_Message,
+  Password_Error_Message,
+  Username_Error_Message,
+} from "../../globals";
+
+const ErroMessage = (props) => {
   return (
     <div className=" m-auto">
-      <p className="text-red-600 text-sm mt-2">{message.message}</p>
+      <p className="text-red-600 text-sm mt-2">{props.message}</p>
     </div>
   );
 };
 
-const Popup = (message) => {
+const Popup = (props) => {
   return (
     <div className="inset-0 z-50 fixed bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center modal__wrapper pointer-events-auto ">
       <div className="bg-white w-1/3 max-w-2xl p-4 rounded-lg modal__container transform translate-y-0 transition-transform">
-        <p className="text-xl mb-6">{message.message}</p>
+        <p className="text-xl mb-6">{props.message}</p>
       </div>
     </div>
   );
@@ -27,8 +33,9 @@ const Popup = (message) => {
 const Login = () => {
   const router = useRouter();
   const [showPopup, setShowPopup] = useState(false);
-  const [showErroMessage, setshowErroMessage] = useState(false);
+  const [showErroMessage, setShowErroMessage] = useState(false);
   const [showMessage, setShowMessage] = useState("");
+
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -36,41 +43,30 @@ const Login = () => {
     },
     validationSchema: Yup.object({
       username: Yup.string()
-        .min(
-          5,
-          "Username must contain only small letters, numbers, and underscores and 5 to 20 characters long"
-        )
-        .max(
-          20,
-          "Username must contain only small letters, numbers, and underscores and 5 to 20 characters long"
-        )
-        .required("This field is required"),
+        // .email(Username_Error_Message)
+        .min(5, Username_Error_Message)
+        .max(20, Username_Error_Message)
+        .required(Error_Message),
       password: Yup.string()
         .oneOf([Yup.ref("password"), null])
         .matches(
           /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/,
-          "Password must be at least 8 characters long, uppercase and lowercase letters,one numeric character and special character"
+          Password_Error_Message
         )
-        .min(
-          8,
-          "Password must be at least 8 characters long, uppercase and lowercase letters,one numeric character and special character"
-        )
-
-        .required("This field is required"),
+        .min(8, Password_Error_Message)
+        .required(Error_Message),
     }),
+
     onSubmit: async (values) => {
       let username = values.username;
       let password = values.password;
-      await fetch(
-        `${API_URL}/login/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        }
-      )
+      await fetch(`${API_URL}/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      })
         .then((response) => {
           return response.json();
         })
@@ -90,11 +86,13 @@ const Login = () => {
         });
     },
   });
+
   const handleShowErroMessage = (message, path) => {
     setShowMessage(message);
-    setshowErroMessage(true);
+    setShowErroMessage(true);
     router.push(path);
   };
+
   const handleOpenPopup = (message, path) => {
     setShowMessage(message);
     setShowPopup(true);
@@ -158,7 +156,6 @@ const Login = () => {
           </div>
         </form>
       </div>
-
       {!showErroMessage && showPopup && <Popup message={showMessage} />}
     </section>
   );
