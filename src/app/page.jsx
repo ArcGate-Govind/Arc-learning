@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { removeUserSession, setUserSession } from "../utils/common";
 import {
   API_URL,
-  Error_Message,
-  Login_Failed_Message,
-  Password_Error_Message,
-  Username_Error_Message,
+  ERROR_MESSAGE,
+  LOGIN_FAILED_MESSAGE,
+  PASSWORD_ERROR_MESSAGE,
+  USERNAME_ERROR_MESSAGE,
 } from "../../globals";
 
 const ErroMessage = (props) => {
@@ -44,24 +44,27 @@ const Login = () => {
     },
     validationSchema: Yup.object({
       username: Yup.string()
-        // .email(Username_Error_Message)
-        .min(5, Username_Error_Message)
-        .max(20, Username_Error_Message)
-        .required(Error_Message),
+        .matches(
+          /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|([0-9]{10})+$/,
+          USERNAME_ERROR_MESSAGE
+        )
+        .email(USERNAME_ERROR_MESSAGE)
+        .max(30, USERNAME_ERROR_MESSAGE)
+        .required(ERROR_MESSAGE),
       password: Yup.string()
         .oneOf([Yup.ref("password"), null])
         .matches(
           /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/,
-          Password_Error_Message
+          PASSWORD_ERROR_MESSAGE
         )
-        .min(8, Password_Error_Message)
-        .required(Error_Message),
+        .min(8, PASSWORD_ERROR_MESSAGE)
+        .required(ERROR_MESSAGE),
     }),
 
     onSubmit: async (values) => {
       let username = values.username;
       let password = values.password;
-      await fetch(`${API_URL}/login/`, {
+      await fetch(`${API_URL}login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,7 +77,7 @@ const Login = () => {
         .then((data) => {
           const token = data.token;
           if (data.token) {
-            setUserSession(token.refresh, token.access, username);
+            setUserSession(token.refresh, token.access, data.token.username);
             handleOpenPopup(token.message, "/adminpanel");
           } else {
             handleShowErroMessage(data.non_field_errors[0], "/");
@@ -82,7 +85,7 @@ const Login = () => {
         })
         .catch((error) => {
           removeUserSession();
-          handleShowErroMessage(Login_Failed_Message, "/");
+          handleShowErroMessage(LOGIN_FAILED_MESSAGE, "/");
           // console.error("Login error:", error);
         });
     },

@@ -5,7 +5,7 @@ export default function RootLayout({ children }) {
     <html>
       <body>
         {" "}
-        <h1>headr page for all adminpanel </h1>
+        <h1>Header page for all admin panel </h1>
         {children}
       </body>
     </html>
