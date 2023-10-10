@@ -3,3 +3,14 @@
 @tailwind utilities;
 
 
+    .dot {
+        height: 25px;
+        width: 25px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .margin{
+        margin-left: 100px;
+        margin-top: 20px;
+      }
