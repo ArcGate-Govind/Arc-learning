@@ -1,3 +1,4 @@
+import Header from "@/components/header";
 import React from "react";
 
 export default function RootLayout({ children }) {
@@ -5,7 +6,7 @@ export default function RootLayout({ children }) {
     <html>
       <body>
         {" "}
-        <h1>headr page for all adminpanel </h1>
+        <Header />
         {children}
       </body>
     </html>
