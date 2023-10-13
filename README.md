@@ -1,4 +1,5 @@
 ## Arcgate E-learning project
+
 ## Clone this git repository, if you haven't done already
 
 git init
@@ -25,6 +26,7 @@ yarn dev
 
 yarn build
 
-## To run test case 
+## To run test case
+
 yarn test
 
