@@ -2,48 +2,73 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { getaccessToken, removeUserSession } from '@/utils/common';
+import { useRouter } from 'next/navigation';
+import { API_URL } from '../../../globals';
 
 const AdminPanel = () => {
+  const router = useRouter();
   const [data, setData] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [blankInputError, setBlankInputError] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [readPermissionAll, setReadPermissionAll] = useState(false);
-  const [updatePermissionAll, setUpdatePermissionAll] = useState(false);
-  const [deletePermissionAll, setDeletePermissionAll] = useState(false);
+  const [selectAllRead, setSelectAllRead] = useState(false);
+  const [selectAllUpdate, setSelectAllUpdate] = useState(false);
+  const [selectAllDelete, setSelectAllDelete] = useState(false);
 
   useEffect(() => {
     fetchData();
   }, [currentPage]);
 
+  const accessToken = getaccessToken()
   async function fetchData() {
     try {
+      setLoading(true);
+
       const { employeeId, employeeName, status } = formik.values;
       const queryParams = [];
 
-      if (employeeId) queryParams.push(`user_id=${parseInt(employeeId)}`);
-      if (employeeName) queryParams.push(`username=${employeeName}`);
+      if (employeeId) queryParams.push(`employee_id=${employeeId}`);
+      if (employeeName) queryParams.push(`fullname=${employeeName}`);
       if (status) {
-        const statusValue = status === 'active' ? 1 : 0;
-        queryParams.push(`status=${statusValue}`);
+        const statusText = status === 'Active' ? 'Active' : 'Inactive';
+        queryParams.push(`status=${statusText}`);
       }
+
       queryParams.push(`page=${currentPage}`);
 
       const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
 
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/user/data/${queryString}`);
+      const response = await fetch(`${API_URL}users/${queryString}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
       const json = await response.json();
-      setData(json.result);
+      let authorizationData;
+
+      if (json.code == 200) {
+        authorizationData = json.results ? json.results : []
+      } else {
+        removeUserSession();
+        router.push("/")
+        authorizationData = []
+      }
+      setData(authorizationData);
+
       setTotalPages(json.pagination.total_pages);
 
       const newUrl = `${window.location.pathname}${queryString}`;
       window.history.replaceState({}, '', newUrl);
+
+      setLoading(false);
     } catch (error) {
       console.error(error);
+      setLoading(false);
     }
   }
-
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -56,15 +81,31 @@ const AdminPanel = () => {
     }
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      console.log("Updated Data:", data);
-      console.log("Data updated successfully (console only)");
+      const updatedData = data;
+      const response = await fetch(`${API_URL}user/update/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        console.log('Data updated successfully');
+      } else {
+        console.error('Failed to update data');
+      }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsSaving(false);
     }
   };
+
 
   const validationSchema = Yup.object().shape({
     employeeId: Yup.string(),
@@ -87,8 +128,8 @@ const AdminPanel = () => {
       } else {
         setBlankInputError(false);
         const queryParams = [];
-        if (values.employeeId) queryParams.push(`user_id=${parseInt(values.employeeId)}`);
-        if (values.employeeName) queryParams.push(`username=${values.employeeName}`);
+        if (values.employeeId) queryParams.push(`employee_id=${values.employeeId}`);
+        if (values.employeeName) queryParams.push(`fullname=${values.employeeName}`);
         if (values.status) queryParams.push(`status=${values.status}`);
         const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
         const newUrl = `${window.location.pathname}${queryString}`;
@@ -98,75 +139,90 @@ const AdminPanel = () => {
     },
   });
 
+  const updateSelectAllCheckboxes = () => {
+    const shouldSelectAllRead = data.every(item => item.permissions.read);
+    const shouldSelectAllUpdate = data.every(item => item.permissions.update);
+    const shouldSelectAllDelete = data.every(item => item.permissions.delete);
+
+    setSelectAllRead(shouldSelectAllRead);
+    setSelectAllUpdate(shouldSelectAllUpdate);
+    setSelectAllDelete(shouldSelectAllDelete);
+  };
+
   const handlePermissionUpdate = (index, field, value) => {
     const updatedData = [...data];
-    updatedData[index].permission[field] = value;
+    updatedData[index].permissions[field] = value;
     setData(updatedData);
+
+    if (field === 'read') {
+      const shouldSelectAllRead = updatedData.every(item => item.permissions.read);
+      setSelectAllRead(shouldSelectAllRead);
+    } else if (field === 'update') {
+      const shouldSelectAllUpdate = updatedData.every(item => item.permissions.update);
+      setSelectAllUpdate(shouldSelectAllUpdate);
+    } else if (field === 'delete') {
+      const shouldSelectAllDelete = updatedData.every(item => item.permissions.delete);
+      setSelectAllDelete(shouldSelectAllDelete);
+    }
   };
-
-  const handleToggleAllPermissions = (index, value) => {
-    const updatedData = [...data];
-    const user = updatedData[index];
-    user.permission.read = value;
-    user.permission.update = value;
-    user.permission.delete = value;
-    setData(updatedData);
-  };
-
-  const handleToggleAllReadPermissions = () => {
-    const allReadChecked = data.every((item) => item.permission.read);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permission: {
-        ...user.permission,
-        read: !allReadChecked,
-      },
-    }));
-    setData(updatedData);
-    setReadPermissionAll(!allReadChecked);
-  };
-
-  const handleToggleAllUpdatePermissions = () => {
-    const allUpdateChecked = data.every((item) => item.permission.update);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permission: {
-        ...user.permission,
-        update: !allUpdateChecked,
-      },
-    }));
-    setData(updatedData);
-    setUpdatePermissionAll(!allUpdateChecked);
-  };
-
-  const handleToggleAllDeletePermissions = () => {
-    const allDeleteChecked = data.every((item) => item.permission.delete);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permission: {
-        ...user.permission,
-        delete: !allDeleteChecked,
-      },
-    }));
-    setData(updatedData);
-    setDeletePermissionAll(!allDeleteChecked);
-  };
-
-  useEffect(() => {
-    const allReadChecked = data.every((item) => item.permission.read);
-    setReadPermissionAll(allReadChecked);
-
-    const allUpdateChecked = data.every((item) => item.permission.update);
-    setUpdatePermissionAll(allUpdateChecked);
-
-    const allDeleteChecked = data.every((item) => item.permission.delete);
-    setDeletePermissionAll(allDeleteChecked);
-  }, [data]);
 
   const handleUpdateStatus = (index, newStatus) => {
     const updatedData = [...data];
     updatedData[index].status = newStatus;
     setData(updatedData);
+  };
+
+  const handleToggleAllReadPermissions = (event) => {
+    const checked = event.target.checked;
+    const updatedData = data.map((item) => {
+      return {
+        ...item,
+        permissions: {
+          ...item.permissions,
+          read: checked,
+        },
+      };
+    });
+    setData(updatedData);
+    setSelectAllRead(checked);
+  };
+
+  const handleToggleAllUpdatePermissions = (event) => {
+    const checked = event.target.checked;
+    const updatedData = data.map((item) => {
+      return {
+        ...item,
+        permissions: {
+          ...item.permissions,
+          update: checked,
+        },
+      };
+    });
+    setData(updatedData);
+    setSelectAllUpdate(checked);
+  };
+
+  const handleToggleAllDeletePermissions = (event) => {
+    const checked = event.target.checked;
+    const updatedData = data.map((item) => {
+      return {
+        ...item,
+        permissions: {
+          ...item.permissions,
+          delete: checked,
+        },
+      };
+    });
+    setData(updatedData);
+    setSelectAllDelete(checked);
+  };
+
+  const getPageNumbers = (totalPages) => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+    return pageNumbers;
   };
 
   return (
@@ -178,7 +234,7 @@ const AdminPanel = () => {
               <input
                 type="text"
                 name="employeeId"
-                className='w-52 md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 md:mb-0'
+                className='md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 md:mb-0'
                 placeholder='Search by Employee Id'
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -187,7 +243,7 @@ const AdminPanel = () => {
               <input
                 type="text"
                 name="employeeName"
-                className='w-52 md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0'
+                className='md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0'
                 placeholder='Search by Employee Name'
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -195,15 +251,15 @@ const AdminPanel = () => {
               />
               <select
                 name="status"
-                className='w-52 md:w-64 h-8 md:h-9 px-3 bg-[#fff] text-[#9CA4B4] border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0'
+                className='md:w-64 h-8 md:h-9 px-3 bg-[#fff] text-[#9CA4B4] border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0'
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.status}
                 placeholder='Search by Employee Status'
               >
                 <option value="" className='text-[#C5C6C8]'>Select Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
               </select>
             </div>
             <div className="text-center md:text-left mr-3 md:mr-0">
@@ -215,7 +271,7 @@ const AdminPanel = () => {
       </form>
 
       <div>
-        <div className="table md:mx-auto md:mt-10 mt-5">
+        <div className="table mx-auto md:mt-10 mt-5">
           <table>
             <thead>
               <tr className="bg-[#E3F2FD] h-12">
@@ -226,16 +282,16 @@ const AdminPanel = () => {
                   />
                 </th>
                 <th className="text-sm md:w-44 md:text-base">Employee Id</th>
-                <th className="w-28 md:w-52 text-sm md:text-base">Employee Name</th>
-                <th className="w-24 md:w-44 text-sm md:text-base">Status</th>
-                <th className="w-20 md:w-36 text-sm md:text-base">Role</th>
+                <th className="md:w-52 text-sm md:text-base">Employee Name</th>
+                <th className="md:w-44 text-sm md:text-base">Status</th>
+                <th className="md:w-36 text-sm md:text-base">Role</th>
                 <th className="md:w-36 h-12 text-center text-sm md:text-base">
                   <div className="flex items-center justify-center mr-2">
                     <span className="md:mr-2">Read</span>
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1"
-                      checked={readPermissionAll}
+                      checked={selectAllRead}
                       onChange={handleToggleAllReadPermissions}
                     />
                   </div>
@@ -246,7 +302,7 @@ const AdminPanel = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1"
-                      checked={updatePermissionAll}
+                      checked={selectAllUpdate}
                       onChange={handleToggleAllUpdatePermissions}
                     />
                   </div>
@@ -257,7 +313,7 @@ const AdminPanel = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1 mr-1"
-                      checked={deletePermissionAll}
+                      checked={selectAllDelete}
                       onChange={handleToggleAllDeletePermissions}
                     />
                   </div>
@@ -265,11 +321,13 @@ const AdminPanel = () => {
               </tr>
             </thead>
             <tbody>
-              {data.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan="7" className='text-center text-red-500 text-lg font-semibold pt-4'>
-                    No data found
-                  </td>
+                  <td colSpan="8">Loading...</td>
+                </tr>
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan="8">No results found</td>
                 </tr>
               ) : (
                 data.map((item, index) => {
@@ -279,29 +337,30 @@ const AdminPanel = () => {
                         <input
                           type="checkbox"
                           className="w-4 h-4"
-                          checked={item.permission.read && item.permission.update && item.permission.delete}
-                          onChange={(e) => handleToggleAllPermissions(index, e.target.checked)}
+                        // checked={item.permission.read && item.permission.update && item.permission.delete}
+                        // onChange={(e) => handleToggleAllPermissions(index, e.target.checked)}
                         />
                       </td>
-                      <td className="w-32 text-center text-sm md:text-base md:w-40 h-12 md:px-5">{item.user_id}</td>
-                      <td className="w-32 md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">{item.username}</td>
-                      <td className="w-20 text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
+                      <td className="text-center text-sm md:text-base md:w-40 h-12 md:px-5">{item.employee_id}</td>
+                      <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">{item.fullname}</td>
+                      <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
                         <select
-                          className="w-20 md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
-                          value={item.status === 1 ? "active" : "inactive"}
-                          onChange={(e) => handleUpdateStatus(index, e.target.value === "active" ? 1 : 0)}
+                          className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
+                          value={item.status}
+                          onChange={(e) => handleUpdateStatus(index, e.target.value)}
                         >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
                         </select>
                       </td>
-                      <td className="w-32 text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">N/A</td>
+
+                      <td className="text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">{item.role}</td>
                       <td className="md:w-36 h-12">
                         <div className="flex items-center justify-center">
                           <input
                             type="checkbox"
                             className="w-4 h-4"
-                            checked={item.permission.read}
+                            checked={item.permissions.read}
                             onChange={(e) => handlePermissionUpdate(index, 'read', e.target.checked)}
                           />
                         </div>
@@ -311,7 +370,7 @@ const AdminPanel = () => {
                           <input
                             type="checkbox"
                             className="w-4 h-4"
-                            checked={item.permission.update}
+                            checked={item.permissions.update}
                             onChange={(e) => handlePermissionUpdate(index, 'update', e.target.checked)}
                           />
                         </div>
@@ -321,7 +380,7 @@ const AdminPanel = () => {
                           <input
                             type="checkbox"
                             className="w-4 h-4"
-                            checked={item.permission.delete}
+                            checked={item.permissions.delete}
                             onChange={(e) => handlePermissionUpdate(index, 'delete', e.target.checked)}
                           />
                         </div>
@@ -332,9 +391,8 @@ const AdminPanel = () => {
               )}
             </tbody>
           </table>
-
           {data.length > 0 && totalPages > 1 && (
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-between mt-4">
               <button
                 className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E]"
                 onClick={handlePrevPage}
@@ -342,8 +400,20 @@ const AdminPanel = () => {
               >
                 Previous
               </button>
+              <div>
+                {getPageNumbers(totalPages).map((page) => (
+                  <button
+                    key={page}
+                    className={`w-12 text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] ${currentPage === page ? 'bg-[#1D2E3E]' : 'bg-[#466EA1]'
+                      }`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
               <button
-                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E]"
+                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover-bg-[#1D2E3E]"
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
               >
@@ -352,19 +422,18 @@ const AdminPanel = () => {
             </div>
           )}
 
-
           {data.length > 0 && (
             <button
-              className="text-[#fff] bg-[#466EA1] float-right px-2 py-1 rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+              className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
               type="button"
               onClick={handleSaveChanges}
               disabled={isSaving}
             >
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
           )}
         </div>
-      </div >
+      </div>
     </>
   );
 };
