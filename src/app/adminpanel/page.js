@@ -1,19 +1,21 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { getaccessToken, removeUserSession } from '@/utils/common';
 import { useRouter } from 'next/navigation';
 import { API_URL } from '../../../globals';
 import Link from 'next/link';
+import { userDetailsContext } from '../../context/createContext';
 
 const AdminPanel = () => {
+  const [currentPage, setCurrentPage] = useContext(userDetailsContext);
   const router = useRouter();
   const [data, setData] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [blankInputError, setBlankInputError] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectAllRead, setSelectAllRead] = useState(false);
   const [selectAllUpdate, setSelectAllUpdate] = useState(false);
@@ -23,6 +25,7 @@ const AdminPanel = () => {
     fetchData();
   }, [currentPage]);
 
+  // console.log("currentPage",currentPage)
   const accessToken = getaccessToken()
   async function fetchData() {
     try {
@@ -62,8 +65,8 @@ const AdminPanel = () => {
 
       setTotalPages(json.pagination.total_pages);
 
-      const newUrl = `${window.location.pathname}${queryString}`;
-      window.history.replaceState({}, '', newUrl);
+      // const newUrl = `${window.location.pathname}${queryString}`;
+      // window.history.replaceState({}, '', newUrl);
 
       setLoading(false);
     } catch (error) {
