@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 function middleware(req) {
-  const verify = req.cookies.get("refreshtoken")?.value;
+  const verify = req.cookies.get("accessToken")?.value;
   const pathname = req.nextUrl.pathname;
   // console.log("pathsnameurl",pathname)
   // console.log("verify",verify)
@@ -18,5 +18,5 @@ function middleware(req) {
 export default middleware;
 
 export const config = {
-  matcher: ["/", "/adminpanel"],
+  matcher: ["/", "/adminpanel","/adminpanel/userdetails"],
 };

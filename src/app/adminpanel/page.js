@@ -1,18 +1,21 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { getaccessToken, removeUserSession } from '@/utils/common';
 import { useRouter } from 'next/navigation';
 import { API_URL } from '../../../globals';
+import Link from 'next/link';
+import { userDetailsContext } from '../../context/createContext';
 
 const AdminPanel = () => {
+  const [currentPage, setCurrentPage] = useContext(userDetailsContext);
   const router = useRouter();
   const [data, setData] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [blankInputError, setBlankInputError] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectAllRead, setSelectAllRead] = useState(false);
   const [selectAllUpdate, setSelectAllUpdate] = useState(false);
@@ -96,8 +99,8 @@ const AdminPanel = () => {
         setTotalPages(json.pagination.total_pages);
       }
 
-      const newUrl = `${window.location.pathname}${queryString}`;
-      window.history.replaceState({}, '', newUrl);
+      // const newUrl = `${window.location.pathname}${queryString}`;
+      // window.history.replaceState({}, '', newUrl);
 
       setLoading(false);
     } catch (error) {
@@ -105,8 +108,7 @@ const AdminPanel = () => {
       setLoading(false);
     }
   }
-
-
+  
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -114,6 +116,7 @@ const AdminPanel = () => {
   };
 
   const handleNextPage = () => {
+    console.log("not work 1111")
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
@@ -159,8 +162,8 @@ const AdminPanel = () => {
       queryParams.push(`page=${currentPage}`);
 
       const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
-      const newUrl = `${window.location.pathname}${queryString}`;
-      window.history.replaceState({}, '', newUrl);
+      // const newUrl = `${window.location.pathname}${queryString}`;
+      // window.history.replaceState({}, '', newUrl);
 
       fetchData();
     }
@@ -191,8 +194,8 @@ const AdminPanel = () => {
         if (values.employeeName) queryParams.push(`fullname=${values.employeeName}`);
         if (values.status) queryParams.push(`status=${values.status}`);
         const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
-        const newUrl = `${window.location.pathname}${queryString}`;
-        window.history.replaceState({}, '', newUrl);
+        // const newUrl = `${window.location.pathname}${queryString}`;
+        // window.history.replaceState({}, '', newUrl);
         fetchData();
       }
     },
@@ -216,6 +219,7 @@ const AdminPanel = () => {
   const handleToggleAllReadPermissions = (event) => {
     const checked = event.target.checked;
     const updatedData = data.map((item) => {
+
       return {
         ...item,
         permissions: {
@@ -299,8 +303,6 @@ const AdminPanel = () => {
     }
     return pageNumbers;
   };
-
-  
 
   return (
     <>
@@ -429,7 +431,7 @@ const AdminPanel = () => {
                             onChange={() => handleToggleUserPermissions(index)}
                           />
                         </td>
-                        <td className="text-center text-sm md:text-base md:w-40 h-12 md:px-5">{item.employee_id}</td>
+                        <td className="text-center text-sm md:text-base md:w-40 h-12 md:px-5" key={item.user_id} ><Link href={`adminpanel/${item.user_id}`}>{item.employee_id}</Link></td>
                         <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">{item.fullname}</td>
                         <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
                           <select
