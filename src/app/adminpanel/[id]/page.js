@@ -1,60 +1,95 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { API_URL } from "../../../../globals";
+import { getaccessToken, removeUserSession } from "@/utils/common";
+import { useRouter } from "next/navigation";
 
-const UserProfile = () => {
+const UserProfile = ({ params  }) => {
+   console.log("params",params);
+  const router = useRouter();
+  
   const [userinfo, setUserinfo] = useState(null);
-  console.log(userinfo, "llls");
   const [loading, setLoading] = useState(true);
+  const [allcheckbox,setAllcheckbox] = useState(false)
+
+  const accessToken = getaccessToken();
 
   useEffect(() => {
     userDetailsinfo();
   }, []);
 
-  const userDetailsinfo = () => {
-    // fetch("http://127.0.0.1:8000/api/v1/user/data/1/")
-    fetch(`${API_URL}user/data/1/`)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setUserinfo(data.project[0][0]); // Access the first project object
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      });
+  const userDetailsinfo = async () => {
+    const response = await fetch(`${API_URL}user/${params.id}/`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const jsonData = await response.json();1
+    let userShowData;
+    if (jsonData.code == 200) {
+      userShowData = jsonData.projects[0][0] ? jsonData.projects[0][0] : [];
+      // Access the first project object
+      setLoading(false);
+    } else {
+      removeUserSession();
+      router.push("/");
+      userShowData = []; // Access the first project object
+      setLoading(false);
+    }
+    setUserinfo(userShowData);
   };
 
   const handleReadCheckboxChange = (isChecked) => {
     if (userinfo) {
+      console.log("mmm",userinfo.permissions);
+      const readPermission = { ...userinfo.permissions, read: isChecked };
+      console.log(readPermission,"...............");
       setUserinfo((prevUserinfo) => ({
         ...prevUserinfo,
-        permission: {
-          ...prevUserinfo.permission,
-          read: isChecked,
-        },
+        permissions: readPermission
+
       }));
+      console.log(userinfo.permissions,"oooo");
+      if(readPermission.read && readPermission.update && readPermission.delete ){
+        setAllcheckbox(true)
+        
+     }
+     else{
+          setAllcheckbox(false)
+     }
+    
     }
   };
 
   const handleUpdateCheckboxChange = (isChecked) => {
-    if (userinfo && userinfo.permission) {
-      const updatedPermission = { ...userinfo.permission, update: isChecked };
+    if (userinfo && userinfo.permissions) {
+      const updatedPermission = { ...userinfo.permissions, update: isChecked };
       setUserinfo((prevUserinfo) => ({
         ...prevUserinfo,
-        permission: updatedPermission,
+        permissions: updatedPermission,
       }));
+      if(updatedPermission.read && updatedPermission.update && updatedPermission.delete ){
+        setAllcheckbox(true)
+     }
+     else{
+          setAllcheckbox(false)
+     }
     }
   };
 
   const handleDeleteCheckboxChange = (isChecked) => {
-    if (userinfo && userinfo.permission) {
-      const updatedPermission = { ...userinfo.permission, delete: isChecked };
+    if (userinfo && userinfo.permissions) {
+      const updatedPermission = { ...userinfo.permissions, delete: isChecked };
       setUserinfo((prevUserinfo) => ({
         ...prevUserinfo,
-        permission: updatedPermission,
+        permissions: updatedPermission,
       }));
+      if(updatedPermission.read && updatedPermission.update &&updatedPermission.delete ){
+        setAllcheckbox(true)
+     }
+     else{
+          setAllcheckbox(false)
+     }
     }
   };
 
@@ -65,49 +100,56 @@ const UserProfile = () => {
     permissionType,
     isChecked
   ) => {
-    console.log(
-      "userinfoModel",
-      userinfoModel,
-      "checkBoxId",
-      checkBoxId,
-      "projectId",
-      projectId,
-      "permissionType",
-      permissionType,
-      "isChecked",
-      isChecked,
-      "55"
-    );
-
+   
     const updatedPermission = {
-      ...userinfoModel.permission,
+      ...userinfoModel.permissions,
       [permissionType]: isChecked,
     };
     setUserinfo((prevUserinfo) => ({
       ...prevUserinfo,
-      permission: updatedPermission,
+      permissions: updatedPermission,
     }));
-    //setUserinfo({ ...userinfoModel }); // Create a new object to trigger a re-render
+    if(updatedPermission.read && updatedPermission.update &&updatedPermission.delete ){
+      setAllcheckbox(true)
+   }
+   else{
+        setAllcheckbox(false)
+   }
+   
   };
+  console.log("userinfo", userinfo);
 
-  const handleSaveChanges = () => {
-    if (userinfo) {
-      fetch("http://127.0.0.1:8000/api/v1/user/update/permissions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userinfo),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Permissions updated:", data);
-        })
-        .catch((error) => {
-          console.error("Error updating permissions:", error);
-        });
+  const handleSaveChanges = async () => {
+    const updatedData = [userinfo];
+    const response = await fetch(`${API_URL}user/update/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    try {
+      if (response.ok) {
+        console.log("Data updated successfully");
+      } else {
+        console.error("Failed to update data");
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
+
+  const clickallcheckedbox = (isChecked)=>{
+    setAllcheckbox(isChecked)
+    const updatedPermission = { delete: isChecked, update: isChecked, read: isChecked }
+    setUserinfo((prevUserinfo) => ({
+      ...prevUserinfo,
+      permissions: updatedPermission,
+    }));
+
+  }
 
   return loading ? (
     <p>Loading</p>
@@ -118,8 +160,8 @@ const UserProfile = () => {
           <div className="bg-[#F5F5F5] mt-20">
             <p className="dot margin text-center">G</p>
             <h3 className="px-4 py-2">Employee: {userinfo.username}</h3>
-            <h3 className="px-4 py-2">Employee id: {userinfo.user_id}</h3>
-            <h3 className="px-4 py-2">Email: {userinfo.email}</h3>
+            <h3 className="px-4 py-2">Employee id: {userinfo.employee_id}</h3>
+            <h3 className="px-4 py-2">Role: {userinfo.role}</h3>
             <h3 className="px-4 py-2">
               Status: {userinfo.status === 1 ? "active" : "inactive"}
             </h3>
@@ -131,7 +173,15 @@ const UserProfile = () => {
             <table className="min-w-full">
               <thead>
                 <tr>
-                  <th className="px-4 py-2 bg-[#E3F2FD] text-left font-semibold">
+                  <th className="px-6 py-3 bg-[#E3F2FD] text-left">
+                    <input
+                      type="checkbox"
+                      className="m-2 form-checkbox h-4 w-4 text-indigo-600"
+                      checked={allcheckbox}
+                      onChange={(e)=>clickallcheckedbox(e.target.checked)}
+                    />
+                  </th>
+                  <th className="px-6 py-3 bg-[#E3F2FD] text-left font-semibold">
                     Project Name
                   </th>
                   <th className="px-6 py-3 bg-[#E3F2FD] text-left">
@@ -139,7 +189,7 @@ const UserProfile = () => {
                     <input
                       type="checkbox"
                       className="m-2 form-checkbox h-4 w-4 text-indigo-600"
-                      checked={userinfo.permission.read}
+                      checked={userinfo.permissions.read}
                       onChange={(e) =>
                         handleReadCheckboxChange(e.target.checked)
                       }
@@ -150,7 +200,7 @@ const UserProfile = () => {
                     <input
                       type="checkbox"
                       className="form-checkbox m-2 h-4 w-4 text-indigo-600"
-                      checked={userinfo.permission.update}
+                      checked={userinfo.permissions.update}
                       onChange={(e) =>
                         handleUpdateCheckboxChange(e.target.checked)
                       }
@@ -161,7 +211,7 @@ const UserProfile = () => {
                     <input
                       type="checkbox"
                       className="form-checkbox m-2 h-4 w-4 text-indigo-600"
-                      checked={userinfo.permission.delete}
+                      checked={userinfo.permissions.delete}
                       onChange={(e) =>
                         handleDeleteCheckboxChange(e.target.checked)
                       }
@@ -171,14 +221,22 @@ const UserProfile = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-300">
-                    {userinfo.project}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-300">
+                  <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
                     <input
                       type="checkbox"
-                      className="form-checkbox h-4 w-4 text-indigo-600"
-                      checked={userinfo.permission.read}
+                      className="m-2 form-checkbox h-4 w-4 text-indigo-600"
+                      onChange={(e)=>clickallcheckedbox(e.target.checked)}
+                      checked={allcheckbox}
+                    />
+                  </td>
+                  <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
+                    {userinfo.project}
+                  </td>
+                  <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
+                    <input
+                      type="checkbox"
+                      className=" m-2 form-checkbox h-4 w-4 text-indigo-600"
+                      checked={userinfo.permissions.read}
                       id={`readCheckBoxId${userinfo.user_id}`}
                       onChange={(e) =>
                         handleCheckboxChange(
@@ -191,11 +249,11 @@ const UserProfile = () => {
                       }
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-300">
+                  <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
                     <input
                       type="checkbox"
-                      className="form-checkbox h-4 w-4 text-indigo-600"
-                      checked={userinfo.permission.update}
+                      className=" m-2 form-checkbox h-4 w-4 text-indigo-600"
+                      checked={userinfo.permissions.update}
                       id={`updateCheckBoxId${userinfo.user_id}`}
                       onChange={(e) =>
                         handleCheckboxChange(
@@ -208,11 +266,11 @@ const UserProfile = () => {
                       }
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-300">
+                  <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
                     <input
                       type="checkbox"
-                      className="form-checkbox h-4 w-4 text-indigo-600"
-                      checked={userinfo.permission.delete}
+                      className=" m-2 form-checkbox h-4 w-4 text-indigo-600"
+                      checked={userinfo.permissions.delete}
                       id={`deleteCheckBoxId${userinfo.user_id}`}
                       onChange={(e) =>
                         handleCheckboxChange(

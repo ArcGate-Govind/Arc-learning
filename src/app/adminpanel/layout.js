@@ -4,11 +4,11 @@ import React from "react";
 export default function RootLayout({ children }) {
   return (
     <html>
-      <body>
+      <body className="w-fit md:w-auto">
         {" "}
         <Header />
         {children}
-      </body>
+      </body> 
     </html>
   );
 }
