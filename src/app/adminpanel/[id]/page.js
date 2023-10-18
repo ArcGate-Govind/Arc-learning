@@ -5,7 +5,6 @@ import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
 
 const UserProfile = ({ params  }) => {
-   console.log("params",params);
   const router = useRouter();
   
   const [userinfo, setUserinfo] = useState(null);
@@ -41,15 +40,12 @@ const UserProfile = ({ params  }) => {
 
   const handleReadCheckboxChange = (isChecked) => {
     if (userinfo) {
-      console.log("mmm",userinfo.permissions);
       const readPermission = { ...userinfo.permissions, read: isChecked };
-      console.log(readPermission,"...............");
       setUserinfo((prevUserinfo) => ({
         ...prevUserinfo,
         permissions: readPermission
 
       }));
-      console.log(userinfo.permissions,"oooo");
       if(readPermission.read && readPermission.update && readPermission.delete ){
         setAllcheckbox(true)
         
@@ -117,7 +113,6 @@ const UserProfile = ({ params  }) => {
    }
    
   };
-  console.log("userinfo", userinfo);
 
   const handleSaveChanges = async () => {
     const updatedData = [userinfo];

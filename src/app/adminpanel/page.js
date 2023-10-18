@@ -1,12 +1,17 @@
 "use client";
-import React, { useContext, useEffect, useState } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { getaccessToken, removeUserSession } from '@/utils/common';
-import { useRouter } from 'next/navigation';
-import { API_URL } from '../../../globals';
-import Link from 'next/link';
-import { userDetailsContext } from '../../context/createContext';
+import React, { useContext, useEffect, useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { getaccessToken, removeUserSession } from "@/utils/common";
+import { useRouter } from "next/navigation";
+import {
+  API_URL,
+  LOADING_MESSAGE,
+  SEARCH_FIELD_MESSAGE,
+  SEARCH_RESULT_MESSAGE,
+} from "../../../globals";
+import Link from "next/link";
+import { userDetailsContext } from "../../context/createContext";
 
 const AdminPanel = () => {
   const [currentPage, setCurrentPage] = useContext(userDetailsContext);
@@ -15,7 +20,6 @@ const AdminPanel = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [blankInputError, setBlankInputError] = useState(false);
-  // const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectAllRead, setSelectAllRead] = useState(false);
   const [selectAllUpdate, setSelectAllUpdate] = useState(false);
@@ -23,27 +27,30 @@ const AdminPanel = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectAllPermissionsMap, setSelectAllPermissionsMap] = useState({});
   const [cachedData, setCachedData] = useState({});
-  const [isDataChanged, setIsDataChanged] = useState(false);
-
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (unsavedChanges) {
         e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave this page?';
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave this page?";
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [unsavedChanges]);
 
   useEffect(() => {
-    fetchData();
+    setLoading(true);
+
+    fetchData().then(() => {
+      setLoading(false);
+    });
   }, [currentPage]);
 
   useEffect(() => {
@@ -55,7 +62,7 @@ const AdminPanel = () => {
     }
   }, [currentPage]);
 
-  const accessToken = getaccessToken()
+  const accessToken = getaccessToken();
   async function fetchData() {
     try {
       setLoading(true);
@@ -66,41 +73,38 @@ const AdminPanel = () => {
       if (employeeId) queryParams.push(`employee_id=${employeeId}`);
       if (employeeName) queryParams.push(`fullname=${employeeName}`);
       if (status) {
-        const statusText = status === 'Active' ? 'Active' : 'Inactive';
+        const statusText = status === "Active" ? "Active" : "Inactive";
         queryParams.push(`status=${statusText}`);
       }
 
       queryParams.push(`page=${currentPage}`);
 
-      const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+      const queryString =
+        queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
       if (cachedData[queryString]) {
-        // Use cached data if available
         setData(cachedData[queryString]);
       } else {
         const response = await fetch(`${API_URL}users/${queryString}`, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
         const json = await response.json();
         let authorizationData;
 
         if (json.code == 200) {
-          authorizationData = json.results ? json.results : []
+          authorizationData = json.results ? json.results : [];
           setCachedData({ ...cachedData, [queryString]: authorizationData });
         } else {
           removeUserSession();
-          router.push("/")
-          authorizationData = []
+          router.push("/");
+          authorizationData = [];
         }
         setData(authorizationData);
 
         setTotalPages(json.pagination.total_pages);
       }
-
-      // const newUrl = `${window.location.pathname}${queryString}`;
-      // window.history.replaceState({}, '', newUrl);
 
       setLoading(false);
     } catch (error) {
@@ -108,7 +112,7 @@ const AdminPanel = () => {
       setLoading(false);
     }
   }
-  
+
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -116,7 +120,6 @@ const AdminPanel = () => {
   };
 
   const handleNextPage = () => {
-    console.log("not work 1111")
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
@@ -127,10 +130,10 @@ const AdminPanel = () => {
     try {
       const updatedData = data;
       const response = await fetch(`${API_URL}user/update/`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(updatedData),
       });
@@ -138,7 +141,7 @@ const AdminPanel = () => {
       if (response.ok) {
         setUnsavedChanges(false);
       } else {
-        console.error('Failed to update data');
+        console.error("Failed to update data");
       }
     } catch (error) {
       console.error(error);
@@ -148,40 +151,44 @@ const AdminPanel = () => {
   };
 
   const handleFormSubmit = () => {
-    if (!formik.values.employeeId && !formik.values.employeeName && !formik.values.status) {
+    if (
+      !formik.values.employeeId &&
+      !formik.values.employeeName &&
+      !formik.values.status
+    ) {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
       const queryParams = [];
-      if (formik.values.employeeId) queryParams.push(`employee_id=${formik.values.employeeId}`);
-      if (formik.values.employeeName) queryParams.push(`fullname=${formik.values.employeeName}`);
+      if (formik.values.employeeId)
+        queryParams.push(`employee_id=${formik.values.employeeId}`);
+      if (formik.values.employeeName)
+        queryParams.push(`fullname=${formik.values.employeeName}`);
       if (formik.values.status) {
-        const statusText = formik.values.status === 'Active' ? 'Active' : 'Inactive';
+        const statusText =
+          formik.values.status === "Active" ? "Active" : "Inactive";
         queryParams.push(`status=${statusText}`);
       }
       queryParams.push(`page=${currentPage}`);
-
-      const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
-      // const newUrl = `${window.location.pathname}${queryString}`;
-      // window.history.replaceState({}, '', newUrl);
-
       fetchData();
     }
   };
 
-  const validationSchema = Yup.object().shape({
-    employeeId: Yup.string(),
-    employeeName: Yup.string(),
-    status: Yup.string(),
-  }).test('Please fill at least one search field', function (values) {
-    return !!values.employeeId || !!values.employeeName || !!values.status;
-  });
+  const validationSchema = Yup.object()
+    .shape({
+      employeeId: Yup.string(),
+      employeeName: Yup.string(),
+      status: Yup.string(),
+    })
+    .test("Please fill at least one search field", function (values) {
+      return !!values.employeeId || !!values.employeeName || !!values.status;
+    });
 
   const formik = useFormik({
     initialValues: {
-      employeeId: '',
-      employeeName: '',
-      status: '',
+      employeeId: "",
+      employeeName: "",
+      status: "",
     },
     validationSchema,
     onSubmit: (values) => {
@@ -190,12 +197,11 @@ const AdminPanel = () => {
       } else {
         setBlankInputError(false);
         const queryParams = [];
-        if (values.employeeId) queryParams.push(`employee_id=${values.employeeId}`);
-        if (values.employeeName) queryParams.push(`fullname=${values.employeeName}`);
+        if (values.employeeId)
+          queryParams.push(`employee_id=${values.employeeId}`);
+        if (values.employeeName)
+          queryParams.push(`fullname=${values.employeeName}`);
         if (values.status) queryParams.push(`status=${values.status}`);
-        const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
-        // const newUrl = `${window.location.pathname}${queryString}`;
-        // window.history.replaceState({}, '', newUrl);
         fetchData();
       }
     },
@@ -205,7 +211,6 @@ const AdminPanel = () => {
     const updatedData = [...data];
     updatedData[index].permissions[field] = value;
     setData(updatedData);
-    setIsDataChanged(true);
     setUnsavedChanges(true);
   };
 
@@ -219,7 +224,6 @@ const AdminPanel = () => {
   const handleToggleAllReadPermissions = (event) => {
     const checked = event.target.checked;
     const updatedData = data.map((item) => {
-
       return {
         ...item,
         permissions: {
@@ -279,7 +283,6 @@ const AdminPanel = () => {
     }));
 
     setData(updatedData);
-    setIsDataChanged(true);
   };
 
   const handleToggleUserPermissions = (index) => {
@@ -304,17 +307,23 @@ const AdminPanel = () => {
     return pageNumbers;
   };
 
+  const sortedData = data.sort((a, b) => {
+    const employeeIdA = parseInt(a.employee_id.replace("emp_", ""), 10);
+    const employeeIdB = parseInt(b.employee_id.replace("emp_", ""), 10);
+    return employeeIdA - employeeIdB;
+  });
+
   return (
     <>
       <form onSubmit={formik.handleSubmit}>
-        <div className='bg-[#f5f5f5] text-center'>
-          <div className='flex md:flex-row justify-center items-center md:h-24'>
-            <div className='pt-5 md:p-5 md:flex gap-4 text-center md:text-left'>
+        <div className="bg-[#f5f5f5] text-center">
+          <div className="flex md:flex-row justify-center items-center md:h-24">
+            <div className="pt-5 md:p-5 md:flex gap-4 text-center md:text-left">
               <input
                 type="text"
                 name="employeeId"
-                className='md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 md:mb-0'
-                placeholder='Search by Employee Id'
+                className="md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 md:mb-0"
+                placeholder="Search by Employee Id"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.employeeId}
@@ -322,21 +331,23 @@ const AdminPanel = () => {
               <input
                 type="text"
                 name="employeeName"
-                className='md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0'
-                placeholder='Search by Employee Name'
+                className="md:w-64 h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0"
+                placeholder="Search by Employee Name"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.employeeName}
               />
               <select
                 name="status"
-                className='md:w-64 h-8 md:h-9 px-3 bg-[#fff] text-[#9CA4B4] border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0'
+                className="md:w-64 h-8 md:h-9 px-3 bg-[#fff] text-[#9CA4B4] border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.status}
-                placeholder='Search by Employee Status'
+                placeholder="Search by Employee Status"
               >
-                <option value="" className='text-[#C5C6C8]'>Select Status</option>
+                <option value="" className="text-[#C5C6C8]">
+                  Select Status
+                </option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
@@ -345,18 +356,23 @@ const AdminPanel = () => {
               <button
                 className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-3 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
                 type="submit"
-                onClick={handleFormSubmit}>
+                onClick={handleFormSubmit}
+              >
                 Search
               </button>
             </div>
           </div>
-          {blankInputError && <div className="text-red-500 block pb-3 md:-mt-5">Please fill in at least one search box</div>}
+          {blankInputError && (
+            <div className="text-red-500 block pb-3 md:-mt-5">
+              {SEARCH_FIELD_MESSAGE}
+            </div>
+          )}
         </div>
       </form>
 
       <div>
         <div className="table mx-auto md:mt-10 mt-5">
-          <table className='border-2 border-[#F5F5F5] shadow-lg'>
+          <table className="border-2 border-[#F5F5F5] shadow-lg">
             <thead>
               <tr className="bg-[#E3F2FD] h-12">
                 <th className="mr-1 md:w-20 h-12 flex justify-center items-center ml-1">
@@ -404,93 +420,130 @@ const AdminPanel = () => {
                     />
                   </div>
                 </th>
-                <th className='md:w-36'>
+                <th className="md:w-36">
                   <p>Save Changes</p>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {
-                loading ? (
-                  <tr>
-                    <td colSpan="8" className='text-black-600 text-center py-3'>Loading...</td>
-                  </tr>
-                ) : data.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className='text-red-600 text-center py-3'>No matching results found</td>
-                  </tr>
-                ) : (
-                  data.map((item, index) => {
-                    return (
-                      <tr key={index} className='border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0'>
-                        <td className="md:w-20 h-12 flex justify-center items-center">
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="text-black-600 text-center py-3">
+                    {LOADING_MESSAGE}
+                  </td>
+                </tr>
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="text-red-600 text-center py-3">
+                    {SEARCH_RESULT_MESSAGE}
+                  </td>
+                </tr>
+              ) : (
+                sortedData.map((item, index) => {
+                  return (
+                    <tr
+                      key={index}
+                      className="border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0"
+                    >
+                      <td className="md:w-20 h-12 flex justify-center items-center">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4"
+                          checked={selectedUsers[index] || false}
+                          onChange={() => handleToggleUserPermissions(index)}
+                        />
+                      </td>
+                      <td
+                        className="text-center text-sm md:text-base md:w-40 h-12 md:px-5"
+                        key={item.user_id}
+                      >
+                        <Link href={`adminpanel/${item.user_id}`}>
+                          {item.employee_id}
+                        </Link>
+                      </td>
+                      <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
+                        {item.fullname}
+                      </td>
+                      <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
+                        <select
+                          className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
+                          value={item.status}
+                          onChange={(e) =>
+                            handleUpdateStatus(index, e.target.value)
+                          }
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                        </select>
+                      </td>
+
+                      <td className="text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
+                        {item.role}
+                      </td>
+                      <td className="md:w-36 h-12">
+                        <div className="flex items-center justify-center">
                           <input
                             type="checkbox"
                             className="w-4 h-4"
-                            checked={selectedUsers[index] || false}
-                            onChange={() => handleToggleUserPermissions(index)}
+                            checked={item.permissions.read}
+                            onChange={(e) =>
+                              handlePermissionUpdate(
+                                index,
+                                "read",
+                                e.target.checked
+                              )
+                            }
                           />
-                        </td>
-                        <td className="text-center text-sm md:text-base md:w-40 h-12 md:px-5" key={item.user_id} ><Link href={`adminpanel/${item.user_id}`}>{item.employee_id}</Link></td>
-                        <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">{item.fullname}</td>
-                        <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
-                          <select
-                            className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
-                            value={item.status}
-                            onChange={(e) => handleUpdateStatus(index, e.target.value)}
+                        </div>
+                      </td>
+                      <td className="md:w-36 h-12">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={item.permissions.update}
+                            onChange={(e) =>
+                              handlePermissionUpdate(
+                                index,
+                                "update",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="md:w-36 h-12">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={item.permissions.delete}
+                            onChange={(e) =>
+                              handlePermissionUpdate(
+                                index,
+                                "delete",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="flex justify-center">
+                        {data.length > 0 && (
+                          <button
+                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
+                            type="button"
+                            onClick={handleSaveChanges}
+                            disabled={isSaving}
                           >
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                          </select>
-                        </td>
-
-                        <td className="text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">{item.role}</td>
-                        <td className="md:w-36 h-12">
-                          <div className="flex items-center justify-center">
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4"
-                              checked={item.permissions.read}
-                              onChange={(e) => handlePermissionUpdate(index, 'read', e.target.checked)}
-                            />
-                          </div>
-                        </td>
-                        <td className="md:w-36 h-12">
-                          <div className="flex items-center justify-center">
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4"
-                              checked={item.permissions.update}
-                              onChange={(e) => handlePermissionUpdate(index, 'update', e.target.checked)}
-                            />
-                          </div>
-                        </td>
-                        <td className="md:w-36 h-12">
-                          <div className="flex items-center justify-center">
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4"
-                              checked={item.permissions.delete}
-                              onChange={(e) => handlePermissionUpdate(index, 'delete', e.target.checked)}
-                            />
-                          </div>
-                        </td>
-                        <td className='flex justify-center'>
-                          {data.length > 0 && (
-                            <button
-                              className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
-                              type="button"
-                              onClick={handleSaveChanges}
-                              disabled={isSaving}
-                            >
-                              Save
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
+                            Save
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
           {data.length > 0 && totalPages > 1 && (
@@ -506,8 +559,9 @@ const AdminPanel = () => {
                 {getPageNumbers(totalPages).map((page) => (
                   <button
                     key={page}
-                    className={`w-12 text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] ${currentPage === page ? 'bg-[#1D2E3E]' : 'bg-[#466EA1]'
-                      }`}
+                    className={`w-12 text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] ${
+                      currentPage === page ? "bg-[#1D2E3E]" : "bg-[#466EA1]"
+                    }`}
                     onClick={() => setCurrentPage(page)}
                   >
                     {page}
@@ -531,7 +585,7 @@ const AdminPanel = () => {
               onClick={handleSaveChanges}
               disabled={isSaving}
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? "Saving..." : "Save Changes"}
             </button>
           )}
         </div>

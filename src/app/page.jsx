@@ -13,7 +13,7 @@ import {
   USERNAME_ERROR_MESSAGE,
 } from "../../globals";
 
-const ErroMessage = (props) => {
+const ErrorMessage = (props) => {
   return (
     <div className=" m-auto">
       <p className="text-red-600 text-sm mt-2">{props.message}</p>
@@ -34,7 +34,7 @@ const Popup = (props) => {
 const Login = () => {
   const router = useRouter();
   const [showPopup, setShowPopup] = useState(false);
-  const [showErroMessage, setShowErroMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showMessage, setShowMessage] = useState("");
 
   const formik = useFormik({
@@ -93,7 +93,7 @@ const Login = () => {
 
   const handleShowErroMessage = (message, path) => {
     setShowMessage(message);
-    setShowErroMessage(true);
+    setShowErrorMessage(true);
     router.push(path);
   };
 
@@ -110,7 +110,7 @@ const Login = () => {
     <section className="relative flex flex-col items-center justify-center min-h-screen">
       <div className="login_back-ground absolute inset-0"></div>
       <div className="bg-white  sm:w-1/2 md:w-1/3 lg:w-1/3 p-6 md:p-12 rounded-lg shadow-lg relative z-1">
-        {!showPopup && showErroMessage && <ErroMessage message={showMessage} />}
+        {!showPopup && showErrorMessage && <ErrorMessage message={showMessage} />}
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-sm font-medium">
@@ -160,7 +160,7 @@ const Login = () => {
           </div>
         </form>
       </div>
-      {!showErroMessage && showPopup && <Popup message={showMessage} />}
+      {!showErrorMessage && showPopup && <Popup message={showMessage} />}
     </section>
   );
 };
