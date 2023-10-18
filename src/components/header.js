@@ -34,7 +34,7 @@ const Header = () => {
                         onClick={handleLogout}
                         src={Logout}
                         alt="Logout"
-                        className="w-5 md:w-8"
+                        className="w-5 md:w-8 cursor-pointer"
                     />
                 </div>
             </div>
