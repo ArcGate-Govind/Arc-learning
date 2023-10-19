@@ -14,3 +14,5 @@ export const SEARCH_RESULT_MESSAGE = "No matching results found";
 export const LOADING_MESSAGE = "Loading...";
 
 export const SEARCH_FIELD_MESSAGE = "Please fill in at least one search box";
+
+export const UPDATE_MESSAGE = "Data updated successfully";

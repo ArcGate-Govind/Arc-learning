@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { API_URL } from "../../../../globals";
+import { API_URL, LOADING_MESSAGE } from "../../../../globals";
 import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
 
@@ -9,32 +9,31 @@ const UserProfile = ({ params }) => {
 
   const [userinfo, setUserinfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [allcheckbox, setAllcheckbox] = useState(false);
+  const [allCheckbox, setAllCheckbox] = useState(false);
 
   const accessToken = getaccessToken();
 
   useEffect(() => {
-    userDetailsinfo();
+    userDetailsInfo();
   }, []);
 
-  const userDetailsinfo = async () => {
+  const userDetailsInfo = async () => {
     const response = await fetch(`${API_URL}user/${params.id}/`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
     const jsonData = await response.json();
-    1;
+
     let userShowData;
     if (jsonData.code == 200) {
       userShowData = jsonData.projects[0][0] ? jsonData.projects[0][0] : [];
-      // Access the first project object
       setLoading(false);
     } else {
       removeUserSession();
       localStorage.removeItem("currentPage");
       router.push("/");
-      userShowData = []; // Access the first project object
+      userShowData = [];
       setLoading(false);
     }
     setUserinfo(userShowData);
@@ -52,9 +51,9 @@ const UserProfile = ({ params }) => {
         readPermission.update &&
         readPermission.delete
       ) {
-        setAllcheckbox(true);
+        setAllCheckbox(true);
       } else {
-        setAllcheckbox(false);
+        setAllCheckbox(false);
       }
     }
   };
@@ -71,9 +70,9 @@ const UserProfile = ({ params }) => {
         updatedPermission.update &&
         updatedPermission.delete
       ) {
-        setAllcheckbox(true);
+        setAllCheckbox(true);
       } else {
-        setAllcheckbox(false);
+        setAllCheckbox(false);
       }
     }
   };
@@ -90,20 +89,14 @@ const UserProfile = ({ params }) => {
         updatedPermission.update &&
         updatedPermission.delete
       ) {
-        setAllcheckbox(true);
+        setAllCheckbox(true);
       } else {
-        setAllcheckbox(false);
+        setAllCheckbox(false);
       }
     }
   };
 
-  const handleCheckboxChange = (
-    userinfoModel,
-    checkBoxId,
-    projectId,
-    permissionType,
-    isChecked
-  ) => {
+  const handleCheckboxChange = (userinfoModel, permissionType, isChecked) => {
     const updatedPermission = {
       ...userinfoModel.permissions,
       [permissionType]: isChecked,
@@ -117,9 +110,9 @@ const UserProfile = ({ params }) => {
       updatedPermission.update &&
       updatedPermission.delete
     ) {
-      setAllcheckbox(true);
+      setAllCheckbox(true);
     } else {
-      setAllcheckbox(false);
+      setAllCheckbox(false);
     }
   };
 
@@ -134,19 +127,10 @@ const UserProfile = ({ params }) => {
       body: JSON.stringify(updatedData),
     });
 
-    try {
-      if (response.ok) {
-        console.log("Data updated successfully");
-      } else {
-        console.error("Failed to update data");
-      }
-    } catch (error) {
-      console.error(error);
-    }
   };
 
-  const clickallcheckedbox = (isChecked) => {
-    setAllcheckbox(isChecked);
+  const clickAllCheckedBox = (isChecked) => {
+    setAllCheckbox(isChecked);
     const updatedPermission = {
       delete: isChecked,
       update: isChecked,
@@ -159,7 +143,7 @@ const UserProfile = ({ params }) => {
   };
 
   return loading ? (
-    <p>Loading</p>
+    <p>{LOADING_MESSAGE}</p>
   ) : (
     <div className="container mx-auto p-4">
       <div className="lg:flex">
@@ -184,8 +168,8 @@ const UserProfile = ({ params }) => {
                     <input
                       type="checkbox"
                       className="m-2 form-checkbox h-4 w-4 text-indigo-600"
-                      checked={allcheckbox}
-                      onChange={(e) => clickallcheckedbox(e.target.checked)}
+                      checked={allCheckbox}
+                      onChange={(e) => clickAllCheckedBox(e.target.checked)}
                     />
                   </th>
                   <th className="px-6 py-3 bg-[#E3F2FD] text-left font-semibold">
@@ -232,8 +216,8 @@ const UserProfile = ({ params }) => {
                     <input
                       type="checkbox"
                       className="m-2 form-checkbox h-4 w-4 text-indigo-600"
-                      onChange={(e) => clickallcheckedbox(e.target.checked)}
-                      checked={allcheckbox}
+                      onChange={(e) => clickAllCheckedBox(e.target.checked)}
+                      checked={allCheckbox}
                     />
                   </td>
                   <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
