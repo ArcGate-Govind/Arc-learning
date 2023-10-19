@@ -85,6 +85,7 @@ const Login = () => {
         })
         .catch((error) => {
           removeUserSession();
+          localStorage.removeItem("currentPage");
           handleShowErroMessage(LOGIN_FAILED_MESSAGE, "/");
           // console.error("Login error:", error);
         });
@@ -110,7 +111,9 @@ const Login = () => {
     <section className="relative flex flex-col items-center justify-center min-h-screen">
       <div className="login_back-ground absolute inset-0"></div>
       <div className="bg-white  sm:w-1/2 md:w-1/3 lg:w-1/3 p-6 md:p-12 rounded-lg shadow-lg relative z-1">
-        {!showPopup && showErrorMessage && <ErrorMessage message={showMessage} />}
+        {!showPopup && showErrorMessage && (
+          <ErrorMessage message={showMessage} />
+        )}
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-sm font-medium">

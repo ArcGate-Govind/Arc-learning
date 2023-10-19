@@ -11,14 +11,14 @@ const UserDetailsProvider = (props) => {
 
   // Try to get the currentPage from localStorage
   const storedCurrentPage = isLocalStorageAvailable
-    ? localStorage.getItem("currentPage")
+    ? JSON.parse(localStorage.getItem("currentPage"))
     : null;
 
   const [currentPage, setCurrentPage] = useState(storedCurrentPage || 1);
 
   useEffect(() => {
     if (isLocalStorageAvailable) {
-      localStorage.setItem("currentPage", currentPage);
+      localStorage.setItem("currentPage", JSON.parse(currentPage));
     }
   }, [currentPage]);
 

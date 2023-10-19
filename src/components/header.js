@@ -36,6 +36,7 @@ const Header = () => {
 
       if (response.status == 200) {
         removeUserSession();
+        localStorage.removeItem("currentPage");
         router.push("/");
       }
     } catch (error) {

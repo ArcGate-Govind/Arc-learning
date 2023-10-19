@@ -4,12 +4,12 @@ import { API_URL } from "../../../../globals";
 import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
 
-const UserProfile = ({ params  }) => {
+const UserProfile = ({ params }) => {
   const router = useRouter();
-  
+
   const [userinfo, setUserinfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [allcheckbox,setAllcheckbox] = useState(false)
+  const [allcheckbox, setAllcheckbox] = useState(false);
 
   const accessToken = getaccessToken();
 
@@ -23,7 +23,8 @@ const UserProfile = ({ params  }) => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    const jsonData = await response.json();1
+    const jsonData = await response.json();
+    1;
     let userShowData;
     if (jsonData.code == 200) {
       userShowData = jsonData.projects[0][0] ? jsonData.projects[0][0] : [];
@@ -31,6 +32,7 @@ const UserProfile = ({ params  }) => {
       setLoading(false);
     } else {
       removeUserSession();
+      localStorage.removeItem("currentPage");
       router.push("/");
       userShowData = []; // Access the first project object
       setLoading(false);
@@ -43,17 +45,17 @@ const UserProfile = ({ params  }) => {
       const readPermission = { ...userinfo.permissions, read: isChecked };
       setUserinfo((prevUserinfo) => ({
         ...prevUserinfo,
-        permissions: readPermission
-
+        permissions: readPermission,
       }));
-      if(readPermission.read && readPermission.update && readPermission.delete ){
-        setAllcheckbox(true)
-        
-     }
-     else{
-          setAllcheckbox(false)
-     }
-    
+      if (
+        readPermission.read &&
+        readPermission.update &&
+        readPermission.delete
+      ) {
+        setAllcheckbox(true);
+      } else {
+        setAllcheckbox(false);
+      }
     }
   };
 
@@ -64,12 +66,15 @@ const UserProfile = ({ params  }) => {
         ...prevUserinfo,
         permissions: updatedPermission,
       }));
-      if(updatedPermission.read && updatedPermission.update && updatedPermission.delete ){
-        setAllcheckbox(true)
-     }
-     else{
-          setAllcheckbox(false)
-     }
+      if (
+        updatedPermission.read &&
+        updatedPermission.update &&
+        updatedPermission.delete
+      ) {
+        setAllcheckbox(true);
+      } else {
+        setAllcheckbox(false);
+      }
     }
   };
 
@@ -80,12 +85,15 @@ const UserProfile = ({ params  }) => {
         ...prevUserinfo,
         permissions: updatedPermission,
       }));
-      if(updatedPermission.read && updatedPermission.update &&updatedPermission.delete ){
-        setAllcheckbox(true)
-     }
-     else{
-          setAllcheckbox(false)
-     }
+      if (
+        updatedPermission.read &&
+        updatedPermission.update &&
+        updatedPermission.delete
+      ) {
+        setAllcheckbox(true);
+      } else {
+        setAllcheckbox(false);
+      }
     }
   };
 
@@ -96,7 +104,6 @@ const UserProfile = ({ params  }) => {
     permissionType,
     isChecked
   ) => {
-   
     const updatedPermission = {
       ...userinfoModel.permissions,
       [permissionType]: isChecked,
@@ -105,13 +112,15 @@ const UserProfile = ({ params  }) => {
       ...prevUserinfo,
       permissions: updatedPermission,
     }));
-    if(updatedPermission.read && updatedPermission.update &&updatedPermission.delete ){
-      setAllcheckbox(true)
-   }
-   else{
-        setAllcheckbox(false)
-   }
-   
+    if (
+      updatedPermission.read &&
+      updatedPermission.update &&
+      updatedPermission.delete
+    ) {
+      setAllcheckbox(true);
+    } else {
+      setAllcheckbox(false);
+    }
   };
 
   const handleSaveChanges = async () => {
@@ -136,15 +145,18 @@ const UserProfile = ({ params  }) => {
     }
   };
 
-  const clickallcheckedbox = (isChecked)=>{
-    setAllcheckbox(isChecked)
-    const updatedPermission = { delete: isChecked, update: isChecked, read: isChecked }
+  const clickallcheckedbox = (isChecked) => {
+    setAllcheckbox(isChecked);
+    const updatedPermission = {
+      delete: isChecked,
+      update: isChecked,
+      read: isChecked,
+    };
     setUserinfo((prevUserinfo) => ({
       ...prevUserinfo,
       permissions: updatedPermission,
     }));
-
-  }
+  };
 
   return loading ? (
     <p>Loading</p>
@@ -173,7 +185,7 @@ const UserProfile = ({ params  }) => {
                       type="checkbox"
                       className="m-2 form-checkbox h-4 w-4 text-indigo-600"
                       checked={allcheckbox}
-                      onChange={(e)=>clickallcheckedbox(e.target.checked)}
+                      onChange={(e) => clickallcheckedbox(e.target.checked)}
                     />
                   </th>
                   <th className="px-6 py-3 bg-[#E3F2FD] text-left font-semibold">
@@ -220,7 +232,7 @@ const UserProfile = ({ params  }) => {
                     <input
                       type="checkbox"
                       className="m-2 form-checkbox h-4 w-4 text-indigo-600"
-                      onChange={(e)=>clickallcheckedbox(e.target.checked)}
+                      onChange={(e) => clickallcheckedbox(e.target.checked)}
                       checked={allcheckbox}
                     />
                   </td>

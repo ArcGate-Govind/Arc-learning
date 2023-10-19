@@ -18,14 +18,17 @@ const AdminPanel = () => {
   const router = useRouter();
   const [data, setData] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [blankInputError, setBlankInputError] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectAllRead, setSelectAllRead] = useState(false);
-  const [selectAllUpdate, setSelectAllUpdate] = useState(false);
-  const [selectAllDelete, setSelectAllDelete] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectAllPermissionsMap, setSelectAllPermissionsMap] = useState({});
+  const [selectAllReadPermissionsMap, setSelectAllReadPermissionsMap] =
+    useState({});
+  const [selectAllUpdatePermissionsMap, setSelectAllUpdatePermissionsMap] =
+    useState({});
+  const [selectAllDeletePermissionsMap, setSelectAllDeletePermissionsMap] =
+    useState({});
   const [cachedData, setCachedData] = useState({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
@@ -46,11 +49,7 @@ const AdminPanel = () => {
   }, [unsavedChanges]);
 
   useEffect(() => {
-    setLoading(true);
-
-    fetchData().then(() => {
-      setLoading(false);
-    });
+    fetchData();
   }, [currentPage]);
 
   useEffect(() => {
@@ -60,30 +59,49 @@ const AdminPanel = () => {
         [currentPage]: false,
       });
     }
+    if (currentPage && !selectAllReadPermissionsMap[currentPage]) {
+      setSelectAllReadPermissionsMap({
+        ...selectAllReadPermissionsMap,
+        [currentPage]: false,
+      });
+    }
+    if (currentPage && !selectAllUpdatePermissionsMap[currentPage]) {
+      setSelectAllUpdatePermissionsMap({
+        ...selectAllUpdatePermissionsMap,
+        [currentPage]: false,
+      });
+    }
+    if (currentPage && !selectAllDeletePermissionsMap[currentPage]) {
+      setSelectAllDeletePermissionsMap({
+        ...selectAllDeletePermissionsMap,
+        [currentPage]: false,
+      });
+    }
   }, [currentPage]);
 
   const accessToken = getaccessToken();
   async function fetchData() {
     try {
       setLoading(true);
-
       const { employeeId, employeeName, status } = formik.values;
       const queryParams = [];
 
-      if (employeeId) queryParams.push(`employee_id=${employeeId}`);
-      if (employeeName) queryParams.push(`fullname=${employeeName}`);
-      if (status) {
+      if (employeeId) {
+        queryParams.push(`employee_id=${employeeId}`);
+      } else if (employeeName) {
+        queryParams.push(`fullname=${employeeName}`);
+      } else if (status) {
         const statusText = status === "Active" ? "Active" : "Inactive";
         queryParams.push(`status=${statusText}`);
+      } else {
+        queryParams.push(`page=${currentPage}`);
       }
-
-      queryParams.push(`page=${currentPage}`);
-
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
       if (cachedData[queryString]) {
         setData(cachedData[queryString]);
+        setLoading(false);
       } else {
         const response = await fetch(`${API_URL}users/${queryString}`, {
           headers: {
@@ -96,20 +114,20 @@ const AdminPanel = () => {
         if (json.code == 200) {
           authorizationData = json.results ? json.results : [];
           setCachedData({ ...cachedData, [queryString]: authorizationData });
+          setLoading(false);
         } else {
           removeUserSession();
+          localStorage.removeItem("currentPage");
           router.push("/");
           authorizationData = [];
         }
         setData(authorizationData);
 
         setTotalPages(json.pagination.total_pages);
+        setLoading(false);
       }
-
-      setLoading(false);
     } catch (error) {
       console.error(error);
-      setLoading(false);
     }
   }
 
@@ -160,16 +178,17 @@ const AdminPanel = () => {
     } else {
       setBlankInputError(false);
       const queryParams = [];
-      if (formik.values.employeeId)
+      if (formik.values.employeeId) {
         queryParams.push(`employee_id=${formik.values.employeeId}`);
-      if (formik.values.employeeName)
+      } else if (formik.values.employeeName) {
         queryParams.push(`fullname=${formik.values.employeeName}`);
-      if (formik.values.status) {
+      } else if (formik.values.status) {
         const statusText =
           formik.values.status === "Active" ? "Active" : "Inactive";
         queryParams.push(`status=${statusText}`);
+      } else {
+        queryParams.push(`page=${currentPage}`);
       }
-      queryParams.push(`page=${currentPage}`);
       fetchData();
     }
   };
@@ -223,6 +242,10 @@ const AdminPanel = () => {
 
   const handleToggleAllReadPermissions = (event) => {
     const checked = event.target.checked;
+    setSelectAllReadPermissionsMap({
+      ...selectAllReadPermissionsMap,
+      [currentPage]: checked,
+    });
     const updatedData = data.map((item) => {
       return {
         ...item,
@@ -233,11 +256,14 @@ const AdminPanel = () => {
       };
     });
     setData(updatedData);
-    setSelectAllRead(checked);
   };
 
   const handleToggleAllUpdatePermissions = (event) => {
     const checked = event.target.checked;
+    setSelectAllUpdatePermissionsMap({
+      ...selectAllUpdatePermissionsMap,
+      [currentPage]: checked,
+    });
     const updatedData = data.map((item) => {
       return {
         ...item,
@@ -248,11 +274,14 @@ const AdminPanel = () => {
       };
     });
     setData(updatedData);
-    setSelectAllUpdate(checked);
   };
 
   const handleToggleAllDeletePermissions = (event) => {
     const checked = event.target.checked;
+    setSelectAllDeletePermissionsMap({
+      ...selectAllDeletePermissionsMap,
+      [currentPage]: checked,
+    });
     const updatedData = data.map((item) => {
       return {
         ...item,
@@ -263,7 +292,6 @@ const AdminPanel = () => {
       };
     });
     setData(updatedData);
-    setSelectAllDelete(checked);
   };
 
   const handleToggleAllPermissions = (event) => {
@@ -393,7 +421,7 @@ const AdminPanel = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1"
-                      checked={selectAllRead}
+                      checked={selectAllReadPermissionsMap[currentPage]}
                       onChange={handleToggleAllReadPermissions}
                     />
                   </div>
@@ -404,7 +432,7 @@ const AdminPanel = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1"
-                      checked={selectAllUpdate}
+                      checked={selectAllUpdatePermissionsMap[currentPage]}
                       onChange={handleToggleAllUpdatePermissions}
                     />
                   </div>
@@ -415,7 +443,7 @@ const AdminPanel = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1 mr-1"
-                      checked={selectAllDelete}
+                      checked={selectAllDeletePermissionsMap[currentPage]}
                       onChange={handleToggleAllDeletePermissions}
                     />
                   </div>
@@ -428,7 +456,10 @@ const AdminPanel = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="text-black-600 text-center py-3">
+                  <td
+                    colSpan="8"
+                    className="text-black-600 text-center font-semibold py-3"
+                  >
                     {LOADING_MESSAGE}
                   </td>
                 </tr>
