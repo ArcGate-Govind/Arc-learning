@@ -86,16 +86,21 @@ const AdminPanel = () => {
       const { employeeId, employeeName, status } = formik.values;
       const queryParams = [];
 
-      if (employeeId) {
-        queryParams.push(`employee_id=${employeeId}`);
-      } else if (employeeName) {
-        queryParams.push(`fullname=${employeeName}`);
-      } else if (status) {
-        const statusText = status === "Active" ? "Active" : "Inactive";
-        queryParams.push(`status=${statusText}`);
+      if (employeeId || employeeName || status) {
+        if (employeeId) {
+          queryParams.push(`employee_id=${employeeId}`);
+        }
+        if (employeeName) {
+          queryParams.push(`fullname=${employeeName}`);
+        }
+        if (status) {
+          const statusText = status === "Active" ? "Active" : "Inactive";
+          queryParams.push(`status=${statusText}`);
+        }
       } else {
         queryParams.push(`page=${currentPage}`);
       }
+
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
@@ -177,18 +182,6 @@ const AdminPanel = () => {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      const queryParams = [];
-      if (formik.values.employeeId) {
-        queryParams.push(`employee_id=${formik.values.employeeId}`);
-      } else if (formik.values.employeeName) {
-        queryParams.push(`fullname=${formik.values.employeeName}`);
-      } else if (formik.values.status) {
-        const statusText =
-          formik.values.status === "Active" ? "Active" : "Inactive";
-        queryParams.push(`status=${statusText}`);
-      } else {
-        queryParams.push(`page=${currentPage}`);
-      }
       fetchData();
     }
   };
