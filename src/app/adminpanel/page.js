@@ -9,6 +9,7 @@ import {
   LOADING_MESSAGE,
   SEARCH_FIELD_MESSAGE,
   SEARCH_RESULT_MESSAGE,
+  UNSAVED_ALERT_MESSAGE,
 } from "../../../globals";
 import Link from "next/link";
 import { userDetailsContext } from "../../context/createContext";
@@ -36,8 +37,7 @@ const AdminPanel = () => {
     const handleBeforeUnload = (e) => {
       if (unsavedChanges) {
         e.preventDefault();
-        e.returnValue =
-          "You have unsaved changes. Are you sure you want to leave this page?";
+        e.returnValue = { UNSAVED_ALERT_MESSAGE };
       }
     };
 
@@ -192,7 +192,7 @@ const AdminPanel = () => {
       employeeName: Yup.string(),
       status: Yup.string(),
     })
-    .test("Please fill at least one search field", function (values) {
+    .test({ SEARCH_FIELD_MESSAGE }, function (values) {
       return !!values.employeeId || !!values.employeeName || !!values.status;
     });
 
