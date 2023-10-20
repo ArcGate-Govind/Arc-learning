@@ -1,5 +1,3 @@
-export const API_URL = "http://127.0.0.1:8000/api/v1/";
-
 export const ERROR_MESSAGE = "This field is required.";
 
 export const USERNAME_ERROR_MESSAGE = "Invalid email address format.";
@@ -19,3 +17,7 @@ export const UPDATE_MESSAGE = "Data updated successfully!";
 
 export const UNSAVED_ALERT_MESSAGE =
   "You have unsaved changes. Are you sure you want to leave this page?";
+
+export const USER_NOT_FOUND = "User details not found.";
+
+export const PAGE_NOT_FOUND = "Page not found.";

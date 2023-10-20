@@ -10,7 +10,7 @@ import {
   removeUserSession,
 } from "@/utils/common";
 import { useRouter } from "next/navigation";
-import { API_URL } from "../../globals";
+import { API_URL } from "../../constant";
 
 const Header = () => {
   const [isClient, setIsClient] = useState(false);

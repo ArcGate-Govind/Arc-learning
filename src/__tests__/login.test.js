@@ -6,7 +6,7 @@ import {
   LOGIN_FAILED_MESSAGE,
   PASSWORD_ERROR_MESSAGE,
   USERNAME_ERROR_MESSAGE,
-} from "../../globals";
+} from "../../message";
 
 // Mock the useRouter function
 jest.mock("next/navigation", () => ({

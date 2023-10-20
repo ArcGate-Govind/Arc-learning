@@ -4,13 +4,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
+import { API_URL } from "../../../constant";
 import {
-  API_URL,
   LOADING_MESSAGE,
   SEARCH_FIELD_MESSAGE,
   SEARCH_RESULT_MESSAGE,
   UNSAVED_ALERT_MESSAGE,
-} from "../../../globals";
+} from "../../../message";
 import Link from "next/link";
 import { userDetailsContext } from "../../context/createContext";
 

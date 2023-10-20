@@ -5,13 +5,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import { removeUserSession, setUserSession } from "../utils/common";
+import { API_URL } from "../../constant";
 import {
-  API_URL,
   ERROR_MESSAGE,
   LOGIN_FAILED_MESSAGE,
   PASSWORD_ERROR_MESSAGE,
   USERNAME_ERROR_MESSAGE,
-} from "../../globals";
+} from "../../message";
 
 const ErrorMessage = (props) => {
   return (
