@@ -545,7 +545,10 @@ const AdminPanel = () => {
                         className="text-center text-sm md:text-base md:w-40 h-12 md:px-5"
                         key={item.user_id}
                       >
-                        <Link href={`adminpanel/${item.user_id}`}>
+                        <Link
+                          href={`adminpanel/${item.user_id}`}
+                          className="font-semibold hover:underline"
+                        >
                           {item.employee_id}
                         </Link>
                       </td>
