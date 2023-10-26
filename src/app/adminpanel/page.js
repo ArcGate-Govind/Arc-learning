@@ -4,15 +4,15 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
-import { API_URL } from "../../../constant";
 import {
   LOADING_MESSAGE,
   SEARCH_FIELD_MESSAGE,
   SEARCH_RESULT_MESSAGE,
-  UNSAVED_ALERT_MESSAGE,
 } from "../../../message";
+import { API_URL } from "../../../constant";
 import Link from "next/link";
 import { userDetailsContext } from "../../context/createContext";
+import PopupModal from "@/components/popupModal";
 
 const AdminPanel = () => {
   const [currentPage, setCurrentPage] = useContext(userDetailsContext);
@@ -32,27 +32,16 @@ const AdminPanel = () => {
     useState({});
   const [cachedData, setCachedData] = useState({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isConfirmModal, setIsConfirmModal] = useState(true);
 
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (unsavedChanges) {
-        e.preventDefault();
-        e.returnValue = { UNSAVED_ALERT_MESSAGE };
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [unsavedChanges]);
+    const initialSelectedUsers = data.map(() => false);
+    setSelectedUsers(initialSelectedUsers);
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [currentPage]);
-
-  useEffect(() => {
     if (currentPage && !selectAllPermissionsMap[currentPage]) {
       setSelectAllPermissionsMap({
         ...selectAllPermissionsMap,
@@ -91,10 +80,10 @@ const AdminPanel = () => {
           queryParams.push(`employee_id=${employeeId}`);
         }
         if (employeeName) {
-          queryParams.push(`fullname=${employeeName}`);
+          queryParams.push(`full_name=${employeeName}`);
         }
         if (status) {
-          const statusText = status === "Active" ? "Active" : "Inactive";
+          const statusText = status === "Active" ? "true" : "false";
           queryParams.push(`status=${statusText}`);
         }
       } else {
@@ -127,7 +116,6 @@ const AdminPanel = () => {
           authorizationData = [];
         }
         setData(authorizationData);
-
         setTotalPages(json.pagination.total_pages);
         setLoading(false);
       }
@@ -137,21 +125,73 @@ const AdminPanel = () => {
   }
 
   const handlePrevPage = () => {
-    if (currentPage > 1) {
+    if (unsavedChanges) {
+      setIsOpenModal(true);
+    } else if (isConfirmModal && currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
+    if (unsavedChanges) {
+      setIsOpenModal(true);
+    } else if (isConfirmModal && currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  const handleSaveChanges = async () => {
+  const confirmModal = () => {
+    setIsOpenModal(false);
+    setIsConfirmModal(true);
+    fetchData();
+    setUnsavedChanges(false);
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+
+    setSelectAllPermissionsMap({
+      ...selectAllPermissionsMap,
+      [currentPage]: false,
+    });
+
+    setSelectAllReadPermissionsMap({
+      ...selectAllReadPermissionsMap,
+      [currentPage]: false,
+    });
+
+    setSelectAllUpdatePermissionsMap({
+      ...selectAllUpdatePermissionsMap,
+      [currentPage]: false,
+    });
+
+    setSelectAllDeletePermissionsMap({
+      ...selectAllDeletePermissionsMap,
+      [currentPage]: false,
+    });
+  };
+
+  const closeModal = () => {
+    setIsOpenModal(false);
+    setIsConfirmModal(false);
+  };
+
+  const handleSaveChanges = async (user = null) => {
     setIsSaving(true);
     try {
-      const updatedData = data;
+      let updatedData;
+
+      if (user) {
+        if (Array.isArray(user)) {
+          updatedData = user;
+        } else {
+          updatedData = [user];
+        }
+      } else {
+        updatedData = data;
+      }
+
       const response = await fetch(`${API_URL}user/update/`, {
         method: "PUT",
         headers: {
@@ -222,8 +262,8 @@ const AdminPanel = () => {
   const handlePermissionUpdate = (index, field, value) => {
     const updatedData = [...data];
     updatedData[index].permissions[field] = value;
-    setData(updatedData);
     setUnsavedChanges(true);
+    setData(updatedData);
   };
 
   const handleUpdateStatus = (index, newStatus) => {
@@ -243,12 +283,12 @@ const AdminPanel = () => {
       return {
         ...item,
         permissions: {
-          ...item.permissions,
           read: checked,
         },
       };
     });
     setData(updatedData);
+    setUnsavedChanges(true);
   };
 
   const handleToggleAllUpdatePermissions = (event) => {
@@ -261,12 +301,12 @@ const AdminPanel = () => {
       return {
         ...item,
         permissions: {
-          ...item.permissions,
           update: checked,
         },
       };
     });
     setData(updatedData);
+    setUnsavedChanges(true);
   };
 
   const handleToggleAllDeletePermissions = (event) => {
@@ -279,18 +319,33 @@ const AdminPanel = () => {
       return {
         ...item,
         permissions: {
-          ...item.permissions,
           delete: checked,
         },
       };
     });
     setData(updatedData);
+    setUnsavedChanges(true);
   };
 
   const handleToggleAllPermissions = (event) => {
     const checked = event.target.checked;
     setSelectAllPermissionsMap({
       ...selectAllPermissionsMap,
+      [currentPage]: checked,
+    });
+
+    setSelectAllReadPermissionsMap({
+      ...selectAllReadPermissionsMap,
+      [currentPage]: checked,
+    });
+
+    setSelectAllUpdatePermissionsMap({
+      ...selectAllUpdatePermissionsMap,
+      [currentPage]: checked,
+    });
+
+    setSelectAllDeletePermissionsMap({
+      ...selectAllDeletePermissionsMap,
       [currentPage]: checked,
     });
 
@@ -302,22 +357,26 @@ const AdminPanel = () => {
         delete: checked,
       },
     }));
-
     setData(updatedData);
+    setUnsavedChanges(true);
   };
 
-  const handleToggleUserPermissions = (index) => {
-    const updatedUsers = [...selectedUsers];
-    updatedUsers[index] = !updatedUsers[index];
-    setSelectedUsers(updatedUsers);
+  const handleToggleUserPermissions = (user_id) => {
+    const userIndex = data.findIndex((item) => item.user_id === user_id);
+    if (userIndex !== -1) {
+      const updatedUsers = [...selectedUsers];
+      updatedUsers[userIndex] = !updatedUsers[userIndex];
+      setSelectedUsers(updatedUsers);
 
-    const updatedData = [...data];
-    updatedData[index].permissions = {
-      read: updatedUsers[index],
-      update: updatedUsers[index],
-      delete: updatedUsers[index],
-    };
-    setData(updatedData);
+      const updatedData = [...data];
+      updatedData[userIndex].permissions = {
+        read: updatedUsers[userIndex],
+        update: updatedUsers[userIndex],
+        delete: updatedUsers[userIndex],
+      };
+      setData(updatedData);
+      setUnsavedChanges(true);
+    }
   };
 
   const getPageNumbers = (totalPages) => {
@@ -473,8 +532,13 @@ const AdminPanel = () => {
                         <input
                           type="checkbox"
                           className="w-4 h-4"
-                          checked={selectedUsers[index] || false}
-                          onChange={() => handleToggleUserPermissions(index)}
+                          checked={selectedUsers[item]}
+                          onChange={() =>
+                            handleToggleUserPermissions(
+                              item.user_id,
+                              currentPage
+                            )
+                          }
                         />
                       </td>
                       <td
@@ -486,18 +550,18 @@ const AdminPanel = () => {
                         </Link>
                       </td>
                       <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
-                        {item.fullname}
+                        {item.full_name}
                       </td>
                       <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
                         <select
                           className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
                           value={item.status}
                           onChange={(e) =>
-                            handleUpdateStatus(index, e.target.value)
+                            handleUpdateStatus(index, e.target.value === "true")
                           }
                         >
-                          <option value="Active">Active</option>
-                          <option value="Inactive">Inactive</option>
+                          <option value="true">Active</option>
+                          <option value="false">Inactive</option>
                         </select>
                       </td>
 
@@ -553,16 +617,14 @@ const AdminPanel = () => {
                         </div>
                       </td>
                       <td className="flex justify-center">
-                        {data.length > 0 && (
-                          <button
-                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
-                            type="button"
-                            onClick={handleSaveChanges}
-                            disabled={isSaving}
-                          >
-                            Save
-                          </button>
-                        )}
+                        <button
+                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover-bg-[#1D2E3E]"
+                          type="button"
+                          onClick={() => handleSaveChanges(item)}
+                          disabled={isSaving}
+                        >
+                          Save
+                        </button>
                       </td>
                     </tr>
                   );
@@ -573,7 +635,7 @@ const AdminPanel = () => {
           {data.length > 0 && totalPages > 1 && (
             <div className="flex justify-between mt-4">
               <button
-                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E]"
+                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
               >
@@ -593,7 +655,7 @@ const AdminPanel = () => {
                 ))}
               </div>
               <button
-                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E]"
+                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
               >
@@ -606,7 +668,7 @@ const AdminPanel = () => {
             <button
               className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
               type="button"
-              onClick={handleSaveChanges}
+              onClick={() => handleSaveChanges(data)}
               disabled={isSaving}
             >
               {isSaving ? "Saving..." : "Save Changes"}
@@ -614,6 +676,9 @@ const AdminPanel = () => {
           )}
         </div>
       </div>
+      {isOpenModal && (
+        <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
+      )}
     </>
   );
 };
