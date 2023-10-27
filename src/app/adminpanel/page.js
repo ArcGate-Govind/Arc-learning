@@ -34,13 +34,15 @@ const AdminPanel = () => {
   const [deletePermissionAll, setDeletePermissionAll] = useState(false);
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [seachValue, setSearchValue] = useState({});
+  // const [seachValue, setSearchValue] = useState({});
 
   useEffect(() => {
     const initialSelectedUsers = data.map(() => false);
     setSelectedUsers(initialSelectedUsers);
-    let values = JSON.parse(localStorage.getItem("values"));
-    setSearchValue(values);
+    // let values = JSON.parse(localStorage.getItem("values"));
+    // setSearchValue(
+    //   values ? values : { employeeId: "fggg", employeeName: "", status: "" }
+    // );
   }, []);
 
   useEffect(() => {
@@ -56,6 +58,7 @@ const AdminPanel = () => {
   async function fetchData() {
     const currentURL = window.location.href;
     const queryStringUrl = currentURL.split("?")[1];
+
     try {
       setLoading(true);
       const queryParams = [];
@@ -63,7 +66,7 @@ const AdminPanel = () => {
 
       if (queryStringUrl == undefined) {
         localStorage.removeItem("values");
-        queryParams.push(`page=${currentPage}`);
+        // queryParams.push(`page=${currentPage}`);
       } else if (values != null) {
         if (values.employeeId || values.employeeName || values.status) {
           if (values.employeeId) {
@@ -81,7 +84,6 @@ const AdminPanel = () => {
       queryParams.push(`page=${currentPage}`);
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
-
       const newUrl = `${window.location.pathname}${queryString}`;
       window.history.replaceState({}, "", newUrl);
 
@@ -96,7 +98,7 @@ const AdminPanel = () => {
         });
         const json = await response.json();
         let authorizationData;
-
+        console.log("json", json, values);
         if (json.code == 200) {
           authorizationData = json.results ? json.results : [];
           setCachedData({ ...cachedData, [queryString]: authorizationData });
@@ -218,11 +220,16 @@ const AdminPanel = () => {
       return !!values.employeeId || !!values.employeeName || !!values.status;
     });
 
+  let searchValue = JSON.parse(localStorage.getItem("values"));
+  if (searchValue == null) {
+    searchValue = { employeeId: "", employeeName: "", status: "" };
+  }
+
   const formik = useFormik({
     initialValues: {
-      employeeId: "",
-      employeeName: "",
-      status: "",
+      employeeId: searchValue.employeeId,
+      employeeName: searchValue.employeeName,
+      status: searchValue.status,
     },
     validationSchema,
     onSubmit: (values) => {
@@ -432,7 +439,6 @@ const AdminPanel = () => {
     const employeeIdB = parseInt(b.employee_id.replace("emp_", ""), 10);
     return employeeIdA - employeeIdB;
   });
-
   return (
     <>
       <form onSubmit={formik.handleSubmit}>
