@@ -39,11 +39,11 @@ const Login = () => {
 
   const formik = useFormik({
     initialValues: {
-      username: "",
+      email: "",
       password: "",
     },
     validationSchema: Yup.object({
-      username: Yup.string()
+      email: Yup.string()
         .matches(
           /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|([0-9]{10})+$/,
           USERNAME_ERROR_MESSAGE
@@ -62,14 +62,14 @@ const Login = () => {
     }),
 
     onSubmit: async (values) => {
-      let username = values.username;
+      let email = values.email;
       let password = values.password;
       await fetch(`${API_URL}login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       })
         .then((response) => {
           return response.json();
@@ -116,21 +116,21 @@ const Login = () => {
         )}
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-sm font-medium">
-              Username
+            <label htmlFor="email" className="block text-sm font-medium">
+              Email
             </label>
             <input
               type="text"
-              name="username"
-              id="username"
+              name="email"
+              id="email"
               onChange={formik.handleChange}
-              value={formik.values.username}
+              value={formik.values.email}
               onBlur={formik.handleBlur}
               className=" border border-gray-300 p-1 mt-4 block w-full cursor-pointer rounded-md"
             />
-            {formik.touched.username && formik.errors.username && (
+            {formik.touched.email && formik.errors.email && (
               <p className="text-red-500 text-sm mt-2">
-                {formik.errors.username}
+                {formik.errors.email}
               </p>
             )}
           </div>
