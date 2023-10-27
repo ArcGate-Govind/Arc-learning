@@ -86,6 +86,7 @@ const Login = () => {
         .catch((error) => {
           removeUserSession();
           localStorage.removeItem("currentPage");
+          localStorage.removeItem("values");
           handleShowErroMessage(LOGIN_FAILED_MESSAGE, "/");
           // console.error("Login error:", error);
         });

@@ -34,10 +34,13 @@ const AdminPanel = () => {
   const [deletePermissionAll, setDeletePermissionAll] = useState(false);
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [seachValue, setSearchValue] = useState({});
 
   useEffect(() => {
     const initialSelectedUsers = data.map(() => false);
     setSelectedUsers(initialSelectedUsers);
+    let values = JSON.parse(localStorage.getItem("values"));
+    setSearchValue(values);
   }, []);
 
   useEffect(() => {
@@ -49,28 +52,33 @@ const AdminPanel = () => {
       });
     }
   }, [currentPage]);
-
   const accessToken = getaccessToken();
   async function fetchData() {
+    const currentURL = window.location.href;
+    const queryStringUrl = currentURL.split("?")[1];
     try {
       setLoading(true);
-      const { employeeId, employeeName, status } = formik.values;
       const queryParams = [];
+      let values = JSON.parse(localStorage.getItem("values"));
 
-      if (employeeId || employeeName || status) {
-        if (employeeId) {
-          queryParams.push(`employee_id=${employeeId}`);
-        }
-        if (employeeName) {
-          queryParams.push(`full_name=${employeeName}`);
-        }
-        if (status) {
-          const statusText = status === "Active" ? "true" : "false";
-          queryParams.push(`status=${statusText}`);
+      if (queryStringUrl == undefined) {
+        localStorage.removeItem("values");
+        queryParams.push(`page=${currentPage}`);
+      } else if (values != null) {
+        if (values.employeeId || values.employeeName || values.status) {
+          if (values.employeeId) {
+            queryParams.push(`employee_id=${values.employeeId}`);
+          }
+          if (values.employeeName) {
+            queryParams.push(`full_name=${values.employeeName}`);
+          }
+          if (values.status) {
+            const statusText = values.status === "Active" ? "true" : "false";
+            queryParams.push(`status=${statusText}`);
+          }
         }
       }
       queryParams.push(`page=${currentPage}`);
-
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
@@ -96,6 +104,7 @@ const AdminPanel = () => {
         } else {
           removeUserSession();
           localStorage.removeItem("currentPage");
+          localStorage.removeItem("values");
           router.push("/");
           authorizationData = [];
         }
@@ -217,6 +226,7 @@ const AdminPanel = () => {
     },
     validationSchema,
     onSubmit: (values) => {
+      localStorage.setItem("values", JSON.stringify(values));
       if (!values.employeeId && !values.employeeName && !values.status) {
         setBlankInputError(true);
       } else {
