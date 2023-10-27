@@ -54,6 +54,7 @@ const AdminPanel = () => {
       });
     }
   }, [currentPage]);
+
   const accessToken = getaccessToken();
   async function fetchData() {
     const currentURL = window.location.href;
@@ -292,15 +293,15 @@ const AdminPanel = () => {
     });
   };
 
-  const handleToggleUserPermissions = (user_id, setToTrue) => {
+  const handleToggleUserPermissions = (user_id, checked) => {
     const updatedData = data.map((user) => {
       if (user.user_id === user_id) {
         return {
           ...user,
           permissions: {
-            read: setToTrue,
-            update: setToTrue,
-            delete: setToTrue,
+            read: checked,
+            update: checked,
+            delete: checked,
           },
         };
       }
@@ -308,7 +309,7 @@ const AdminPanel = () => {
     });
 
     const updatedSelectedUsers = { ...selectedUsers };
-    updatedSelectedUsers[user_id] = setToTrue;
+    updatedSelectedUsers[user_id] = checked;
 
     setData(updatedData);
     setSelectedUsers(updatedSelectedUsers);
@@ -358,44 +359,49 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    const allReadChecked = data.every((item) => item.permissions.read);
+    const allReadChecked =
+      data.length > 0 && data.every((item) => item.permissions.read);
     setReadPermissionAll(allReadChecked);
 
-    const allUpdateChecked = data.every((item) => item.permissions.update);
+    const allUpdateChecked =
+      data.length > 0 && data.every((item) => item.permissions.update);
     setUpdatePermissionAll(allUpdateChecked);
 
-    const allDeleteChecked = data.every((item) => item.permissions.delete);
+    const allDeleteChecked =
+      data.length > 0 && data.every((item) => item.permissions.delete);
     setDeletePermissionAll(allDeleteChecked);
 
-    const allPermissionsTrue = data.every(
-      (user) =>
-        user.permissions.read &&
-        user.permissions.update &&
-        user.permissions.delete
-    );
+    const allPermissionsTrue =
+      data.length > 0 &&
+      data.every(
+        (user) =>
+          user.permissions.read &&
+          user.permissions.update &&
+          user.permissions.delete
+      );
 
-    // Check if all permissions are true in the database
     let allPermissionsAreTrue = true;
-    for (const user of data) {
-      if (
-        !user.permissions.read ||
-        !user.permissions.update ||
-        !user.permissions.delete
-      ) {
-        allPermissionsAreTrue = false;
-        break;
+    if (data.length > 0) {
+      for (const user of data) {
+        if (
+          !user.permissions.read ||
+          !user.permissions.update ||
+          !user.permissions.delete
+        ) {
+          allPermissionsAreTrue = false;
+          break;
+        }
       }
     }
 
     if (allPermissionsTrue) {
-      setSelectAllPermissionsMap((prevMap) => ({
-        ...prevMap,
+      setSelectAllPermissionsMap((permission) => ({
+        ...permission,
         [currentPage]: true,
       }));
     } else {
-      // If not all permissions are true, set it to false
-      setSelectAllPermissionsMap((prevMap) => ({
-        ...prevMap,
+      setSelectAllPermissionsMap((permission) => ({
+        ...permission,
         [currentPage]: false,
       }));
     }
@@ -410,9 +416,8 @@ const AdminPanel = () => {
       .map((user) => user.user_id);
 
     const initialSelectedUsers = data.reduce((selected, user) => {
-      selected[user.user_id] = usersWithAllPermissionsTrue.includes(
-        user.user_id
-      );
+      selected[user.user_id] =
+        data.length > 0 && usersWithAllPermissionsTrue.includes(user.user_id);
       return selected;
     }, {});
 
@@ -512,7 +517,7 @@ const AdminPanel = () => {
                 <th className="text-sm md:w-44 md:text-base">Employee Id</th>
                 <th className="md:w-52 text-sm md:text-base">Employee Name</th>
                 <th className="md:w-44 text-sm md:text-base">Status</th>
-                <th className="md:w-36 text-sm md:text-base">Role</th>
+                {/* <th className="md:w-36 text-sm md:text-base">Role</th> */}
                 <th className="md:w-36 h-12 text-center text-sm md:text-base">
                   <div className="flex items-center justify-center mr-2">
                     <span className="md:mr-2">Read</span>
@@ -613,10 +618,9 @@ const AdminPanel = () => {
                           <option value="false">Inactive</option>
                         </select>
                       </td>
-
-                      <td className="text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
+                      {/* <td className="text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
                         {item.role}
-                      </td>
+                      </td> */}
                       <td className="md:w-36 h-12">
                         <div className="flex items-center justify-center">
                           <input
