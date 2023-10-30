@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import PopupMessage from "@/components/popupMessage";
 import { API_URL } from "../../../../constant";
 import { LOADING_MESSAGE, USER_NOT_FOUND } from "../../../../message";
 import { getaccessToken } from "@/utils/common";
@@ -7,14 +8,16 @@ import NotFound from "@/app/not-found";
 
 const UserProfile = ({ params }) => {
   const [userinfo, setUserinfo] = useState([]);
-  console.log(userinfo, "bbbb");
+  console.log(userinfo, "userinfo");
+
   const [checkedAllRead, setCheckedAllRead] = useState(false);
   const [checkedAllUpdate, setCheckedAllUpdate] = useState(false);
   const [checkedAllDelete, setCheckedAllDelete] = useState(false);
   const [projectAllPermissions, setProjectAllPermissions] = useState([]);
   const [allCheckbox, setAllCheckbox] = useState(false);
+  const [showPopupMessage, setShowPopupMessage] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   let accessToken = getaccessToken();
-  console.log(accessToken);
 
   useEffect(() => {
     (async () => {
@@ -25,8 +28,9 @@ const UserProfile = ({ params }) => {
           },
         });
         const data = await response.json();
-        console.log(data, "dataaa");
+
         setUserinfo(data);
+        console.log(userinfo?.projects,"bbb");
         handledefultpermissions(data);
       } catch (error) {
         console.error("Error:", error);
@@ -69,14 +73,13 @@ const UserProfile = ({ params }) => {
       setCheckedAllUpdate(allupdate);
     }
     if (alldelete) {
-      checkedAllDelete(alldelete);
+      setAllCheckbox(alldelete);
     }
   };
 
   const handlePermissionChange = (projectIndex, permissionType) => {
     const updatedData = { ...userinfo };
     const project = updatedData.projects[projectIndex];
-    // setAllCheckbox(!project.permissions[permissionType])
     project.permissions[permissionType] = !project.permissions[permissionType];
     if (
       project.permissions["read"] &&
@@ -139,7 +142,6 @@ const UserProfile = ({ params }) => {
 
   const handleallPermissionsByType = (permissionType, checkboxvalues) => {
     let projectPermission = [];
-    // setAllCheckbox(!checkboxvalues)
     userinfo.projects.map((project, index) => {
       const updatedProject = { ...project };
       updatedProject.permissions[permissionType] = !checkboxvalues;
@@ -182,7 +184,6 @@ const UserProfile = ({ params }) => {
 
     let updatedallPermississio = [...projectAllPermissions];
     updatedallPermississio[index] = !updatedallPermississio[index];
-    // setAllCheckbox(updatedallPermississio[index] )
     setProjectAllPermissions(updatedallPermississio);
     project.permissions["read"] = updatedallPermississio[index];
     project.permissions["update"] = updatedallPermississio[index];
@@ -191,9 +192,10 @@ const UserProfile = ({ params }) => {
     let allRead = true;
     let allUpdate = true;
     let allDelete = true;
-    let allcheckbox = true;
+  ;
 
     userinfo.projects.map((project) => {
+      let allcheckbox = true
       if (!project.permissions["read"]) {
         allRead = false;
         allcheckbox = false;
@@ -217,26 +219,80 @@ const UserProfile = ({ params }) => {
       setAllCheckbox(true);
     }
   };
-
-  const handleSaveChanges = async () => {
-    const updatedData = userinfo.projects;
-    console.log(updatedData, "userinfo");
+  const handleAllSaveChanges = async () => {
     try {
-      const response = await fetch(`${API_URL}user/upate/`, {
+      const updatedData = userinfo.projects;
+      console.log(updatedData, "updatadata");
+
+      const response = await fetch(`${API_URL}user/update/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        
+
         body: JSON.stringify(updatedData),
-       
       });
       const json = await response.json();
+      console.log(json, "json");
       if (json.code == 200) {
-        alert("hello")
+        setShowPopupMessage(json.message);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 1000);
+      } else {
+        setShowPopupMessage(response.statusText);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 1000);
       }
-      
+
+      if (!response.ok) {
+        console.error(
+          "Error updating user data:",
+          response.status,
+          response.statusText
+        );
+        return;
+      }
+    } catch (error) {
+      console.error("An error occurred while updating user data:", error);
+    }
+  };
+
+  const handleSaveChanges = async (index) => {
+    try {
+      const updatedData = userinfo.projects[index];
+      const singleUpdateData = [];
+      singleUpdateData.push(updatedData);
+      console.log(updatedData, "updatadata");
+
+      const response = await fetch(`${API_URL}user/update/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+
+        body: JSON.stringify(singleUpdateData),
+      });
+      const json = await response.json();
+      console.log(json, "json");
+      if (json.code == 200) {
+        setShowPopupMessage(json.message);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 1000);
+      } else {
+        setShowPopupMessage(response.statusText);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 1000);
+      }
 
       if (!response.ok) {
         console.error(
@@ -270,11 +326,20 @@ const UserProfile = ({ params }) => {
     <div className="container mx-auto p-4 w-[100%]">
       <div className="lg:flex w-[100%]">
         <div className="w-full lg:w-[15%] bg-white p-4">
-          <div className="bg-[#F5F5F5] mt-20">
-            <p className="dot margin text-center">G</p>
-            <h3 className="px-4 py-2">Employee:{userinfo?.full_name} </h3>
-            <h3 className="px-4 py-2">Employee id:{userinfo?.employee_id}</h3>
-          </div>
+        {
+          userinfo?.projects?.map((item)=>{
+            return(
+              <>
+              <div className="bg-[#F5F5F5] mt-20">
+              <p className="dot margin text-center">G</p>
+              <h3 className="px-4 py-2">Employee:{item?.full_name} </h3>
+              <h3 className="px-4 py-2">Employee id:{item?.employee_id}</h3>
+            </div>
+              </>
+            )
+          })
+        }
+          
         </div>
         <div className="w-full lg:w-4/5 bg-white p-4">
           <div className="m-2 w-full lg:w-[100%] overflow-x-auto">
@@ -381,7 +446,12 @@ const UserProfile = ({ params }) => {
                         />
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
-                        <button className="mx-20 bg-[#466EA1] p-1 rounded-md text-white">
+                        <button
+                          className="mx-20 bg-[#466EA1] p-1 rounded-md text-white"
+                          onClick={() => {
+                            handleSaveChanges(index);
+                          }}
+                        >
                           Save Changes
                         </button>
                       </td>
@@ -393,7 +463,7 @@ const UserProfile = ({ params }) => {
             <div className="flex justify-center lg:justify-end mt-6">
               <button
                 className="mx-20 bg-[#466EA1] p-1 rounded-md text-white"
-                onClick={handleSaveChanges}
+                onClick={handleAllSaveChanges}
               >
                 Save Changes
               </button>
@@ -401,6 +471,7 @@ const UserProfile = ({ params }) => {
           </div>
         </div>
       </div>
+      {showPopup && <PopupMessage showPopupMessage={showPopupMessage} />}
     </div>
   );
 };

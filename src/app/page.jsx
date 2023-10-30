@@ -21,19 +21,19 @@ const ErrorMessage = (props) => {
   );
 };
 
-const Popup = (props) => {
-  return (
-    <div className="inset-0 z-50 fixed bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center modal__wrapper pointer-events-auto ">
-      <div className="bg-white w-1/3 max-w-2xl p-4 rounded-lg modal__container transform translate-y-0 transition-transform">
-        <p className="text-xl mb-6">{props.message}</p>
-      </div>
-    </div>
-  );
-};
+// const Popup = (props) => {
+//   return (
+//     <div className="inset-0 z-50 fixed bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center modal__wrapper pointer-events-auto ">
+//       <div className="bg-white w-1/3 max-w-2xl p-4 rounded-lg modal__container transform translate-y-0 transition-transform">
+//         <p className="text-xl mb-6">{props.message}</p>
+//       </div>
+//     </div>
+//   );
+// };
 
 const Login = () => {
   const router = useRouter();
-  const [showPopup, setShowPopup] = useState(false);
+  // const [showPopup, setShowPopup] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showMessage, setShowMessage] = useState("");
 
@@ -99,21 +99,19 @@ const Login = () => {
   };
 
   const handleOpenPopup = (message, path) => {
+    router.push(path);
     setShowMessage(message);
-    setShowPopup(true);
-    setTimeout(() => {
-      setShowPopup(false);
-      router.push(path);
-    }, 1000);
+    // setShowPopup(true);
+    // setTimeout(() => {
+    //   setShowPopup(false);
+    // }, 1000);
   };
 
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen">
       <div className="login_back-ground absolute inset-0"></div>
       <div className="bg-white  sm:w-1/2 md:w-1/3 lg:w-1/3 p-6 md:p-12 rounded-lg shadow-lg relative z-1">
-        {!showPopup && showErrorMessage && (
-          <ErrorMessage message={showMessage} />
-        )}
+        {showErrorMessage && <ErrorMessage message={showMessage} />}
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium">
@@ -129,9 +127,7 @@ const Login = () => {
               className=" border border-gray-300 p-1 mt-4 block w-full cursor-pointer rounded-md"
             />
             {formik.touched.email && formik.errors.email && (
-              <p className="text-red-500 text-sm mt-2">
-                {formik.errors.email}
-              </p>
+              <p className="text-red-500 text-sm mt-2">{formik.errors.email}</p>
             )}
           </div>
           <div className="mb-4">
@@ -163,7 +159,7 @@ const Login = () => {
           </div>
         </form>
       </div>
-      {!showErrorMessage && showPopup && <Popup message={showMessage} />}
+      {/* {!showErrorMessage && showPopup && <Popup message={showMessage} />} */}
     </section>
   );
 };

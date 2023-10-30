@@ -4,15 +4,16 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
-import { API_URL } from "../../../constant";
 import {
   LOADING_MESSAGE,
   SEARCH_FIELD_MESSAGE,
   SEARCH_RESULT_MESSAGE,
-  UNSAVED_ALERT_MESSAGE,
 } from "../../../message";
+import { API_URL } from "../../../constant";
 import Link from "next/link";
 import { userDetailsContext } from "../../context/createContext";
+import PopupModal from "@/components/popupModal";
+import PopupMessage from "@/components/popupMessage";
 
 const AdminPanel = () => {
   const [currentPage, setCurrentPage] = useContext(userDetailsContext);
@@ -24,56 +25,26 @@ const AdminPanel = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectAllPermissionsMap, setSelectAllPermissionsMap] = useState({});
-  const [selectAllReadPermissionsMap, setSelectAllReadPermissionsMap] =
-    useState({});
-  const [selectAllUpdatePermissionsMap, setSelectAllUpdatePermissionsMap] =
-    useState({});
-  const [selectAllDeletePermissionsMap, setSelectAllDeletePermissionsMap] =
-    useState({});
   const [cachedData, setCachedData] = useState({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isConfirmModal, setIsConfirmModal] = useState(true);
+  const [readPermissionAll, setReadPermissionAll] = useState(false);
+  const [updatePermissionAll, setUpdatePermissionAll] = useState(false);
+  const [deletePermissionAll, setDeletePermissionAll] = useState(false);
+  const [showPopupMessage, setShowPopupMessage] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (unsavedChanges) {
-        e.preventDefault();
-        e.returnValue = { UNSAVED_ALERT_MESSAGE };
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [unsavedChanges]);
+    const initialSelectedUsers = data.map(() => false);
+    setSelectedUsers(initialSelectedUsers);
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [currentPage]);
-
-  useEffect(() => {
     if (currentPage && !selectAllPermissionsMap[currentPage]) {
       setSelectAllPermissionsMap({
         ...selectAllPermissionsMap,
-        [currentPage]: false,
-      });
-    }
-    if (currentPage && !selectAllReadPermissionsMap[currentPage]) {
-      setSelectAllReadPermissionsMap({
-        ...selectAllReadPermissionsMap,
-        [currentPage]: false,
-      });
-    }
-    if (currentPage && !selectAllUpdatePermissionsMap[currentPage]) {
-      setSelectAllUpdatePermissionsMap({
-        ...selectAllUpdatePermissionsMap,
-        [currentPage]: false,
-      });
-    }
-    if (currentPage && !selectAllDeletePermissionsMap[currentPage]) {
-      setSelectAllDeletePermissionsMap({
-        ...selectAllDeletePermissionsMap,
         [currentPage]: false,
       });
     }
@@ -91,18 +62,20 @@ const AdminPanel = () => {
           queryParams.push(`employee_id=${employeeId}`);
         }
         if (employeeName) {
-          queryParams.push(`fullname=${employeeName}`);
+          queryParams.push(`full_name=${employeeName}`);
         }
         if (status) {
-          const statusText = status === "Active" ? "Active" : "Inactive";
+          const statusText = status === "Active" ? "true" : "false";
           queryParams.push(`status=${statusText}`);
         }
-      } else {
-        queryParams.push(`page=${currentPage}`);
       }
+      queryParams.push(`page=${currentPage}`);
 
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+
+      const newUrl = `${window.location.pathname}${queryString}`;
+      window.history.replaceState({}, "", newUrl);
 
       if (cachedData[queryString]) {
         setData(cachedData[queryString]);
@@ -127,7 +100,6 @@ const AdminPanel = () => {
           authorizationData = [];
         }
         setData(authorizationData);
-
         setTotalPages(json.pagination.total_pages);
         setLoading(false);
       }
@@ -137,21 +109,52 @@ const AdminPanel = () => {
   }
 
   const handlePrevPage = () => {
-    if (currentPage > 1) {
+    if (unsavedChanges) {
+      setIsOpenModal(true);
+    } else if (isConfirmModal && currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
+    if (unsavedChanges) {
+      setIsOpenModal(true);
+    } else if (isConfirmModal && currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  const handleSaveChanges = async () => {
+  const confirmModal = () => {
+    setIsOpenModal(false);
+    setIsConfirmModal(true);
+    setUnsavedChanges(false);
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const closeModal = () => {
+    setIsOpenModal(false);
+    setIsConfirmModal(false);
+  };
+
+  const handleSaveChanges = async (user = null) => {
     setIsSaving(true);
     try {
-      const updatedData = data;
+      let updatedData;
+
+      if (user) {
+        if (Array.isArray(user)) {
+          updatedData = user;
+        } else {
+          updatedData = [user];
+        }
+      } else {
+        updatedData = data;
+      }
+
       const response = await fetch(`${API_URL}user/update/`, {
         method: "PUT",
         headers: {
@@ -160,11 +163,21 @@ const AdminPanel = () => {
         },
         body: JSON.stringify(updatedData),
       });
-
-      if (response.ok) {
+      const json = await response.json();
+      console.log("response", json);
+      if (json.code == 200) {
         setUnsavedChanges(false);
+        setShowPopupMessage(json.message);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 1000);
       } else {
-        console.error("Failed to update data");
+        setShowPopupMessage(response.statusText);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 1000);
       }
     } catch (error) {
       console.error(error);
@@ -226,98 +239,174 @@ const AdminPanel = () => {
     setUnsavedChanges(true);
   };
 
+  const handleToggleAllPermissions = () => {
+    const allPermissionsTrue = data.every(
+      (user) =>
+        user.permissions.read &&
+        user.permissions.update &&
+        user.permissions.delete
+    );
+
+    const currentPageValue = !allPermissionsTrue;
+
+    const updatedData = data.map((user) => ({
+      ...user,
+      permissions: {
+        read: currentPageValue,
+        update: currentPageValue,
+        delete: currentPageValue,
+      },
+    }));
+
+    const updatedSelectedUsers = updatedData.reduce(
+      (users, user) => {
+        users[user.user_id] = currentPageValue;
+        return users;
+      },
+      { ...selectedUsers }
+    );
+
+    setSelectedUsers(updatedSelectedUsers);
+    setData(updatedData);
+    setUnsavedChanges(true);
+    setSelectAllPermissionsMap({
+      ...selectAllPermissionsMap,
+      [currentPage]: currentPageValue,
+    });
+  };
+
+  const handleToggleUserPermissions = (user_id, setToTrue) => {
+    const updatedData = data.map((user) => {
+      if (user.user_id === user_id) {
+        return {
+          ...user,
+          permissions: {
+            read: setToTrue,
+            update: setToTrue,
+            delete: setToTrue,
+          },
+        };
+      }
+      return user;
+    });
+
+    const updatedSelectedUsers = { ...selectedUsers };
+    updatedSelectedUsers[user_id] = setToTrue;
+
+    setData(updatedData);
+    setSelectedUsers(updatedSelectedUsers);
+    setUnsavedChanges(true);
+  };
+
+  const handleToggleAllReadPermissions = () => {
+    const allReadChecked = data.every((item) => item.permissions.read);
+    const updatedData = data.map((user) => ({
+      ...user,
+      permissions: {
+        ...user.permissions,
+        read: !allReadChecked,
+      },
+    }));
+    setData(updatedData);
+    setReadPermissionAll(!allReadChecked);
+    setUnsavedChanges(true);
+  };
+
+  const handleToggleAllUpdatePermissions = () => {
+    const allUpdateChecked = data.every((item) => item.permissions.update);
+    const updatedData = data.map((user) => ({
+      ...user,
+      permissions: {
+        ...user.permissions,
+        update: !allUpdateChecked,
+      },
+    }));
+    setData(updatedData);
+    setUpdatePermissionAll(!allUpdateChecked);
+    setUnsavedChanges(true);
+  };
+
+  const handleToggleAllDeletePermissions = () => {
+    const allDeleteChecked = data.every((item) => item.permissions.delete);
+    const updatedData = data.map((user) => ({
+      ...user,
+      permissions: {
+        ...user.permissions,
+        delete: !allDeleteChecked,
+      },
+    }));
+    setData(updatedData);
+    setDeletePermissionAll(!allDeleteChecked);
+    setUnsavedChanges(true);
+  };
+
+  useEffect(() => {
+    const allReadChecked = data.every((item) => item.permissions.read);
+    setReadPermissionAll(allReadChecked);
+
+    const allUpdateChecked = data.every((item) => item.permissions.update);
+    setUpdatePermissionAll(allUpdateChecked);
+
+    const allDeleteChecked = data.every((item) => item.permissions.delete);
+    setDeletePermissionAll(allDeleteChecked);
+
+    const allPermissionsTrue = data.every(
+      (user) =>
+        user.permissions.read &&
+        user.permissions.update &&
+        user.permissions.delete
+    );
+
+    // Check if all permissions are true in the database
+    let allPermissionsAreTrue = true;
+    for (const user of data) {
+      if (
+        !user.permissions.read ||
+        !user.permissions.update ||
+        !user.permissions.delete
+      ) {
+        allPermissionsAreTrue = false;
+        break;
+      }
+    }
+
+    if (allPermissionsTrue) {
+      setSelectAllPermissionsMap((prevMap) => ({
+        ...prevMap,
+        [currentPage]: true,
+      }));
+    } else {
+      // If not all permissions are true, set it to false
+      setSelectAllPermissionsMap((prevMap) => ({
+        ...prevMap,
+        [currentPage]: false,
+      }));
+    }
+
+    const usersWithAllPermissionsTrue = data
+      .filter(
+        (user) =>
+          user.permissions.read &&
+          user.permissions.update &&
+          user.permissions.delete
+      )
+      .map((user) => user.user_id);
+
+    const initialSelectedUsers = data.reduce((selected, user) => {
+      selected[user.user_id] = usersWithAllPermissionsTrue.includes(
+        user.user_id
+      );
+      return selected;
+    }, {});
+
+    setSelectedUsers(initialSelectedUsers);
+  }, [data]);
+
   const handleUpdateStatus = (index, newStatus) => {
     const updatedData = [...data];
     updatedData[index].status = newStatus;
     setData(updatedData);
     setUnsavedChanges(true);
-  };
-
-  const handleToggleAllReadPermissions = (event) => {
-    const checked = event.target.checked;
-    setSelectAllReadPermissionsMap({
-      ...selectAllReadPermissionsMap,
-      [currentPage]: checked,
-    });
-    const updatedData = data.map((item) => {
-      return {
-        ...item,
-        permissions: {
-          ...item.permissions,
-          read: checked,
-        },
-      };
-    });
-    setData(updatedData);
-  };
-
-  const handleToggleAllUpdatePermissions = (event) => {
-    const checked = event.target.checked;
-    setSelectAllUpdatePermissionsMap({
-      ...selectAllUpdatePermissionsMap,
-      [currentPage]: checked,
-    });
-    const updatedData = data.map((item) => {
-      return {
-        ...item,
-        permissions: {
-          ...item.permissions,
-          update: checked,
-        },
-      };
-    });
-    setData(updatedData);
-  };
-
-  const handleToggleAllDeletePermissions = (event) => {
-    const checked = event.target.checked;
-    setSelectAllDeletePermissionsMap({
-      ...selectAllDeletePermissionsMap,
-      [currentPage]: checked,
-    });
-    const updatedData = data.map((item) => {
-      return {
-        ...item,
-        permissions: {
-          ...item.permissions,
-          delete: checked,
-        },
-      };
-    });
-    setData(updatedData);
-  };
-
-  const handleToggleAllPermissions = (event) => {
-    const checked = event.target.checked;
-    setSelectAllPermissionsMap({
-      ...selectAllPermissionsMap,
-      [currentPage]: checked,
-    });
-
-    const updatedData = data.map((item) => ({
-      ...item,
-      permissions: {
-        read: checked,
-        update: checked,
-        delete: checked,
-      },
-    }));
-
-    setData(updatedData);
-  };
-
-  const handleToggleUserPermissions = (index) => {
-    const updatedUsers = [...selectedUsers];
-    updatedUsers[index] = !updatedUsers[index];
-    setSelectedUsers(updatedUsers);
-
-    const updatedData = [...data];
-    updatedData[index].permissions = {
-      read: updatedUsers[index],
-      update: updatedUsers[index],
-      delete: updatedUsers[index],
-    };
-    setData(updatedData);
   };
 
   const getPageNumbers = (totalPages) => {
@@ -414,7 +503,7 @@ const AdminPanel = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1"
-                      checked={selectAllReadPermissionsMap[currentPage]}
+                      checked={readPermissionAll}
                       onChange={handleToggleAllReadPermissions}
                     />
                   </div>
@@ -425,7 +514,7 @@ const AdminPanel = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4 ml-1"
-                      checked={selectAllUpdatePermissionsMap[currentPage]}
+                      checked={updatePermissionAll}
                       onChange={handleToggleAllUpdatePermissions}
                     />
                   </div>
@@ -435,8 +524,8 @@ const AdminPanel = () => {
                     <span className="md:mr-2">Delete</span>
                     <input
                       type="checkbox"
-                      className="w-4 h-4 ml-1 mr-1"
-                      checked={selectAllDeletePermissionsMap[currentPage]}
+                      className="w-4 h-4 ml-1"
+                      checked={deletePermissionAll}
                       onChange={handleToggleAllDeletePermissions}
                     />
                   </div>
@@ -473,31 +562,39 @@ const AdminPanel = () => {
                         <input
                           type="checkbox"
                           className="w-4 h-4"
-                          checked={selectedUsers[index] || false}
-                          onChange={() => handleToggleUserPermissions(index)}
+                          checked={selectedUsers[item.user_id]}
+                          onChange={(e) =>
+                            handleToggleUserPermissions(
+                              item.user_id,
+                              e.target.checked
+                            )
+                          }
                         />
                       </td>
                       <td
                         className="text-center text-sm md:text-base md:w-40 h-12 md:px-5"
                         key={item.user_id}
                       >
-                        <Link href={`adminpanel/${item.user_id}`}>
+                        <Link
+                          href={`adminpanel/${item.user_id}`}
+                          className="font-semibold hover:underline"
+                        >
                           {item.employee_id}
                         </Link>
                       </td>
                       <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
-                        {item.fullname}
+                        {item.full_name}
                       </td>
                       <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
                         <select
                           className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
                           value={item.status}
                           onChange={(e) =>
-                            handleUpdateStatus(index, e.target.value)
+                            handleUpdateStatus(index, e.target.value === "true")
                           }
                         >
-                          <option value="Active">Active</option>
-                          <option value="Inactive">Inactive</option>
+                          <option value="true">Active</option>
+                          <option value="false">Inactive</option>
                         </select>
                       </td>
 
@@ -553,16 +650,14 @@ const AdminPanel = () => {
                         </div>
                       </td>
                       <td className="flex justify-center">
-                        {data.length > 0 && (
-                          <button
-                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
-                            type="button"
-                            onClick={handleSaveChanges}
-                            disabled={isSaving}
-                          >
-                            Save
-                          </button>
-                        )}
+                        <button
+                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover-bg-[#1D2E3E]"
+                          type="button"
+                          onClick={() => handleSaveChanges(item)}
+                          disabled={isSaving}
+                        >
+                          Save
+                        </button>
                       </td>
                     </tr>
                   );
@@ -573,7 +668,7 @@ const AdminPanel = () => {
           {data.length > 0 && totalPages > 1 && (
             <div className="flex justify-between mt-4">
               <button
-                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E]"
+                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
               >
@@ -593,7 +688,7 @@ const AdminPanel = () => {
                 ))}
               </div>
               <button
-                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E]"
+                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
               >
@@ -606,7 +701,7 @@ const AdminPanel = () => {
             <button
               className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
               type="button"
-              onClick={handleSaveChanges}
+              onClick={() => handleSaveChanges(data)}
               disabled={isSaving}
             >
               {isSaving ? "Saving..." : "Save Changes"}
@@ -614,6 +709,10 @@ const AdminPanel = () => {
           )}
         </div>
       </div>
+      {isOpenModal && (
+        <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
+      )}
+      {showPopup && <PopupMessage showPopupMessage={showPopupMessage} />}
     </>
   );
 };
