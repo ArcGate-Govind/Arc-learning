@@ -145,6 +145,7 @@ const AdminPanel = () => {
     try {
       let updatedData;
 
+      console.log(user,"user");
       if (user) {
         if (Array.isArray(user)) {
           updatedData = user;

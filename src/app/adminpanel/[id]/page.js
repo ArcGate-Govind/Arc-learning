@@ -8,6 +8,8 @@ import NotFound from "@/app/not-found";
 
 const UserProfile = ({ params }) => {
   const [userinfo, setUserinfo] = useState([]);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   console.log(userinfo, "userinfo");
 
   const [checkedAllRead, setCheckedAllRead] = useState(false);
@@ -22,22 +24,24 @@ const UserProfile = ({ params }) => {
   useEffect(() => {
     (async () => {
       try {
+        setLoading(true);
+        setError(false);
         const response = await fetch(`${API_URL}user/${params.id}/`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
         const data = await response.json();
-
+        console.log(data,"data");
         setUserinfo(data);
-        console.log(userinfo?.projects,"bbb");
         handledefultpermissions(data);
+        setLoading(false);
       } catch (error) {
+        setError(true);
         console.error("Error:", error);
       }
     })();
   }, []);
-
   const handledefultpermissions = (data) => {
     let allread = true;
     let allupdate = true;
@@ -192,10 +196,8 @@ const UserProfile = ({ params }) => {
     let allRead = true;
     let allUpdate = true;
     let allDelete = true;
-  ;
-
     userinfo.projects.map((project) => {
-      let allcheckbox = true
+      let allcheckbox = true;
       if (!project.permissions["read"]) {
         allRead = false;
         allcheckbox = false;
@@ -324,22 +326,15 @@ const UserProfile = ({ params }) => {
 
   return (
     <div className="container mx-auto p-4 w-[100%]">
+      {loading && <h1>Loading....</h1>}
+      {error && <h1>Something went wrong</h1>}
       <div className="lg:flex w-[100%]">
         <div className="w-full lg:w-[15%] bg-white p-4">
-        {
-          userinfo?.projects?.map((item)=>{
-            return(
-              <>
-              <div className="bg-[#F5F5F5] mt-20">
-              <p className="dot margin text-center">G</p>
-              <h3 className="px-4 py-2">Employee:{item?.full_name} </h3>
-              <h3 className="px-4 py-2">Employee id:{item?.employee_id}</h3>
-            </div>
-              </>
-            )
-          })
-        }
-          
+          <div className="bg-[#F5F5F5] mt-20">
+            <p className="dot margin text-center">G</p>
+            <h3 className="px-4 py-2">Employee:{userinfo?.full_name} </h3>
+            <h3 className="px-4 py-2">Employee id:{userinfo?.employee_id}</h3>
+          </div>
         </div>
         <div className="w-full lg:w-4/5 bg-white p-4">
           <div className="m-2 w-full lg:w-[100%] overflow-x-auto">
