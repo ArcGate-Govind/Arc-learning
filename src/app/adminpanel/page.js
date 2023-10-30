@@ -259,7 +259,6 @@ const AdminPanel = () => {
       );
       if (!values.employeeId && !values.employeeName && !values.status) {
         setBlankInputError(true);
-        handleFormClear();
       } else {
         setBlankInputError(false);
         const queryParams = [];
