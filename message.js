@@ -21,3 +21,5 @@ export const UNSAVED_ALERT_MESSAGE =
 export const USER_NOT_FOUND = "User details not found.";
 
 export const PAGE_NOT_FOUND = "Page not found.";
+
+export const NO_CHANGES_MESSAGE = "No changes to save.";

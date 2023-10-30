@@ -6,6 +6,7 @@ import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
 import {
   LOADING_MESSAGE,
+  NO_CHANGES_MESSAGE,
   SEARCH_FIELD_MESSAGE,
   SEARCH_RESULT_MESSAGE,
 } from "../../../message";
@@ -34,7 +35,9 @@ const AdminPanel = () => {
   const [deletePermissionAll, setDeletePermissionAll] = useState(false);
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [noChangesToSave, setNoChangesToSave] = useState(false);
   // const [seachValue, setSearchValue] = useState({});
+  const [searchClear, setSearchClear] = useState(false);
 
   useEffect(() => {
     const initialSelectedUsers = data.map(() => false);
@@ -60,10 +63,19 @@ const AdminPanel = () => {
     const currentURL = window.location.href;
     const queryStringUrl = currentURL.split("?")[1];
 
+    const url = new URL(currentURL);
+    const pageValue = url.searchParams.get("page");
+    // console.log("pageValue", pageValue);
+
     try {
       setLoading(true);
       const queryParams = [];
-      let values = JSON.parse(localStorage.getItem("values"));
+      const isLocalStorageAvailable =
+        typeof window !== "undefined" && window.localStorage;
+
+      let values = isLocalStorageAvailable
+        ? JSON.parse(localStorage.getItem("values"))
+        : null;
 
       if (queryStringUrl == undefined) {
         localStorage.removeItem("values");
@@ -99,7 +111,7 @@ const AdminPanel = () => {
         });
         const json = await response.json();
         let authorizationData;
-        console.log("json", json, values);
+        // console.log("json", json, values);
         if (json.code == 200) {
           authorizationData = json.results ? json.results : [];
           setCachedData({ ...cachedData, [queryString]: authorizationData });
@@ -155,7 +167,7 @@ const AdminPanel = () => {
   const handleSaveChanges = async (user = null) => {
     setIsSaving(true);
     try {
-      let updatedData;
+      let updatedData = data.filter((user) => user.unsavedChanges);
 
       if (user) {
         if (Array.isArray(user)) {
@@ -167,29 +179,38 @@ const AdminPanel = () => {
         updatedData = data;
       }
 
-      const response = await fetch(`${API_URL}user/update/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(updatedData),
-      });
-      const json = await response.json();
-      console.log("response", json);
-      if (json.code == 200) {
-        setUnsavedChanges(false);
-        setShowPopupMessage(json.message);
-        setShowPopup(true);
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 1000);
+      if (updatedData.length > 0) {
+        setNoChangesToSave(false);
+        const response = await fetch(`${API_URL}user/update/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(updatedData),
+        });
+        const json = await response.json();
+
+        console.log("response", json);
+        if (json.code == 200) {
+          setUnsavedChanges(false);
+          setShowPopupMessage(json.message);
+          setShowPopup(true);
+          setTimeout(() => {
+            setShowPopup(false);
+          }, 1500);
+        } else {
+          setShowPopupMessage(response.statusText);
+          setShowPopup(true);
+          setTimeout(() => {
+            setShowPopup(false);
+          }, 1500);
+        }
       } else {
-        setShowPopupMessage(response.statusText);
-        setShowPopup(true);
+        setNoChangesToSave(true);
         setTimeout(() => {
-          setShowPopup(false);
-        }, 1000);
+          setNoChangesToSave(false);
+        }, 1500);
       }
     } catch (error) {
       console.error(error);
@@ -199,6 +220,7 @@ const AdminPanel = () => {
   };
 
   const handleFormSubmit = () => {
+    setCurrentPage(1);
     if (
       !formik.values.employeeId &&
       !formik.values.employeeName &&
@@ -221,7 +243,11 @@ const AdminPanel = () => {
       return !!values.employeeId || !!values.employeeName || !!values.status;
     });
 
-  let searchValue = JSON.parse(localStorage.getItem("values"));
+  const isLocalStorageAvailable =
+    typeof window !== "undefined" && window.localStorage;
+  let searchValue = isLocalStorageAvailable
+    ? JSON.parse(localStorage.getItem("values"))
+    : null;
   if (searchValue == null) {
     searchValue = { employeeId: "", employeeName: "", status: "" };
   }
@@ -234,9 +260,14 @@ const AdminPanel = () => {
     },
     validationSchema,
     onSubmit: (values) => {
-      localStorage.setItem("values", JSON.stringify(values));
+      let searchValues = { employeeId: "", employeeName: "", status: "" };
+      localStorage.setItem(
+        "values",
+        JSON.stringify(searchClear ? searchValues : values)
+      );
       if (!values.employeeId && !values.employeeName && !values.status) {
         setBlankInputError(true);
+        handleFormClear();
       } else {
         setBlankInputError(false);
         const queryParams = [];
@@ -253,6 +284,7 @@ const AdminPanel = () => {
   const handlePermissionUpdate = (index, field, value) => {
     const updatedData = [...data];
     updatedData[index].permissions[field] = value;
+    updatedData[index].unsavedChanges = true;
     setData(updatedData);
     setUnsavedChanges(true);
   };
@@ -274,6 +306,7 @@ const AdminPanel = () => {
         update: currentPageValue,
         delete: currentPageValue,
       },
+      unsavedChanges: true,
     }));
 
     const updatedSelectedUsers = updatedData.reduce(
@@ -303,6 +336,7 @@ const AdminPanel = () => {
             update: checked,
             delete: checked,
           },
+          unsavedChanges: true,
         };
       }
       return user;
@@ -324,6 +358,7 @@ const AdminPanel = () => {
         ...user.permissions,
         read: !allReadChecked,
       },
+      unsavedChanges: true,
     }));
     setData(updatedData);
     setReadPermissionAll(!allReadChecked);
@@ -338,6 +373,7 @@ const AdminPanel = () => {
         ...user.permissions,
         update: !allUpdateChecked,
       },
+      unsavedChanges: true,
     }));
     setData(updatedData);
     setUpdatePermissionAll(!allUpdateChecked);
@@ -352,6 +388,7 @@ const AdminPanel = () => {
         ...user.permissions,
         delete: !allDeleteChecked,
       },
+      unsavedChanges: true,
     }));
     setData(updatedData);
     setDeletePermissionAll(!allDeleteChecked);
@@ -427,8 +464,19 @@ const AdminPanel = () => {
   const handleUpdateStatus = (index, newStatus) => {
     const updatedData = [...data];
     updatedData[index].status = newStatus;
+    updatedData[index].unsavedChanges = true;
     setData(updatedData);
     setUnsavedChanges(true);
+  };
+  const handleFormClear = () => {
+    setSearchClear(true);
+    const isLocalStorageAvailable =
+      typeof window !== "undefined" && window.localStorage;
+    let searchValueEmpty = { employeeId: "", employeeName: "", status: "" };
+    isLocalStorageAvailable
+      ? localStorage.setItem("values", JSON.stringify(searchValueEmpty))
+      : null;
+    window.location.reload();
   };
 
   const getPageNumbers = (totalPages) => {
@@ -444,6 +492,7 @@ const AdminPanel = () => {
     const employeeIdB = parseInt(b.employee_id.replace("emp_", ""), 10);
     return employeeIdA - employeeIdB;
   });
+
   return (
     <>
       <form onSubmit={formik.handleSubmit}>
@@ -485,11 +534,18 @@ const AdminPanel = () => {
             </div>
             <div className="text-center md:text-left mr-3 md:mr-0">
               <button
-                className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-3 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+                className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-1 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
                 type="submit"
                 onClick={handleFormSubmit}
               >
                 Search
+              </button>
+              <button
+                className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-3 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+                type="submit"
+                onClick={handleFormClear}
+              >
+                Clear
               </button>
             </div>
           </div>
@@ -517,7 +573,6 @@ const AdminPanel = () => {
                 <th className="text-sm md:w-44 md:text-base">Employee Id</th>
                 <th className="md:w-52 text-sm md:text-base">Employee Name</th>
                 <th className="md:w-44 text-sm md:text-base">Status</th>
-                {/* <th className="md:w-36 text-sm md:text-base">Role</th> */}
                 <th className="md:w-36 h-12 text-center text-sm md:text-base">
                   <div className="flex items-center justify-center mr-2">
                     <span className="md:mr-2">Read</span>
@@ -618,9 +673,6 @@ const AdminPanel = () => {
                           <option value="false">Inactive</option>
                         </select>
                       </td>
-                      {/* <td className="text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
-                        {item.role}
-                      </td> */}
                       <td className="md:w-36 h-12">
                         <div className="flex items-center justify-center">
                           <input
@@ -670,14 +722,21 @@ const AdminPanel = () => {
                         </div>
                       </td>
                       <td className="flex justify-center">
-                        <button
-                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover-bg-[#1D2E3E]"
-                          type="button"
-                          onClick={() => handleSaveChanges(item)}
-                          disabled={isSaving}
-                        >
-                          Save
-                        </button>
+                        {item.unsavedChanges ? (
+                          <button
+                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
+                            onClick={() => handleSaveChanges(item)}
+                          >
+                            Save
+                          </button>
+                        ) : (
+                          <button
+                            disabled
+                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed"
+                          >
+                            Save
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -721,7 +780,9 @@ const AdminPanel = () => {
             <button
               className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
               type="button"
-              onClick={() => handleSaveChanges(data)}
+              onClick={() =>
+                handleSaveChanges(data.filter((item) => item.unsavedChanges))
+              }
               disabled={isSaving}
             >
               {isSaving ? "Saving..." : "Save Changes"}
@@ -733,6 +794,9 @@ const AdminPanel = () => {
         <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
       )}
       {showPopup && <PopupMessage showPopupMessage={showPopupMessage} />}
+      {noChangesToSave && (
+        <PopupMessage showPopupMessage={NO_CHANGES_MESSAGE} />
+      )}
     </>
   );
 };
