@@ -7,12 +7,14 @@ import NotFound from "@/app/not-found";
 
 const UserProfile = ({ params }) => {
   const [userinfo, setUserinfo] = useState([]);
+  console.log(userinfo, "bbbb");
   const [checkedAllRead, setCheckedAllRead] = useState(false);
   const [checkedAllUpdate, setCheckedAllUpdate] = useState(false);
   const [checkedAllDelete, setCheckedAllDelete] = useState(false);
   const [projectAllPermissions, setProjectAllPermissions] = useState([]);
   const [allCheckbox, setAllCheckbox] = useState(false);
   let accessToken = getaccessToken();
+  console.log(accessToken);
 
   useEffect(() => {
     (async () => {
@@ -23,7 +25,7 @@ const UserProfile = ({ params }) => {
           },
         });
         const data = await response.json();
-        console.log(data,"dataaa");
+        console.log(data, "dataaa");
         setUserinfo(data);
         handledefultpermissions(data);
       } catch (error) {
@@ -217,19 +219,24 @@ const UserProfile = ({ params }) => {
   };
 
   const handleSaveChanges = async () => {
-    const { employee_id, user_id, full_name, projects } = userinfo;
-    console.log(employee_id,user_id,full_name,projects,"formate data");
-    console.log(userinfo,"userinfo");
+    const updatedData = userinfo.projects;
+    console.log(updatedData, "userinfo");
     try {
-      const response = await fetch(`${API_URL}user/update/`, {
+      const response = await fetch(`${API_URL}user/upate/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
+        
         body: JSON.stringify(updatedData),
+       
       });
-      console.log(response,"response");
+      const json = await response.json();
+      if (json.code == 200) {
+        alert("hello")
+      }
+      
 
       if (!response.ok) {
         console.error(
@@ -260,9 +267,9 @@ const UserProfile = ({ params }) => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="lg:flex">
-        <div className="w-full lg:w-1/5 bg-white p-4">
+    <div className="container mx-auto p-4 w-[100%]">
+      <div className="lg:flex w-[100%]">
+        <div className="w-full lg:w-[15%] bg-white p-4">
           <div className="bg-[#F5F5F5] mt-20">
             <p className="dot margin text-center">G</p>
             <h3 className="px-4 py-2">Employee:{userinfo?.full_name} </h3>
@@ -270,7 +277,7 @@ const UserProfile = ({ params }) => {
           </div>
         </div>
         <div className="w-full lg:w-4/5 bg-white p-4">
-          <div className="m-2 w-full lg:w-[75%] overflow-x-auto">
+          <div className="m-2 w-full lg:w-[100%] overflow-x-auto">
             <table className="min-w-full">
               <thead>
                 <tr>
@@ -285,6 +292,10 @@ const UserProfile = ({ params }) => {
                   <th className="px-6 py-3 bg-[#E3F2FD] text-left font-semibold">
                     Project Name
                   </th>
+                  <th className="px-6 py-3 bg-[#E3F2FD] text-left font-semibold">
+                    Role
+                  </th>
+
                   <th className="px-6 py-3 bg-[#E3F2FD] text-left">
                     Read
                     <input
@@ -318,6 +329,9 @@ const UserProfile = ({ params }) => {
                       }
                     />
                   </th>
+                  <th className="px-6 py-3 bg-[#E3F2FD] text-left font-semibold">
+                    Save Changes
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -334,6 +348,9 @@ const UserProfile = ({ params }) => {
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
                         {userdata.project}
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
+                        {userdata.role}
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
                         <input
@@ -362,6 +379,11 @@ const UserProfile = ({ params }) => {
                             handlePermissionChange(index, "delete")
                           }
                         />
+                      </td>
+                      <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
+                        <button className="mx-20 bg-[#466EA1] p-1 rounded-md text-white">
+                          Save Changes
+                        </button>
                       </td>
                     </tr>
                   );
