@@ -24,8 +24,8 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [blankInputError, setBlankInputError] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedUsers, setSelectedUsers] = useState([]);
-  const [selectAllPermissionsMap, setSelectAllPermissionsMap] = useState({});
+  const [selectedUsers, setSelectedUsers] = useState(false);
+  const [selectAllPermissionsMap, setSelectAllPermissionsMap] = useState(false);
   const [cachedData, setCachedData] = useState({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -36,16 +36,11 @@ const AdminPanel = () => {
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [noChangesToSave, setNoChangesToSave] = useState(false);
-  // const [seachValue, setSearchValue] = useState({});
   const [searchClear, setSearchClear] = useState(false);
 
   useEffect(() => {
     const initialSelectedUsers = data.map(() => false);
     setSelectedUsers(initialSelectedUsers);
-    // let values = JSON.parse(localStorage.getItem("values"));
-    // setSearchValue(
-    //   values ? values : { employeeId: "fggg", employeeName: "", status: "" }
-    // );
   }, []);
 
   useEffect(() => {
@@ -65,7 +60,6 @@ const AdminPanel = () => {
 
     const url = new URL(currentURL);
     const pageValue = url.searchParams.get("page");
-    // console.log("pageValue", pageValue);
 
     try {
       setLoading(true);
@@ -79,7 +73,6 @@ const AdminPanel = () => {
 
       if (queryStringUrl == undefined) {
         localStorage.removeItem("values");
-        // queryParams.push(`page=${currentPage}`);
       } else if (values != null) {
         if (values.employeeId || values.employeeName || values.status) {
           if (values.employeeId) {
@@ -111,7 +104,6 @@ const AdminPanel = () => {
         });
         const json = await response.json();
         let authorizationData;
-        // console.log("json", json, values);
         if (json.code == 200) {
           authorizationData = json.results ? json.results : [];
           setCachedData({ ...cachedData, [queryString]: authorizationData });
@@ -566,7 +558,7 @@ const AdminPanel = () => {
                   <input
                     type="checkbox"
                     className="w-4 h-4"
-                    checked={selectAllPermissionsMap[currentPage]}
+                    checked={selectAllPermissionsMap[currentPage] || false}
                     onChange={handleToggleAllPermissions}
                   />
                 </th>
@@ -638,7 +630,7 @@ const AdminPanel = () => {
                         <input
                           type="checkbox"
                           className="w-4 h-4"
-                          checked={selectedUsers[item.user_id]}
+                          checked={selectedUsers[item.user_id] || false}
                           onChange={(e) =>
                             handleToggleUserPermissions(
                               item.user_id,
