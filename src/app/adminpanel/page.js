@@ -159,49 +159,49 @@ const AdminPanel = () => {
   const handleSaveChanges = async (user = null) => {
     setIsSaving(true);
     try {
-      let updatedData = data.filter((user) => user.unsavedChanges);
+      if (unsavedChanges) {
+        let updatedData = data.filter((user) => user.unsavedChanges);
 
-      if (user) {
-        if (Array.isArray(user)) {
-          updatedData = user;
-        } else {
-          updatedData = [user];
+        if (Object.keys(selectedUsers).length > 0) {
+          updatedData = updatedData.filter(
+            (user) => selectedUsers[user.user_id]
+          );
         }
-      } else {
-        updatedData = data;
-      }
 
-      if (updatedData.length > 0) {
-        setNoChangesToSave(false);
-        const response = await fetch(`${API_URL}user/update/`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(updatedData),
-        });
-        const json = await response.json();
-
-        if (json.code == 200) {
-          setUnsavedChanges(false);
-          setShowPopupMessage(json.message);
-          setShowPopup(true);
-          setTimeout(() => {
-            setShowPopup(false);
-          }, 1500);
-        } else {
-          setShowPopupMessage(response.statusText);
-          setShowPopup(true);
-          setTimeout(() => {
-            setShowPopup(false);
-          }, 1500);
+        if (user) {
+          if (Array.isArray(user)) {
+            updatedData = user;
+          } else {
+            updatedData = [user];
+          }
         }
-      } else {
-        setNoChangesToSave(true);
-        setTimeout(() => {
+
+        if (updatedData.length > 0) {
           setNoChangesToSave(false);
-        }, 1500);
+          const response = await fetch(`${API_URL}user/update/`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(updatedData),
+          });
+          const json = await response.json();
+
+          console.log("response", json);
+          if (json.code === 200) {
+            setUnsavedChanges(false);
+            setShowPopupMessage(json.message);
+            setShowPopup(true);
+            setTimeout(() => {
+              setShowPopup(false);
+            }, 1500);
+            setSelectAllPermissionsMap({});
+            setSelectedUsers({});
+          } else {
+            setShowPopupMessage(response.statusText);
+          }
+        }
       }
     } catch (error) {
       console.error(error);
@@ -290,65 +290,28 @@ const AdminPanel = () => {
     setUnsavedChanges(true);
   };
 
-  const handleToggleAllPermissions = () => {
-    const allPermissionsTrue = data.every(
-      (user) =>
-        user.permissions.read &&
-        user.permissions.update &&
-        user.permissions.delete
-    );
-
-    const currentPageValue = !allPermissionsTrue;
-
-    const updatedData = data.map((user) => ({
-      ...user,
-      permissions: {
-        read: currentPageValue,
-        update: currentPageValue,
-        delete: currentPageValue,
-      },
-      unsavedChanges: true,
-    }));
-
-    const updatedSelectedUsers = updatedData.reduce(
-      (users, user) => {
-        users[user.user_id] = currentPageValue;
-        return users;
-      },
-      { ...selectedUsers }
-    );
+  const handleToggleAllPermissions = (checked) => {
+    const updatedSelectedUsers = {};
+    data.forEach((user) => {
+      updatedSelectedUsers[user.user_id] = checked;
+    });
 
     setSelectedUsers(updatedSelectedUsers);
-    setData(updatedData);
-    setUnsavedChanges(true);
-    setSelectAllPermissionsMap({
-      ...selectAllPermissionsMap,
-      [currentPage]: currentPageValue,
-    });
+
+    const updatedSelectAllPermissionsMap = { ...selectAllPermissionsMap };
+    updatedSelectAllPermissionsMap[currentPage] = checked;
+    setSelectAllPermissionsMap(updatedSelectAllPermissionsMap);
   };
 
   const handleToggleUserPermissions = (user_id, checked) => {
-    const updatedData = data.map((user) => {
-      if (user.user_id === user_id) {
-        return {
-          ...user,
-          permissions: {
-            read: checked,
-            update: checked,
-            delete: checked,
-          },
-          unsavedChanges: true,
-        };
-      }
-      return user;
-    });
-
     const updatedSelectedUsers = { ...selectedUsers };
     updatedSelectedUsers[user_id] = checked;
-
-    setData(updatedData);
     setSelectedUsers(updatedSelectedUsers);
-    setUnsavedChanges(true);
+
+    const allChecked = data.every((user) => updatedSelectedUsers[user.user_id]);
+    const updatedSelectAllPermissionsMap = { ...selectAllPermissionsMap };
+    updatedSelectAllPermissionsMap[currentPage] = allChecked;
+    setSelectAllPermissionsMap(updatedSelectAllPermissionsMap);
   };
 
   const handleToggleAllReadPermissions = () => {
@@ -408,58 +371,6 @@ const AdminPanel = () => {
     const allDeleteChecked =
       data.length > 0 && data.every((item) => item.permissions.delete);
     setDeletePermissionAll(allDeleteChecked);
-
-    const allPermissionsTrue =
-      data.length > 0 &&
-      data.every(
-        (user) =>
-          user.permissions.read &&
-          user.permissions.update &&
-          user.permissions.delete
-      );
-
-    let allPermissionsAreTrue = true;
-    if (data.length > 0) {
-      for (const user of data) {
-        if (
-          !user.permissions.read ||
-          !user.permissions.update ||
-          !user.permissions.delete
-        ) {
-          allPermissionsAreTrue = false;
-          break;
-        }
-      }
-    }
-
-    if (allPermissionsTrue) {
-      setSelectAllPermissionsMap((permission) => ({
-        ...permission,
-        [currentPage]: true,
-      }));
-    } else {
-      setSelectAllPermissionsMap((permission) => ({
-        ...permission,
-        [currentPage]: false,
-      }));
-    }
-
-    const usersWithAllPermissionsTrue = data
-      .filter(
-        (user) =>
-          user.permissions.read &&
-          user.permissions.update &&
-          user.permissions.delete
-      )
-      .map((user) => user.user_id);
-
-    const initialSelectedUsers = data.reduce((selected, user) => {
-      selected[user.user_id] =
-        data.length > 0 && usersWithAllPermissionsTrue.includes(user.user_id);
-      return selected;
-    }, {});
-
-    setSelectedUsers(initialSelectedUsers);
   }, [data]);
 
   const handleUpdateStatus = (index, newStatus) => {
@@ -554,246 +465,275 @@ const AdminPanel = () => {
         </div>
       </form>
 
-      <div>
-        <div className="table mx-auto md:mt-10 mt-5">
-          <table className="border-2 border-[#F5F5F5] shadow-lg">
-            <thead>
-              <tr className="bg-[#E3F2FD] h-12">
-                <th className="mr-1 md:w-20 h-12 flex justify-center items-center ml-1">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4"
-                    checked={selectAllPermissionsMap[currentPage] || false}
-                    onChange={handleToggleAllPermissions}
-                  />
-                </th>
-                <th className="text-sm md:w-44 md:text-base">Employee Id</th>
-                <th className="md:w-52 text-sm md:text-base">Employee Name</th>
-                <th className="md:w-44 text-sm md:text-base">Status</th>
-                <th className="md:w-36 h-12 text-center text-sm md:text-base">
-                  <div className="flex items-center justify-center mr-2">
-                    <span className="md:mr-2">Read</span>
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 ml-1"
-                      checked={readPermissionAll}
-                      onChange={handleToggleAllReadPermissions}
-                    />
-                  </div>
-                </th>
-                <th className="md:w-36 h-12 text-center text-sm md:text-base">
-                  <div className="flex items-center justify-center mr-2">
-                    <span className="md:mr-2">Update</span>
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 ml-1"
-                      checked={updatePermissionAll}
-                      onChange={handleToggleAllUpdatePermissions}
-                    />
-                  </div>
-                </th>
-                <th className="md:w-36 h-12 text-center text-sm md:text-base">
-                  <div className="flex items-center justify-center">
-                    <span className="md:mr-2">Delete</span>
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 ml-1"
-                      checked={deletePermissionAll}
-                      onChange={handleToggleAllDeletePermissions}
-                    />
-                  </div>
-                </th>
-                <th className="md:w-36">
-                  <p>Save Changes</p>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan="8"
-                    className="text-black-600 text-center font-semibold py-3"
-                  >
-                    {LOADING_MESSAGE}
-                  </td>
-                </tr>
-              ) : data.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="text-red-600 text-center py-3">
-                    {SEARCH_RESULT_MESSAGE}
-                  </td>
-                </tr>
-              ) : (
-                sortedData.map((item, index) => {
-                  return (
-                    <tr
-                      key={index}
-                      className="border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0"
-                    >
-                      <td className="md:w-20 h-12 flex justify-center items-center">
+          <div>
+            <div className="table mx-auto md:mt-10 mt-5">
+              <table className="border-2 border-[#F5F5F5] shadow-lg">
+                <thead>
+                  <tr className="bg-[#E3F2FD] h-12">
+                    <th className="mr-1 md:w-20 h-12 flex justify-center items-center ml-1">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4"
+                        checked={selectAllPermissionsMap[currentPage] || false}
+                        onChange={(e) =>
+                          handleToggleAllPermissions(e.target.checked)
+                        }
+                      />
+                    </th>
+                    <th className="text-sm md:w-44 md:text-base">
+                      Employee Id
+                    </th>
+                    <th className="md:w-52 text-sm md:text-base">
+                      Employee Name
+                    </th>
+                    <th className="md:w-44 text-sm md:text-base">Status</th>
+                    <th className="md:w-36 h-12 text-center text-sm md:text-base">
+                      <div className="flex items-center justify-center mr-2">
+                        <span className="md:mr-2">Read</span>
                         <input
                           type="checkbox"
-                          className="w-4 h-4"
-                          checked={selectedUsers[item.user_id] || false}
-                          onChange={(e) =>
-                            handleToggleUserPermissions(
-                              item.user_id,
-                              e.target.checked
-                            )
-                          }
+                          className="w-4 h-4 ml-1"
+                          checked={readPermissionAll}
+                          onChange={handleToggleAllReadPermissions}
                         />
-                      </td>
+                      </div>
+                    </th>
+                    <th className="md:w-36 h-12 text-center text-sm md:text-base">
+                      <div className="flex items-center justify-center mr-2">
+                        <span className="md:mr-2">Update</span>
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 ml-1"
+                          checked={updatePermissionAll}
+                          onChange={handleToggleAllUpdatePermissions}
+                        />
+                      </div>
+                    </th>
+                    <th className="md:w-36 h-12 text-center text-sm md:text-base">
+                      <div className="flex items-center justify-center">
+                        <span className="md:mr-2">Delete</span>
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 ml-1"
+                          checked={deletePermissionAll}
+                          onChange={handleToggleAllDeletePermissions}
+                        />
+                      </div>
+                    </th>
+                    <th className="md:w-36">
+                      <p>Save Changes</p>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
                       <td
-                        className="text-center text-sm md:text-base md:w-40 h-12 md:px-5"
-                        key={item.user_id}
+                        colSpan="8"
+                        className="text-black-600 text-center font-semibold py-3"
                       >
-                        <Link
-                          href={`adminpanel/${item.user_id}`}
-                          className="font-semibold hover:underline"
-                        >
-                          {item.employee_id}
-                        </Link>
-                      </td>
-                      <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
-                        {item.full_name}
-                      </td>
-                      <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
-                        <select
-                          className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
-                          value={item.status}
-                          onChange={(e) =>
-                            handleUpdateStatus(index, e.target.value === "true")
-                          }
-                        >
-                          <option value="true">Active</option>
-                          <option value="false">Inactive</option>
-                        </select>
-                      </td>
-                      <td className="md:w-36 h-12">
-                        <div className="flex items-center justify-center">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={item.permissions.read}
-                            onChange={(e) =>
-                              handlePermissionUpdate(
-                                index,
-                                "read",
-                                e.target.checked
-                              )
-                            }
-                          />
-                        </div>
-                      </td>
-                      <td className="md:w-36 h-12">
-                        <div className="flex items-center justify-center">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={item.permissions.update}
-                            onChange={(e) =>
-                              handlePermissionUpdate(
-                                index,
-                                "update",
-                                e.target.checked
-                              )
-                            }
-                          />
-                        </div>
-                      </td>
-                      <td className="md:w-36 h-12">
-                        <div className="flex items-center justify-center">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={item.permissions.delete}
-                            onChange={(e) =>
-                              handlePermissionUpdate(
-                                index,
-                                "delete",
-                                e.target.checked
-                              )
-                            }
-                          />
-                        </div>
-                      </td>
-                      <td className="flex justify-center">
-                        {item.unsavedChanges ? (
-                          <button
-                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
-                            onClick={() => handleSaveChanges(item)}
-                          >
-                            Save
-                          </button>
-                        ) : (
-                          <button
-                            disabled
-                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed"
-                          >
-                            Save
-                          </button>
-                        )}
+                        {LOADING_MESSAGE}
                       </td>
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-          {totalPages > 1 && (
-            <div className="flex justify-between mt-4">
-              <button
-                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <div>
-                {getPageNumbers(totalPages).map((page) => (
-                  <button
-                    key={page}
-                    className={`w-12 text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] ${
-                      currentPage === page ? "bg-[#1D2E3E]" : "bg-[#466EA1]"
-                    }`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-              </div>
-              <button
-                className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          )}
+                  ) : data.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="text-red-600 text-center py-3">
+                        {SEARCH_RESULT_MESSAGE}
+                      </td>
+                    </tr>
+                  ) : (
+                    sortedData.map((item, index) => {
+                      const isSelected = selectedUsers[item.user_id];
 
-          {data.length > 0 && (
-            <button
-              className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
-              type="button"
-              onClick={() =>
-                handleSaveChanges(data.filter((item) => item.unsavedChanges))
-              }
-              disabled={isSaving}
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
+                      return (
+                        <tr
+                          key={index}
+                          className={`border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0 ${
+                            isSelected ? "bg-[#f5f5f5] border-b-[#ffff]" : ""
+                          }`}
+                        >
+                          <td className="md:w-20 h-12 flex justify-center items-center">
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4"
+                              checked={selectedUsers[item.user_id] || false}
+                              onChange={(e) =>
+                                handleToggleUserPermissions(
+                                  item.user_id,
+                                  e.target.checked
+                                )
+                              }
+                            />
+                          </td>
+                          <td
+                            className="text-center text-sm md:text-base md:w-40 h-12 md:px-5"
+                            key={item.user_id}
+                          >
+                            <Link
+                              href={`adminpanel/${item.user_id}`}
+                              className="font-semibold hover:underline"
+                            >
+                              {item.employee_id}
+                            </Link>
+                          </td>
+                          <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
+                            {item.full_name}
+                          </td>
+                          <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
+                            <select
+                              className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
+                              value={item.status}
+                              onChange={(e) =>
+                                handleUpdateStatus(
+                                  index,
+                                  e.target.value === "true"
+                                )
+                              }
+                            >
+                              <option value="true">Active</option>
+                              <option value="false">Inactive</option>
+                            </select>
+                          </td>
+                          <td className="md:w-36 h-12">
+                            <div className="flex items-center justify-center">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={item.permissions.read}
+                                onChange={(e) =>
+                                  handlePermissionUpdate(
+                                    index,
+                                    "read",
+                                    e.target.checked
+                                  )
+                                }
+                              />
+                            </div>
+                          </td>
+                          <td className="md:w-36 h-12">
+                            <div className="flex items-center justify-center">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={item.permissions.update}
+                                onChange={(e) =>
+                                  handlePermissionUpdate(
+                                    index,
+                                    "update",
+                                    e.target.checked
+                                  )
+                                }
+                              />
+                            </div>
+                          </td>
+                          <td className="md:w-36 h-12">
+                            <div className="flex items-center justify-center">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={item.permissions.delete}
+                                onChange={(e) =>
+                                  handlePermissionUpdate(
+                                    index,
+                                    "delete",
+                                    e.target.checked
+                                  )
+                                }
+                              />
+                            </div>
+                          </td>
+                          <td className="flex justify-center">
+                            {item.unsavedChanges ? (
+                              <button
+                                className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
+                                onClick={() => handleSaveChanges(item)}
+                              >
+                                Save
+                              </button>
+                            ) : (
+                              <button
+                                disabled
+                                className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed"
+                              >
+                                Save
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+              {data.length > 0 && totalPages > 1 && (
+                <div className="flex justify-between mt-4">
+                  <button
+                    className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <div>
+                    {getPageNumbers(totalPages).map((page) => (
+                      <button
+                        key={page}
+                        className={`w-12 text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] ${
+                          currentPage === page ? "bg-[#1D2E3E]" : "bg-[#466EA1]"
+                        }`}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+
+              {data.length > 0 && (
+                <button
+                  className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#466EA1] rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+                  type="button"
+                  onClick={() => {
+                    if (unsavedChanges) {
+                      const selectedUsersToSave = data.filter(
+                        (item) =>
+                          item.unsavedChanges && selectedUsers[item.user_id]
+                      );
+                      if (selectedUsersToSave.length > 0) {
+                        handleSaveChanges(selectedUsersToSave);
+                      }
+                    }
+                  }}
+                  disabled={
+                    isSaving ||
+                    Object.values(selectedUsers).every(
+                      (selected) => !selected || !unsavedChanges
+                    )
+                  }
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </button>
+              )}
+            </div>
+          </div>
+          {isOpenModal && (
+            <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
           )}
-        </div>
-      </div>
-      {isOpenModal && (
-        <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
+          {showPopup && <PopupMessage showPopupMessage={showPopupMessage} />}
+          {noChangesToSave && (
+            <PopupMessage showPopupMessage={NO_CHANGES_MESSAGE} />
+          )}
+        {/* </div>
       )}
-      {showPopup && <PopupMessage showPopupMessage={showPopupMessage} />}
-      {noChangesToSave && (
-        <PopupMessage showPopupMessage={NO_CHANGES_MESSAGE} />
-      )}
+      {pageNotFound && <NotFound />} */}
     </>
   );
 };
