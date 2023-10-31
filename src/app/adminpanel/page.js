@@ -175,6 +175,19 @@ const AdminPanel = () => {
             updatedData = [user];
           }
         }
+        if (Object.keys(selectedUsers).length > 0) {
+          updatedData = updatedData.filter(
+            (user) => selectedUsers[user.user_id]
+          );
+        }
+
+        if (user) {
+          if (Array.isArray(user)) {
+            updatedData = user;
+          } else {
+            updatedData = [user];
+          }
+        }
 
         if (updatedData.length > 0) {
           setNoChangesToSave(false);
@@ -732,8 +745,8 @@ const AdminPanel = () => {
             <PopupMessage showPopupMessage={NO_CHANGES_MESSAGE} />
           )}
         {/* </div>
-      )}
-      {pageNotFound && <NotFound />} */}
+      )} */}
+      {/* {pageNotFound && <NotFound />} */}
     </>
   );
 };
