@@ -21,19 +21,8 @@ const ErrorMessage = (props) => {
   );
 };
 
-// const Popup = (props) => {
-//   return (
-//     <div className="inset-0 z-50 fixed bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center modal__wrapper pointer-events-auto ">
-//       <div className="bg-white w-1/3 max-w-2xl p-4 rounded-lg modal__container transform translate-y-0 transition-transform">
-//         <p className="text-xl mb-6">{props.message}</p>
-//       </div>
-//     </div>
-//   );
-// };
-
 const Login = () => {
   const router = useRouter();
-  // const [showPopup, setShowPopup] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showMessage, setShowMessage] = useState("");
 
@@ -102,10 +91,6 @@ const Login = () => {
   const handleOpenPopup = (message, path) => {
     router.push(path);
     setShowMessage(message);
-    // setShowPopup(true);
-    // setTimeout(() => {
-    //   setShowPopup(false);
-    // }, 1000);
   };
 
   return (
@@ -160,7 +145,6 @@ const Login = () => {
           </div>
         </form>
       </div>
-      {/* {!showErrorMessage && showPopup && <Popup message={showMessage} />} */}
     </section>
   );
 };
