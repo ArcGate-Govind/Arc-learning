@@ -280,12 +280,7 @@ const UserProfile = ({ params }) => {
           router.push("/adminpanel", { scroll: false });
         }}
       >
-        <Image
-          src={Logo}
-          width={20}
-          height={20}
-          alt="Picture of the author"
-        />
+        <Image src={Logo} width={20} height={20} alt="Picture of the author" />
       </button>
       <div className="lg:flex w-[100%]">
         <div className="w-full lg:w-[15%] bg-white p-4">

@@ -9,12 +9,24 @@ const UserDetailsProvider = (props) => {
   const isLocalStorageAvailable =
     typeof window !== "undefined" && window.localStorage;
 
+  const islocationAvailable = typeof window !== "undefined" && window.location;
+
   // Try to get the currentPage from localStorage
   const storedCurrentPage = isLocalStorageAvailable
     ? JSON.parse(localStorage.getItem("currentPage"))
     : null;
-
-  const [currentPage, setCurrentPage] = useState(storedCurrentPage || 1);
+  const urlString = islocationAvailable ? window.location.href : null;
+  let pageValue = null;
+  if (urlString) {
+    try {
+      const url = new URL(urlString);
+      pageValue = url.searchParams.get("page");
+    } catch (error) {
+      console.error("Error parsing URL:", error);
+    }
+  }
+  const pageValueAsNumber = parseInt(pageValue);
+  const [currentPage, setCurrentPage] = useState(pageValueAsNumber || 1);
 
   useEffect(() => {
     if (isLocalStorageAvailable) {
