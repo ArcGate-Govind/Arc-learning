@@ -733,9 +733,6 @@ const AdminPanel = () => {
         <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
       )}
       {showPopup && <PopupMessage showPopupMessage={showPopupMessage} />}
-      {noChangesToSave && (
-        <PopupMessage showPopupMessage={NO_CHANGES_MESSAGE} />
-      )}
     </>
   );
 };
