@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+
 import Logo from "../image/arcgate-logo.png";
 import LogoutImage from "../image/logout.png";
 import {
@@ -49,7 +50,7 @@ const Header = () => {
     <>
       <div className="header bg-[#1D2E3E] p-4 flex items-center justify-between">
         <div className="logo w-36 md:w-32 text-center md:text-left md:m-auto">
-          <Image src={Logo} alt="Arcgate" />
+          <Image src={Logo} alt="Arcgate"   onClick={()=>{router.push('/adminpanel', { scroll: false })}} />
         </div>
         <div className="flex gap-x-2 md:gap-x-4 items-center md:items-start mt-2 md:mt-0">
           <p className="text-[#ffff] uppercase text-lg md:text-xl">
