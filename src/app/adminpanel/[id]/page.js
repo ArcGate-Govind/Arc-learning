@@ -1,15 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import PopupMessage from "@/components/popupMessage";
+import React, { useEffect, useState, Fragment } from "react";
+import PopupMessage from "/var/www/html/frontend/src/components/popupMessage.js";
+import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
-import { LOADING_MESSAGE, USER_NOT_FOUND } from "../../../../message";
-import { getaccessToken } from "@/utils/common";
-import NotFound from "@/app/not-found";
+import Logo from "/var/www/html/frontend/src/image/arrow.png";
+import { getaccessToken } from "/var/www/html/frontend/src/utils/common.js";
+import Image from "next/image";
 
 const UserProfile = ({ params }) => {
   const [userinfo, setUserinfo] = useState([]);
-  console.log(userinfo, "userinfo");
-
+  const [filterData, setFilterData] = useState([]);
   const [checkedAllRead, setCheckedAllRead] = useState(false);
   const [checkedAllUpdate, setCheckedAllUpdate] = useState(false);
   const [checkedAllDelete, setCheckedAllDelete] = useState(false);
@@ -18,6 +18,7 @@ const UserProfile = ({ params }) => {
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   let accessToken = getaccessToken();
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -27,10 +28,9 @@ const UserProfile = ({ params }) => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        const data = await response.json();
-
+        const data = await response?.json();
         setUserinfo(data);
-        console.log(userinfo?.projects,"bbb");
+        setFilterData(data);
         handledefultpermissions(data);
       } catch (error) {
         console.error("Error:", error);
@@ -38,12 +38,12 @@ const UserProfile = ({ params }) => {
     })();
   }, []);
 
-  const handledefultpermissions = (data) => {
+  const handledefultpermissions = (userinfo) => {
     let allread = true;
     let allupdate = true;
     let alldelete = true;
     let projectAllPermissions = [];
-    data.projects.map((project) => {
+    userinfo.projects.map((project) => {
       if (
         project.permissions["read"] &&
         project.permissions["update"] &&
@@ -53,6 +53,7 @@ const UserProfile = ({ params }) => {
       } else {
         projectAllPermissions.push(false);
       }
+
       if (!project.permissions["read"]) {
         allread = false;
       }
@@ -104,17 +105,14 @@ const UserProfile = ({ params }) => {
         switch (permissionType) {
           case "read":
             allread = false;
-
             break;
 
           case "update":
             allupdate = false;
-
             break;
 
           case "delete":
             alldelete = false;
-
             break;
         }
       }
@@ -122,7 +120,6 @@ const UserProfile = ({ params }) => {
     switch (permissionType) {
       case "read":
         setCheckedAllRead(allread);
-
         break;
 
       case "update":
@@ -159,17 +156,14 @@ const UserProfile = ({ params }) => {
     switch (permissionType) {
       case "read":
         setCheckedAllRead(!checkedAllRead);
-
         break;
 
       case "update":
         setCheckedAllUpdate(!checkedAllUpdate);
-
         break;
 
       case "delete":
         setCheckedAllDelete(!checkedAllDelete);
-
         break;
     }
     if (!checkedAllRead || !checkedAllUpdate || !checkedAllDelete) {
@@ -192,10 +186,9 @@ const UserProfile = ({ params }) => {
     let allRead = true;
     let allUpdate = true;
     let allDelete = true;
-  ;
+    let allcheckbox = true;
 
     userinfo.projects.map((project) => {
-      let allcheckbox = true
       if (!project.permissions["read"]) {
         allRead = false;
         allcheckbox = false;
@@ -222,7 +215,7 @@ const UserProfile = ({ params }) => {
   const handleAllSaveChanges = async () => {
     try {
       const updatedData = userinfo.projects;
-      console.log(updatedData, "updatadata");
+      console.log(updatedData, "updatadata1234");
 
       const response = await fetch(`${API_URL}user/update/`, {
         method: "PUT",
@@ -262,58 +255,15 @@ const UserProfile = ({ params }) => {
     }
   };
 
-  const handleSaveChanges = async (index) => {
-    try {
-      const updatedData = userinfo.projects[index];
-      const singleUpdateData = [];
-      singleUpdateData.push(updatedData);
-      console.log(updatedData, "updatadata");
-
-      const response = await fetch(`${API_URL}user/update/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-
-        body: JSON.stringify(singleUpdateData),
-      });
-      const json = await response.json();
-      console.log(json, "json");
-      if (json.code == 200) {
-        setShowPopupMessage(json.message);
-        setShowPopup(true);
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 1000);
-      } else {
-        setShowPopupMessage(response.statusText);
-        setShowPopup(true);
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 1000);
-      }
-
-      if (!response.ok) {
-        console.error(
-          "Error updating user data:",
-          response.status,
-          response.statusText
-        );
-        return;
-      }
-    } catch (error) {
-      console.error("An error occurred while updating user data:", error);
-    }
-  };
   const handleSelectAll = () => {
     setAllCheckbox(!allCheckbox);
     let projectPermission = [];
-    userinfo.projects.map((project, index) => {
+    userinfo?.projects.map((project, index) => {
       const updatedProject = { ...project };
       updatedProject.permissions["read"] = !allCheckbox;
       updatedProject.permissions["update"] = !allCheckbox;
       updatedProject.permissions["delete"] = !allCheckbox;
+      console.log((updatedProject.permissions["delete"] = !allCheckbox), "nnn");
       projectPermission.push(!allCheckbox);
     });
     setProjectAllPermissions(projectPermission);
@@ -324,22 +274,40 @@ const UserProfile = ({ params }) => {
 
   return (
     <div className="container mx-auto p-4 w-[100%]">
+      <button
+        className="border px-6 py-2 bg-[#E3F2FD] "
+        onClick={() => {
+          router.push("/adminpanel", { scroll: false });
+        }}
+      >
+        <Image
+          src={Logo}
+          width={20}
+          height={20}
+          alt="Picture of the author"
+        />
+      </button>
       <div className="lg:flex w-[100%]">
         <div className="w-full lg:w-[15%] bg-white p-4">
-        {
-          userinfo?.projects?.map((item)=>{
-            return(
-              <>
-              <div className="bg-[#F5F5F5] mt-20">
-              <p className="dot margin text-center">G</p>
-              <h3 className="px-4 py-2">Employee:{item?.full_name} </h3>
-              <h3 className="px-4 py-2">Employee id:{item?.employee_id}</h3>
-            </div>
-              </>
-            )
-          })
-        }
-          
+          {userinfo?.projects?.map((item, index) => {
+            return (
+              <React.Fragment key={index}>
+                <div
+                  className={
+                    index == 0
+                      ? "bg-[#F5F5F5] mt-20"
+                      : 'hidden "bg-[#F5F5F5] mt-20'
+                  }
+                  key={item.user_id}
+                >
+                  <h3 className="px-4 py-2" key={index}>
+                    Employee:{item?.full_name}{" "}
+                  </h3>
+                  <h3 className="px-4 py-2">Employee id:{item?.employee_id}</h3>
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
         <div className="w-full lg:w-4/5 bg-white p-4">
           <div className="m-2 w-full lg:w-[100%] overflow-x-auto">
@@ -394,9 +362,6 @@ const UserProfile = ({ params }) => {
                       }
                     />
                   </th>
-                  <th className="px-6 py-3 bg-[#E3F2FD] text-left font-semibold">
-                    Save Changes
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -445,16 +410,6 @@ const UserProfile = ({ params }) => {
                           }
                         />
                       </td>
-                      <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
-                        <button
-                          className="mx-20 bg-[#466EA1] p-1 rounded-md text-white"
-                          onClick={() => {
-                            handleSaveChanges(index);
-                          }}
-                        >
-                          Save Changes
-                        </button>
-                      </td>
                     </tr>
                   );
                 })}
@@ -463,7 +418,7 @@ const UserProfile = ({ params }) => {
             <div className="flex justify-center lg:justify-end mt-6">
               <button
                 className="mx-20 bg-[#466EA1] p-1 rounded-md text-white"
-                onClick={handleAllSaveChanges}
+                onClick={() => handleAllSaveChanges(1)}
               >
                 Save Changes
               </button>
