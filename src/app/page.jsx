@@ -5,15 +5,15 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import { removeUserSession, setUserSession } from "../utils/common";
+import { API_URL } from "../../constant";
 import {
-  API_URL,
-  Error_Message,
-  Login_Failed_Message,
-  Password_Error_Message,
-  Username_Error_Message,
-} from "../../globals";
+  ERROR_MESSAGE,
+  LOGIN_FAILED_MESSAGE,
+  PASSWORD_ERROR_MESSAGE,
+  USERNAME_ERROR_MESSAGE,
+} from "../../message";
 
-const ErroMessage = (props) => {
+const ErrorMessage = (props) => {
   return (
     <div className=" m-auto">
       <p className="text-red-600 text-sm mt-2">{props.message}</p>
@@ -21,52 +21,44 @@ const ErroMessage = (props) => {
   );
 };
 
-const Popup = (props) => {
-  return (
-    <div className="inset-0 z-50 fixed bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center modal__wrapper pointer-events-auto ">
-      <div className="bg-white w-1/3 max-w-2xl p-4 rounded-lg modal__container transform translate-y-0 transition-transform">
-        <p className="text-xl mb-6">{props.message}</p>
-      </div>
-    </div>
-  );
-};
-
 const Login = () => {
   const router = useRouter();
-  const [showPopup, setShowPopup] = useState(false);
-  const [showErroMessage, setShowErroMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showMessage, setShowMessage] = useState("");
 
   const formik = useFormik({
     initialValues: {
-      username: "",
+      email: "",
       password: "",
     },
     validationSchema: Yup.object({
-      username: Yup.string()
-        // .email(Username_Error_Message)
-        .min(5, Username_Error_Message)
-        .max(20, Username_Error_Message)
-        .required(Error_Message),
+      email: Yup.string()
+        .matches(
+          /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|([0-9]{10})+$/,
+          USERNAME_ERROR_MESSAGE
+        )
+        .email(USERNAME_ERROR_MESSAGE)
+        .max(30, USERNAME_ERROR_MESSAGE)
+        .required(ERROR_MESSAGE),
       password: Yup.string()
         .oneOf([Yup.ref("password"), null])
         .matches(
           /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/,
-          Password_Error_Message
+          PASSWORD_ERROR_MESSAGE
         )
-        .min(8, Password_Error_Message)
-        .required(Error_Message),
+        .min(8, PASSWORD_ERROR_MESSAGE)
+        .required(ERROR_MESSAGE),
     }),
 
     onSubmit: async (values) => {
-      let username = values.username;
+      let email = values.email;
       let password = values.password;
-      await fetch(`${API_URL}/login/`, {
+      await fetch(`${API_URL}login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       })
         .then((response) => {
           return response.json();
@@ -74,7 +66,7 @@ const Login = () => {
         .then((data) => {
           const token = data.token;
           if (data.token) {
-            setUserSession(token.refresh, token.access, username);
+            setUserSession(token.refresh, token.access, data.token.username);
             handleOpenPopup(token.message, "/adminpanel");
           } else {
             handleShowErroMessage(data.non_field_errors[0], "/");
@@ -82,7 +74,9 @@ const Login = () => {
         })
         .catch((error) => {
           removeUserSession();
-          handleShowErroMessage(Login_Failed_Message, "/");
+          localStorage.removeItem("currentPage");
+          localStorage.removeItem("values");
+          handleShowErroMessage(LOGIN_FAILED_MESSAGE, "/");
           // console.error("Login error:", error);
         });
     },
@@ -90,42 +84,36 @@ const Login = () => {
 
   const handleShowErroMessage = (message, path) => {
     setShowMessage(message);
-    setShowErroMessage(true);
+    setShowErrorMessage(true);
     router.push(path);
   };
 
   const handleOpenPopup = (message, path) => {
+    router.push(path);
     setShowMessage(message);
-    setShowPopup(true);
-    setTimeout(() => {
-      setShowPopup(false);
-      router.push(path);
-    }, 1000);
   };
 
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen">
       <div className="login_back-ground absolute inset-0"></div>
       <div className="bg-white  sm:w-1/2 md:w-1/3 lg:w-1/3 p-6 md:p-12 rounded-lg shadow-lg relative z-1">
-        {!showPopup && showErroMessage && <ErroMessage message={showMessage} />}
+        {showErrorMessage && <ErrorMessage message={showMessage} />}
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-sm font-medium">
-              Username
+            <label htmlFor="email" className="block text-sm font-medium">
+              Email
             </label>
             <input
               type="text"
-              name="username"
-              id="username"
+              name="email"
+              id="email"
               onChange={formik.handleChange}
-              value={formik.values.username}
+              value={formik.values.email}
               onBlur={formik.handleBlur}
               className=" border border-gray-300 p-1 mt-4 block w-full cursor-pointer rounded-md"
             />
-            {formik.touched.username && formik.errors.username && (
-              <p className="text-red-500 text-sm mt-2">
-                {formik.errors.username}
-              </p>
+            {formik.touched.email && formik.errors.email && (
+              <p className="text-red-500 text-sm mt-2">{formik.errors.email}</p>
             )}
           </div>
           <div className="mb-4">
@@ -157,7 +145,6 @@ const Login = () => {
           </div>
         </form>
       </div>
-      {!showErroMessage && showPopup && <Popup message={showMessage} />}
     </section>
   );
 };

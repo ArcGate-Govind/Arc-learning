@@ -2,7 +2,7 @@ import React from "react";
 import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Login from "../../src/app/page";
-import { Login_Failed_Message, Password_Error_Message, Username_Error_Message } from "../../globals";
+import { LOGIN_FAILED_MESSAGE, PASSWORD_ERROR_MESSAGE } from "../../message";
 
 // Mock the useRouter function
 jest.mock("next/navigation", () => ({
@@ -26,10 +26,10 @@ test("renders the Login component with login error", async () => {
 
   render(<Login />);
 
-  const emailInput = await screen.findByLabelText("Username");
+  const emailInput = await screen.findByLabelText("Email");
   const passwordInput = await screen.findByLabelText("Password");
 
-  fireEvent.change(emailInput, { target: { value: "admin" } });
+  fireEvent.change(emailInput, { target: { value: "admin@gmail.com" } });
   fireEvent.change(passwordInput, { target: { value: "Admin@12" } });
 
   // Mock API response with login error
@@ -39,7 +39,7 @@ test("renders the Login component with login error", async () => {
   fireEvent.click(submitButton);
 
   await waitFor(() => {
-    const errorPopup = screen.getByText(Login_Failed_Message, { exact: false });
+    const errorPopup = screen.getByText(LOGIN_FAILED_MESSAGE, { exact: false });
     expect(errorPopup).toBeInTheDocument();
   });
 });
@@ -49,10 +49,10 @@ test("renders the Login component Successfully", async () => {
 
   render(<Login />);
 
-  const emailInput = await screen.findByLabelText("Username");
+  const emailInput = await screen.findByLabelText("Email");
   const passwordInput = await screen.findByLabelText("Password");
 
-  fireEvent.change(emailInput, { target: { value: "admin" } });
+  fireEvent.change(emailInput, { target: { value: "admin@gmail.com" } });
   fireEvent.change(passwordInput, { target: { value: "Admin@12" } });
 
   // Mock successful API response
@@ -61,6 +61,7 @@ test("renders the Login component Successfully", async () => {
       Promise.resolve({
         token: {
           message: "Login Successfully!",
+          email: "admin",
           refresh:
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5NjQxNzM1NCwiaWF0IjoxNjk2MzMwOTU0LCJqdGkiOiIwMTYwYzgzYWQyMjk0MDNhODNjYjBhM2RlNDEzOTc4MCIsInVzZXJfaWQiOjF9.t6SrV_UvQ1Htjbu0wCSNHt9pEqSjOJaieB9hqHUSZ6k",
           access:
@@ -71,63 +72,48 @@ test("renders the Login component Successfully", async () => {
 
   const submitButton = screen.getByText("Login");
   fireEvent.click(submitButton);
-
-  // Wait for success message to appear and assert its presence
-  await waitFor(() => {
-    const successPopup = screen.queryByText("Login Successfully!", {
-      exact: false,
-    });
-    expect(successPopup).toBeInTheDocument();
-  });
 });
 
-test("renders the Login component username and password validation", async () => {
+test("renders the Login component email and password validation", async () => {
   jest.setTimeout(15000); // Increased the timeout to 15 seconds
 
   render(<Login />);
 
-  const emailInput = await screen.findByLabelText("Username");
+  const emailInput = await screen.findByLabelText("Email");
   const passwordInput = await screen.findByLabelText("Password");
 
-  fireEvent.change(emailInput, { target: { value: "admi" } });
+  fireEvent.change(emailInput, { target: { value: "admi@gmail.com" } });
   fireEvent.change(passwordInput, { target: { value: "Admi" } });
 
   const submitButton = screen.getByText("Login");
   fireEvent.click(submitButton);
 
   await waitFor(() => {
-    const usernameValidation = screen.getByText(
-      Username_Error_Message,
-      { exact: false }
-    );
-    const passwordValidation = screen.getByText(
-      Password_Error_Message,
-      { exact: false }
-    );
-    expect(usernameValidation).toBeInTheDocument();
+    const passwordValidation = screen.getByText(PASSWORD_ERROR_MESSAGE, {
+      exact: false,
+    });
     expect(passwordValidation).toBeInTheDocument();
   });
 });
 
-test("renders the Login component username and password error message", async () => {
-  jest.setTimeout(15000); // Increased the timeout to 15 seconds
+test("renders the Login component email and password error message", async () => {
+  jest.setTimeout(15000);
 
   render(<Login />);
 
-  const emailInput = await screen.findByLabelText("Username");
+  const emailInput = await screen.findByLabelText("Email");
   const passwordInput = await screen.findByLabelText("Password");
 
-  fireEvent.change(emailInput, { target: { value: "admin" } });
+  fireEvent.change(emailInput, { target: { value: "admin@13" } });
   fireEvent.change(passwordInput, { target: { value: "12345678" } });
 
   const submitButton = screen.getByText("Login");
   fireEvent.click(submitButton);
 
   await waitFor(() => {
-    const errormessage = screen.getByText(
-      Password_Error_Message,
-      { exact: false }
-    );
+    const errormessage = screen.getByText(PASSWORD_ERROR_MESSAGE, {
+      exact: false,
+    });
     expect(errormessage).toBeInTheDocument();
   });
 });
@@ -145,10 +131,10 @@ test("renders the Login component invalid credentials", async () => {
   );
   render(<Login />);
 
-  const emailInput = await screen.findByLabelText("Username");
+  const emailInput = await screen.findByLabelText("Email");
   const passwordInput = await screen.findByLabelText("Password");
 
-  fireEvent.change(emailInput, { target: { value: "admii" } });
+  fireEvent.change(emailInput, { target: { value: "admiii@gmail.com" } });
   fireEvent.change(passwordInput, { target: { value: "Admin@18" } });
 
   const submitButton = screen.getByText("Login");

@@ -20,6 +20,7 @@ export const removeUserSession = () => {
   Cookies.remove("refreshtoken");
   Cookies.remove("user");
   Cookies.remove("accessToken");
+
 };
 
 // set the token and user from the Cookies storage
