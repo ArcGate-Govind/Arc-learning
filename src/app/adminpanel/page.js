@@ -6,7 +6,6 @@ import { getaccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
 import {
   LOADING_MESSAGE,
-  NO_CHANGES_MESSAGE,
   SEARCH_FIELD_MESSAGE,
   SEARCH_RESULT_MESSAGE,
 } from "../../../message";
@@ -35,7 +34,6 @@ const AdminPanel = () => {
   const [deletePermissionAll, setDeletePermissionAll] = useState(false);
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [noChangesToSave, setNoChangesToSave] = useState(false);
   const [searchClear, setSearchClear] = useState(false);
 
   useEffect(() => {
@@ -190,7 +188,6 @@ const AdminPanel = () => {
         }
 
         if (updatedData.length > 0) {
-          setNoChangesToSave(false);
           const response = await fetch(`${API_URL}user/update/`, {
             method: "PUT",
             headers: {
@@ -224,7 +221,6 @@ const AdminPanel = () => {
   };
 
   const handleFormSubmit = () => {
-    setCurrentPage(1);
     if (
       !formik.values.employeeId &&
       !formik.values.employeeName &&
@@ -234,6 +230,7 @@ const AdminPanel = () => {
     } else {
       setBlankInputError(false);
       fetchData();
+      setCurrentPage(1);
     }
   };
 
