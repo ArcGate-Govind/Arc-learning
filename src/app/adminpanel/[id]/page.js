@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState, Fragment } from "react";
-import PopupMessage from "/var/www/html/frontend/src/components/popupMessage.js";
+import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
-import Logo from "/var/www/html/frontend/src/image/arrow.png";
-import { getaccessToken } from "/var/www/html/frontend/src/utils/common.js";
+import Logo from  "@/image/arrow.png"
+import { getaccessToken } from "@/utils/common";
 import Image from "next/image";
 
 const UserProfile = ({ params }) => {
@@ -286,7 +286,7 @@ const UserProfile = ({ params }) => {
         <div className="w-full lg:w-[15%] bg-white p-4">
           {userinfo?.projects?.map((item, index) => {
             return (
-              <React.Fragment key={index}>
+              <div key={index}>
                 <div
                   className={
                     index == 0
@@ -300,7 +300,7 @@ const UserProfile = ({ params }) => {
                   </h3>
                   <h3 className="px-4 py-2">Employee id:{item?.employee_id}</h3>
                 </div>
-              </React.Fragment>
+              </div>
             );
           })}
         </div>
