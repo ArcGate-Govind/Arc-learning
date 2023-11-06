@@ -67,7 +67,7 @@ const Login = () => {
           const token = data.token;
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
-            handleOpenPopup(token.message, "/adminpanel");
+            handleOpenPopup("/adminpanel");
           } else {
             handleShowErroMessage(data.non_field_errors[0], "/");
           }
@@ -88,9 +88,8 @@ const Login = () => {
     router.push(path);
   };
 
-  const handleOpenPopup = (message, path) => {
+  const handleOpenPopup = (path) => {
     router.push(path);
-    setShowMessage(message);
   };
 
   return (

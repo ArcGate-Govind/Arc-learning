@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState, Fragment } from "react";
-import PopupMessage from "/var/www/html/frontend/src/components/popupMessage.js";
+import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
-import Logo from "/var/www/html/frontend/src/image/arrow.png";
-import { getaccessToken } from "/var/www/html/frontend/src/utils/common.js";
+import Logo from "@/image/arrow.png";
+import { getaccessToken } from "@/utils/common";
 import Image from "next/image";
 
 const UserProfile = ({ params }) => {
