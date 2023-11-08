@@ -118,7 +118,7 @@ const AdminPanel = () => {
         setLoading(false);
       }
     } catch (error) {
-      console.error(error);
+      // console.log(error);
     }
   }
 
@@ -477,17 +477,23 @@ const AdminPanel = () => {
 
       <div>
         <div className="table mx-auto md:mt-10 mt-5">
-          <table className="border-2 border-[#F5F5F5] shadow-lg">
+          <table
+            className="border-2 border-[#F5F5F5] shadow-lg"
+            data-testid="admin-panel"
+            data-data={JSON.stringify(data)}
+          >
             <thead>
               <tr className="bg-[#E3F2FD] h-12">
                 <th className="mr-1 md:w-20 h-12 flex justify-center items-center ml-1">
                   <input
+                    data-testid="toggle-all-permissions-checkbox"
                     type="checkbox"
                     className="w-4 h-4"
                     checked={selectAllPermissionsMap[currentPage] || false}
                     onChange={(e) =>
                       handleToggleAllPermissions(e.target.checked)
                     }
+                    name="Toggle All Permissions"
                   />
                 </th>
                 <th className="text-sm md:w-44 md:text-base">Employee Id</th>
@@ -501,6 +507,7 @@ const AdminPanel = () => {
                       className="w-4 h-4 ml-1"
                       checked={readPermissionAll}
                       onChange={handleToggleAllReadPermissions}
+                      data-testid="read-checkbox"
                     />
                   </div>
                 </th>
@@ -512,6 +519,7 @@ const AdminPanel = () => {
                       className="w-4 h-4 ml-1"
                       checked={updatePermissionAll}
                       onChange={handleToggleAllUpdatePermissions}
+                      data-testid="update-checkbox"
                     />
                   </div>
                 </th>
@@ -523,6 +531,7 @@ const AdminPanel = () => {
                       className="w-4 h-4 ml-1"
                       checked={deletePermissionAll}
                       onChange={handleToggleAllDeletePermissions}
+                      data-testid="delete-checkbox"
                     />
                   </div>
                 </th>
@@ -535,6 +544,7 @@ const AdminPanel = () => {
               {loading ? (
                 <tr>
                   <td
+                    data-testid="loading-row"
                     colSpan="8"
                     className="text-black-600 text-center font-semibold py-3"
                   >
@@ -569,6 +579,7 @@ const AdminPanel = () => {
                               e.target.checked
                             )
                           }
+                          data-testid={`user-checkbox-${item.user_id}`}
                         />
                       </td>
                       <td
@@ -587,6 +598,7 @@ const AdminPanel = () => {
                       </td>
                       <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
                         <select
+                          data-testid={`status-dropdown-${item.user_id}`}
                           className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
                           value={item.status}
                           onChange={(e) =>
@@ -648,13 +660,14 @@ const AdminPanel = () => {
                       <td className="flex justify-center">
                         {item.unsavedChanges ? (
                           <button
-                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover:bg-[#1D2E3E]"
+                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover-bg-[#1D2E3E]"
                             onClick={() => handleSaveChanges(item)}
                           >
                             Save
                           </button>
                         ) : (
                           <button
+                            data-testid="disable-save-button"
                             disabled
                             className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed"
                           >
@@ -671,6 +684,7 @@ const AdminPanel = () => {
           {totalPages > 1 && (
             <div className="flex justify-between mt-4">
               <button
+                data-testid="previous-button"
                 className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
@@ -691,6 +705,7 @@ const AdminPanel = () => {
                 ))}
               </div>
               <button
+                data-testid="next-button"
                 className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
@@ -702,6 +717,8 @@ const AdminPanel = () => {
 
           {data.length > 0 && (
             <button
+              name="Save Changes"
+              data-testid="save-changes-button"
               className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#466EA1] rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
               type="button"
               onClick={() => {
