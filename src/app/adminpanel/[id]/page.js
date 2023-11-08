@@ -4,8 +4,6 @@ import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
 import { getaccessToken } from "/var/www/html/frontend/src/utils/common.js";
-;
-
 const UserProfile = ({ params }) => {
   const [userinfo, setUserinfo] = useState([]);
   const [filterData, setFilterData] = useState([]);
@@ -279,7 +277,7 @@ const UserProfile = ({ params }) => {
           router.push("/adminpanel", { scroll: false });
         }}
       >
-       Back
+        Back
       </button>
       <div className="lg:flex w-[100%]">
         <div className="w-full lg:w-[15%] bg-white p-4">

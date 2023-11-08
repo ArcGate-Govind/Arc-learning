@@ -56,7 +56,6 @@ const mockData = {
   ],
 };
 
-
 jest.mock("next/router", () => ({
   useRouter: jest.fn(),
 }));
@@ -74,10 +73,9 @@ beforeEach(() => {
   fetch.mockClear();
 });
 
-
 global.fetch = jest.fn(() =>
   Promise.resolve({
-    json: () => Promise.resolve({mockData}),
+    json: () => Promise.resolve({ mockData }),
   })
 );
 
@@ -167,26 +165,17 @@ describe("UserProfile component", () => {
     expect(inputBoxes.length).not.toBe(8);
   });
 
- 
-it('should toggle permissions and update state accordingly', () => {
-  const { getByTestId } = render(<UserProfile />);
+  it("should toggle permissions and update state accordingly", () => {
+    const { getByTestId } = render(<UserProfile />);
 
-  const readCheckbox = getByTestId('read-checkbox');
+    const readCheckbox = getByTestId("read-checkbox");
 
-  fireEvent.click(readCheckbox);
+    fireEvent.click(readCheckbox);
 
-  // You can add assertions based on the expected state changes and behavior in the component
-  // For example, checking the state after the checkbox click
-  expect(readCheckbox.checked).toBe(true); // or whatever your expected behavior is
+    // You can add assertions based on the expected state changes and behavior in the component
+    // For example, checking the state after the checkbox click
+    expect(readCheckbox.checked).toBe(true); // or whatever your expected behavior is
 
-  // Add other necessary assertions based on the logic in your handleallPermissionsByType function
-})
-
-
-
-
-
-
-
- 
+    // Add other necessary assertions based on the logic in your handleallPermissionsByType function
+  });
 });
