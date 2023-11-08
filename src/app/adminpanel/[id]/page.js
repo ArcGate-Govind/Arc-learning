@@ -3,9 +3,8 @@ import React, { useEffect, useState, Fragment } from "react";
 import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
-import Logo from  "@/image/arrow.png"
-import { getaccessToken } from "@/utils/common";
-import Image from "next/image";
+import { getaccessToken } from "/var/www/html/frontend/src/utils/common.js";
+;
 
 const UserProfile = ({ params }) => {
   const [userinfo, setUserinfo] = useState([]);
@@ -43,7 +42,7 @@ const UserProfile = ({ params }) => {
     let allupdate = true;
     let alldelete = true;
     let projectAllPermissions = [];
-    userinfo.projects.map((project) => {
+    userinfo?.projects?.map((project) => {
       if (
         project.permissions["read"] &&
         project.permissions["update"] &&
@@ -100,7 +99,7 @@ const UserProfile = ({ params }) => {
     let allread = true;
     let allupdate = true;
     let alldelete = true;
-    userinfo.projects.map((project) => {
+    userinfo?.projects?.map((project) => {
       if (!project.permissions[permissionType]) {
         switch (permissionType) {
           case "read":
@@ -139,7 +138,7 @@ const UserProfile = ({ params }) => {
 
   const handleallPermissionsByType = (permissionType, checkboxvalues) => {
     let projectPermission = [];
-    userinfo.projects.map((project, index) => {
+    userinfo?.projects?.map((project, index) => {
       const updatedProject = { ...project };
       updatedProject.permissions[permissionType] = !checkboxvalues;
       if (
@@ -188,7 +187,7 @@ const UserProfile = ({ params }) => {
     let allDelete = true;
     let allcheckbox = true;
 
-    userinfo.projects.map((project) => {
+    userinfo?.projects?.map((project) => {
       if (!project.permissions["read"]) {
         allRead = false;
         allcheckbox = false;
@@ -258,7 +257,7 @@ const UserProfile = ({ params }) => {
   const handleSelectAll = () => {
     setAllCheckbox(!allCheckbox);
     let projectPermission = [];
-    userinfo?.projects.map((project, index) => {
+    userinfo?.projects?.map((project, index) => {
       const updatedProject = { ...project };
       updatedProject.permissions["read"] = !allCheckbox;
       updatedProject.permissions["update"] = !allCheckbox;
@@ -280,13 +279,13 @@ const UserProfile = ({ params }) => {
           router.push("/adminpanel", { scroll: false });
         }}
       >
-        <Image src={Logo} width={20} height={20} alt="Picture of the author" />
+       Back
       </button>
       <div className="lg:flex w-[100%]">
         <div className="w-full lg:w-[15%] bg-white p-4">
           {userinfo?.projects?.map((item, index) => {
             return (
-              <div key={index}>
+              <React.Fragment key={index}>
                 <div
                   className={
                     index == 0
@@ -300,7 +299,7 @@ const UserProfile = ({ params }) => {
                   </h3>
                   <h3 className="px-4 py-2">Employee id:{item?.employee_id}</h3>
                 </div>
-              </div>
+              </React.Fragment>
             );
           })}
         </div>
@@ -312,6 +311,7 @@ const UserProfile = ({ params }) => {
                   <th className="px-6 py-3 bg-[#E3F2FD] text-left">
                     <input
                       type="checkbox"
+                      data-testid="read-checkbox"
                       className="m-2 form-checkbox h-4 w-4 text-indigo-600"
                       checked={allCheckbox}
                       onChange={() => handleSelectAll()}
