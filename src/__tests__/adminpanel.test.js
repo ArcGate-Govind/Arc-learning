@@ -82,24 +82,20 @@ beforeAll(() => {
 });
 
 describe("AdminPanel", () => {
-  test("Renders component correctly", () => {
+  test("Renders component correctly.", () => {
     render(component);
-    const employeeIdInput = screen.getByPlaceholderText(
-      "Search by Employee Id"
-    );
-    const employeeNameInput = screen.getByPlaceholderText(
-      "Search by Employee Name"
-    );
-    const statusSelect = screen.getByPlaceholderText(
+    const employeeId = screen.getByPlaceholderText("Search by Employee Id");
+    const employeeName = screen.getByPlaceholderText("Search by Employee Name");
+    const employeeStatus = screen.getByPlaceholderText(
       "Search by Employee Status"
     );
 
-    expect(employeeIdInput).toBeInTheDocument();
-    expect(employeeNameInput).toBeInTheDocument();
-    expect(statusSelect).toBeInTheDocument();
+    expect(employeeId).toBeInTheDocument();
+    expect(employeeName).toBeInTheDocument();
+    expect(employeeStatus).toBeInTheDocument();
   });
 
-  test("Displays error when clicking search with empty inputs", async () => {
+  test("An error message is displayed when the search button is clicked with empty inputs.", async () => {
     render(component);
 
     const searchButton = screen.getByText("Search");
@@ -107,14 +103,14 @@ describe("AdminPanel", () => {
     fireEvent.click(searchButton);
 
     await waitFor(() => {
-      const errorElement = screen.getByText(
+      const errorMessage = screen.getByText(
         "Please fill in at least one search box."
       );
-      expect(errorElement).toBeInTheDocument();
+      expect(errorMessage).toBeInTheDocument();
     });
   });
 
-  test("AdminPanel fetches data", async () => {
+  test("API data fetched successfully.", async () => {
     render(component);
 
     await waitFor(() => {
@@ -123,7 +119,7 @@ describe("AdminPanel", () => {
     });
   });
 
-  test("Renders filtered data in the table", async () => {
+  test("Renders filtered data as result.", async () => {
     render(component);
 
     const employeeIdInput = screen.getByPlaceholderText(
@@ -141,7 +137,7 @@ describe("AdminPanel", () => {
     });
   });
 
-  test("Clicking Previous button decrements the current page", async () => {
+  test("Clicking previous button decrements the current page.", async () => {
     render(component);
 
     let currentPage = 2;
@@ -164,7 +160,7 @@ describe("AdminPanel", () => {
     expect(currentPage).toBe(1);
   });
 
-  test("Clicking Next button increments the current page", async () => {
+  test("Clicking next button increments the current page.", async () => {
     render(component);
 
     let currentPage = 1;
@@ -188,7 +184,7 @@ describe("AdminPanel", () => {
     expect(currentPage).toBe(2);
   });
 
-  test("Clicking 'Read' checkbox sets all read permissions to true", async () => {
+  test("'Select All Read' checkbox sets all read permissions to true.", async () => {
     render(component);
 
     const readCheckbox = screen.getByTestId("read-checkbox");
@@ -211,7 +207,7 @@ describe("AdminPanel", () => {
     mockData = originalData;
   });
 
-  test("Clicking 'Delete' checkbox sets all delete permissions to true", async () => {
+  test("'Select All Delete' checkbox sets all delete permissions to true.", async () => {
     render(component);
 
     const deleteCheckbox = screen.getByTestId("delete-checkbox");
@@ -234,7 +230,7 @@ describe("AdminPanel", () => {
     mockData = originalData;
   });
 
-  test("Clicking 'Update' checkbox sets all update permissions to true", async () => {
+  test("'Select All Update' checkbox sets all update permissions to true.", async () => {
     render(component);
 
     const updateCheckbox = screen.getByTestId("update-checkbox");
@@ -257,7 +253,7 @@ describe("AdminPanel", () => {
     mockData = originalData;
   });
 
-  test("Displays 'No results found' message when there are no search results", async () => {
+  test("Displays 'No results found' message when there are no search results.", async () => {
     render(component);
 
     const employeeIdInput = screen.getByPlaceholderText(
@@ -278,7 +274,7 @@ describe("AdminPanel", () => {
     });
   });
 
-  test('Clicking "Toggle All Permissions" checkbox checks all permissions', () => {
+  test("'Select All' checkbox selects all users.", () => {
     render(component);
 
     const toggleAllPermissionsCheckbox = screen.getByTestId(
@@ -287,7 +283,7 @@ describe("AdminPanel", () => {
     fireEvent.click(toggleAllPermissionsCheckbox);
   });
 
-  test("Confirm modal", () => {
+  test("Pop-up modal.", () => {
     render(component);
     const confirmModal = jest.fn();
     const closeModal = jest.fn();
@@ -302,7 +298,7 @@ describe("AdminPanel", () => {
     expect(closeModal).not.toHaveBeenCalled();
   });
 
-  test("Clicking 'Clear' button clears the form without page reload", () => {
+  test("Clicking 'Clear' button clears the search input fields.", () => {
     render(component);
 
     const employeeIdInput = screen.getByPlaceholderText(
@@ -316,7 +312,7 @@ describe("AdminPanel", () => {
     expect(employeeIdInput.value).toBe("");
   });
 
-  test("Clicking Individual User Checkboxes - Verify checkbox behavior", async () => {
+  test("The Save Changes button should be disabled until the user is selected.", async () => {
     render(component);
 
     const readCheckbox = screen.getByTestId("read-checkbox");
@@ -330,7 +326,7 @@ describe("AdminPanel", () => {
     });
   });
 
-  test("Saving Changes - Checks if changes are saved and button disabled", async () => {
+  test("If there are no unsaved changes, 'Save Changes' button should remain disabled.", async () => {
     render(component);
 
     await waitFor(() => {
@@ -355,7 +351,7 @@ describe("AdminPanel", () => {
     });
   });
 
-  test("Unsaved Changes Detection - enable 'Save Changes' button", async () => {
+  test("If there are unsaved changes, 'Save Changes' button should be enabled.", async () => {
     render(component);
 
     const readCheckbox = screen.getByTestId("read-checkbox");
@@ -373,7 +369,7 @@ describe("AdminPanel", () => {
     }
   });
 
-  test("handleUpdateStatus updates status and sets unsavedChanges", () => {
+  test("Updates status and set unsaved changes true.", () => {
     const initialData = [
       {
         employee_id: "emp_01",
@@ -458,7 +454,7 @@ describe("AdminPanel", () => {
     expect(setUnsavedChanges).toHaveBeenCalledWith(true);
   });
 
-  test("handlePermissionUpdate updates permissions and sets unsavedChanges", () => {
+  test("Updates permissions and sets unsaved changes true.", () => {
     const initialData = [
       {
         employee_id: "emp_01",
