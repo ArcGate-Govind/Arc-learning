@@ -51,27 +51,6 @@ function VideoContainer() {
       projectName: "Project-Name 89",
       time: "9 days ago",
     },
-    {
-      image: videoImg,
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
-      projectName: "Project-Name 1",
-      time: " 5 days ago",
-    },
-    {
-      image: videoImg,
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
-      projectName: "Project-Name 1",
-      time: " 5 days ago",
-    },
-    {
-      image: videoImg,
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
-      projectName: "Project-Name 1",
-      time: " 5 days ago",
-    },
   ];
   return (
     <>
