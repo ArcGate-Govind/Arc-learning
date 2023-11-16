@@ -9,13 +9,12 @@ const UserDetailsProvider = (props) => {
   const isLocalStorageAvailable =
     typeof window !== "undefined" && window.localStorage;
 
-  const islocationAvailable = typeof window !== "undefined" && window.location;
+  const isLocationAvailable = typeof window !== "undefined" && window.location;
 
-  // Try to get the currentPage from localStorage
   const storedCurrentPage = isLocalStorageAvailable
     ? JSON.parse(localStorage.getItem("currentPage"))
     : null;
-  const urlString = islocationAvailable ? window.location.href : null;
+  const urlString = isLocationAvailable ? window.location.href : null;
   let pageValue = null;
   if (urlString) {
     try {

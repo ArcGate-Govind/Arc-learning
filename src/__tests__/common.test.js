@@ -2,12 +2,11 @@ import * as cookies from "js-cookie";
 import {
   getUser,
   getToken,
-  getaccessToken,
+  getAccessToken,
   removeUserSession,
   setUserSession,
 } from "../../src/utils/common";
 
-// Mock the 'js-cookie' library functions
 jest.mock("js-cookie", () => ({
   get: jest.fn(),
   set: jest.fn(),
@@ -20,7 +19,6 @@ describe("Cookie Functions", () => {
   });
 
   it("should get user data from Cookies", () => {
-    // Mock the 'get' function from 'js-cookie'
     cookies.get.mockReturnValue(JSON.stringify({ username: "testUser" }));
 
     const user = getUser();
@@ -41,7 +39,7 @@ describe("Cookie Functions", () => {
 
     const refreshToken = getToken();
     expect(refreshToken).toEqual("refreshToken123");
-    expect(cookies.get).toHaveBeenCalledWith("refreshtoken");
+    expect(cookies.get).toHaveBeenCalledWith("refreshToken");
   });
 
   it("should return null when no refresh token in Cookies", () => {
@@ -49,13 +47,13 @@ describe("Cookie Functions", () => {
 
     const refreshToken = getToken();
     expect(refreshToken).toBeNull();
-    expect(cookies.get).toHaveBeenCalledWith("refreshtoken");
+    expect(cookies.get).toHaveBeenCalledWith("refreshToken");
   });
 
   it("should get the access token from Cookies", () => {
     cookies.get.mockReturnValue("accessToken456");
 
-    const accessToken = getaccessToken();
+    const accessToken = getAccessToken();
     expect(accessToken).toEqual("accessToken456");
     expect(cookies.get).toHaveBeenCalledWith("accessToken");
   });
@@ -63,16 +61,14 @@ describe("Cookie Functions", () => {
   it("should return null when no access token in Cookies", () => {
     cookies.get.mockReturnValue(null);
 
-    const accessToken = getaccessToken();
+    const accessToken = getAccessToken();
     expect(accessToken).toBeNull();
     expect(cookies.get).toHaveBeenCalledWith("accessToken");
   });
 
   it("should remove user session from Cookies", () => {
     removeUserSession();
-
-    // Verify that 'remove' function from 'js-cookie' is called for each cookie
-    expect(cookies.remove).toHaveBeenCalledWith("refreshtoken");
+    expect(cookies.remove).toHaveBeenCalledWith("refreshToken");
     expect(cookies.remove).toHaveBeenCalledWith("user");
     expect(cookies.remove).toHaveBeenCalledWith("accessToken");
   });
@@ -84,7 +80,6 @@ describe("Cookie Functions", () => {
 
     setUserSession(refreshToken, accessToken, user);
 
-    // Verify that 'set' function from 'js-cookie' is called with the correct values
     expect(cookies.set).toHaveBeenCalledWith(
       "user",
       JSON.stringify(user),
@@ -96,7 +91,7 @@ describe("Cookie Functions", () => {
       expect.any(Object)
     );
     expect(cookies.set).toHaveBeenCalledWith(
-      "refreshtoken",
+      "refreshToken",
       refreshToken,
       expect.any(Object)
     );

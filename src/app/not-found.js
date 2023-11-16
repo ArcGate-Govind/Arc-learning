@@ -6,11 +6,11 @@ import Loading from "../image/loading.jpeg";
 import Plugs from "../image/Plugs.png";
 
 const NotFound = (props) => {
-  let getPropsLenth = Object.keys(props).length;
+  let getPropsLength = Object.keys(props).length;
   return (
     <div className="container-fluid mx-auto p-4 bg-[#1D2E3E] max-h-screen">
       <div className="z-1 text-[#ffff]">
-        {getPropsLenth == 0 ? PAGE_NOT_FOUND : props.message}
+        {getPropsLength == 0 ? PAGE_NOT_FOUND : props.message}
       </div>
       <div className="flex">
         <div className="w-screen flex items-center justify-center">

@@ -69,20 +69,19 @@ const Login = () => {
             setUserSession(token.refresh, token.access, data.token.username);
             handleOpenPopup("/adminpanel");
           } else {
-            handleShowErroMessage(data.non_field_errors[0], "/");
+            handleShowErrorMessage(data.non_field_errors[0], "/");
           }
         })
         .catch((error) => {
           removeUserSession();
           localStorage.removeItem("currentPage");
           localStorage.removeItem("values");
-          handleShowErroMessage(LOGIN_FAILED_MESSAGE, "/");
-          // console.error("Login error:", error);
+          handleShowErrorMessage(LOGIN_FAILED_MESSAGE, "/");
         });
     },
   });
 
-  const handleShowErroMessage = (message, path) => {
+  const handleShowErrorMessage = (message, path) => {
     setShowMessage(message);
     setShowErrorMessage(true);
     router.push(path);
