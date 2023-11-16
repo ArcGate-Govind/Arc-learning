@@ -16,7 +16,6 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
     <div className="w-32 sm:w-48 text-center bg-[#E7E3E3]  text-[#4a4949f0] font-bold ">
       <div className="pt-20 p-2"></div>
       {arrProjectName.map((projectName, index) => {
-        console.log("projectName", projectName, index);
         return (
           <div
             key={index}

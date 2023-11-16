@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 .dot {
   height: 25px;
   width: 25px;
@@ -19,4 +20,17 @@
   background-repeat: no-repeat;
   background-size: cover;
   opacity: 0.6;
+}
+
+/* custom-scrollbar.css */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c9c9c9; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
