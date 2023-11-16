@@ -108,10 +108,10 @@ test("renders the Login component email and password error message", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      const errormessage = screen.getByText(PASSWORD_ERROR_MESSAGE, {
+      const errorMessage = screen.getByText(PASSWORD_ERROR_MESSAGE, {
         exact: false,
       });
-      expect(errormessage).toBeInTheDocument();
+      expect(errorMessage).toBeInTheDocument();
     });
   });
 });
@@ -145,5 +145,3 @@ test("renders the Login component invalid credentials", () => {
     });
   });
 });
-
-

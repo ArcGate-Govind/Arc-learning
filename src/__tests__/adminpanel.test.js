@@ -343,10 +343,6 @@ describe("AdminPanel", () => {
 
         expect(mockData[0].status).toBe("false");
         expect(saveChangesButton).toBeDisabled();
-      } else {
-        console.log(
-          "Save Changes button does not exist in the current context."
-        );
       }
     });
   });
