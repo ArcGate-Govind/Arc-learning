@@ -7,7 +7,7 @@ import LogoutImage from "../image/logout.png";
 import {
   getToken,
   getUser,
-  getaccessToken,
+  getAccessToken,
   removeUserSession,
 } from "@/utils/common";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ const Header = () => {
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const userName = getUser();
-  const accessToken = getaccessToken();
+  const accessToken = getAccessToken();
   const refresh = getToken();
 
   useEffect(() => {
@@ -50,7 +50,13 @@ const Header = () => {
     <>
       <div className="header bg-[#1D2E3E] p-4 flex items-center justify-between">
         <div className="logo w-36 md:w-32 text-center md:text-left md:m-auto">
-          <Image src={Logo} alt="Arcgate"   onClick={()=>{router.push('/adminpanel', { scroll: false })}} />
+          <Image
+            src={Logo}
+            alt="Arcgate"
+            onClick={() => {
+              router.push("/adminpanel", { scroll: false });
+            }}
+          />
         </div>
         <div className="flex gap-x-2 md:gap-x-4 items-center md:items-start mt-2 md:mt-0">
           <p className="text-[#ffff] uppercase text-lg md:text-xl">

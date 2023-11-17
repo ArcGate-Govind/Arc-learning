@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { getaccessToken, removeUserSession } from "@/utils/common";
+import { getAccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
 import {
   LOADING_MESSAGE,
@@ -51,7 +51,7 @@ const AdminPanel = () => {
     }
   }, [currentPage]);
 
-  const accessToken = getaccessToken();
+  const accessToken = getAccessToken();
   async function fetchData() {
     const currentURL = window.location.href;
     const queryStringUrl = currentURL.split("?")[1];
@@ -118,7 +118,7 @@ const AdminPanel = () => {
         setLoading(false);
       }
     } catch (error) {
-      // console.log(error);
+      console.log(error);
     }
   }
 
@@ -198,7 +198,6 @@ const AdminPanel = () => {
           });
           const json = await response.json();
 
-          console.log("response", json);
           if (json.code === 200) {
             setUnsavedChanges(false);
             setShowPopupMessage(json.message);
