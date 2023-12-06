@@ -65,22 +65,15 @@ const VideoDetails = ({ params }) => {
   const videoRefs = useRef([]);
 
   async function fetchData() {
-    // const filteredProjects = projectDetails.filter((projectDetail) => {
-    //   return params.id == projectDetail.id;
-    // });
     videoRefs.current = {};
-    // console.log("filteredProjects", filteredProjects);
+
     projectDetails.forEach((project) => {
-      // console.log("project",project);
       videoRefs.current[project.id] = createRef();
     });
 
     setDataParams(projectDetails);
     setShowVideo(true);
     setLoading(false);
-    // const response = await fetch(`${API_URL}users/${queryString}`);
-    // const json = await response.json();
-    // console.log("json", json);
   }
 
   const handleUpdateUrl = (id) => {

@@ -128,10 +128,6 @@ const VideoContainer = () => {
     });
     setData(filteredProjects);
     setShowVideo(true);
-
-    // const response = await fetch(`${API_URL}users/${queryString}`);
-    // const json = await response.json();
-    // console.log("json", json);
   }
 
   const validationSchema = Yup.object()
@@ -183,7 +179,6 @@ const VideoContainer = () => {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      // fetchData();
     }
   };
 
@@ -292,10 +287,7 @@ const VideoContainer = () => {
                             controls
                             onPause={() => getCurrentTime(index, project.id)}
                             controlsList="nodownload"
-                            // controlsList="nodownload nofullscreen"
                             disablePictureInPicture
-                            // onPlay={() => getCurrentTime(index)}
-                            // onEnded={() => videoSeenData(index)}
                           >
                             <source src={project.VideoImage} type="video/mp4" />
                           </video>

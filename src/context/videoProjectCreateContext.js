@@ -19,7 +19,6 @@ const VideoProjectCreateContext = (props) => {
     }
   }
 
-  // console.log("pageValueAsNumber",pageValueAsNumber);
   const [selectedTab, setSelectedTab] = useState(pageValue || "AllProjects");
 
   useEffect(() => {
