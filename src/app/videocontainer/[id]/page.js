@@ -1,9 +1,9 @@
 "use client";
 import React, { createRef, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import like from "../../../image/Like.png";
-import dislike from "../../../image/dislike.png";
-import comment from "../../../image/comment1.png";
+import like from "@/image/Like.png";
+import dislike from "@/image/dislike.png";
+import comment from "@/image/comment1.png";
 import { LOADING_MESSAGE } from "../../../../message";
 const VideoDetails = ({ params }) => {
   const [dataParams, setDataParams] = useState([]);
@@ -150,7 +150,7 @@ const VideoDetails = ({ params }) => {
                       <div className="sm:flex">
                         <div className="w-80">
                           <p className=" font-medium text-[#000000]  line-clamp-2 text-xs">
-                            projectName _____{project.id}
+                            projectName
                           </p>
                         </div>
                         <div className="sm:flex w-2/6 justify-between justify-center items-center">
@@ -210,7 +210,7 @@ const VideoDetails = ({ params }) => {
                         </video>
                       </div>
                       <p className="font-medium text-[#000000] w-3/5 line-clamp-2 text-xs mb-1">
-                        _____{project.id} {project.description}
+                        {project.description}
                       </p>
                     </div>
                   );
