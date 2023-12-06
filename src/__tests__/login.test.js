@@ -5,7 +5,6 @@ import { act } from "react-dom/test-utils";
 import Login from "../../src/app/page";
 import { LOGIN_FAILED_MESSAGE, PASSWORD_ERROR_MESSAGE } from "../../message";
 
-// Mock the useRouter function
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     pathname: "/",
@@ -15,7 +14,6 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock fetch function
 global.fetch = jest.fn();
 
 beforeEach(() => {
@@ -25,7 +23,7 @@ beforeEach(() => {
 global.fetch = jest.fn().mockRejectedValue({});
 
 test("renders the Login component with login error", async () => {
-  jest.setTimeout(15000); // Increased the timeout to 15 seconds
+  jest.setTimeout(15000);
 
   render(<Login />);
 
@@ -39,7 +37,6 @@ test("renders the Login component with login error", async () => {
 
   fireEvent.click(submitButton);
 
-  // Wait for the error message to appear
   await screen.findByText(LOGIN_FAILED_MESSAGE, { exact: false });
 });
 
@@ -54,7 +51,6 @@ test("renders the Login component Successfully", () => {
     fireEvent.change(emailInput, { target: { value: "admin@gmail.com" } });
     fireEvent.change(passwordInput, { target: { value: "Admin@12" } });
 
-    // Mock successful API response
     fetch.mockResolvedValueOnce({
       json: () =>
         Promise.resolve({
@@ -75,7 +71,7 @@ test("renders the Login component Successfully", () => {
 });
 
 test("renders the Login component email and password validation", () => {
-  jest.setTimeout(15000); // Increased the timeout to 15 seconds
+  jest.setTimeout(15000);
   act(async () => {
     render(<Login />);
 
