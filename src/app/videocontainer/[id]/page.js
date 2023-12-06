@@ -77,14 +77,12 @@ const VideoDetails = ({ params }) => {
   }
 
   const handleUpdateUrl = (id) => {
-    console.log("id", id);
     const currentPath = `${window.location.pathname}`;
     const newPath = currentPath.replace(
       /\/videocontainer\/\d+/,
       `/videocontainer/${id}`
     );
-    console.log("newPath", newPath);
-    console.log("newUrl", currentPath);
+
     window.history.replaceState({}, "", newPath);
     window.location.reload();
   };
@@ -112,7 +110,6 @@ const VideoDetails = ({ params }) => {
   };
 
   const getCurrentTime = (index, projectID) => {
-    console.log("projectID", projectID, videoRefs);
     if (videoRefs.current[projectID]) {
       setVideoSeen((prevVideoSeen) => ({
         ...prevVideoSeen,
