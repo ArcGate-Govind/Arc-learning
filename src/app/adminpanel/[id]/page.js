@@ -24,9 +24,15 @@ const UserProfile = ({ params }) => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
+
         const data = await response?.json();
-        setUserInfo(data);
-        handleDefaultPermissions(data);
+        console.log("response", response, data);
+        if (data.code == 200) {
+          setUserInfo(data);
+          handleDefaultPermissions(data);
+        } else {
+          router.push("/adminpanel");
+        }
       } catch (error) {
         console.error("Error:", error);
       }

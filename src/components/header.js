@@ -39,6 +39,7 @@ const Header = () => {
         removeUserSession();
         localStorage.removeItem("currentPage");
         localStorage.removeItem("values");
+        localStorage.removeItem("selectedTab");
         router.push("/");
       }
     } catch (error) {
