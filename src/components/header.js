@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-
 import Logo from "../image/arcgate-logo.png";
 import LogoutImage from "../image/logout.png";
+import menu from "../image/main-menu.png";
 import {
   getToken,
   getUser,
@@ -13,7 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../constant";
 
-const Header = () => {
+const Header = ({ isOpen, setIsOpen }) => {
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const userName = getUser();
@@ -49,6 +49,9 @@ const Header = () => {
   return (
     <>
       <div className="header bg-[#1D2E3E] p-4 flex items-center justify-between">
+        <div className="w-7 cursor-pointer">
+          <Image src={menu} alt="Menu" onClick={() => setIsOpen(!isOpen)} />
+        </div>
         <div className="logo w-36 md:w-32 text-center md:text-left md:m-auto">
           <Image
             src={Logo}

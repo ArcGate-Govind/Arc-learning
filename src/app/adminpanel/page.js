@@ -414,7 +414,7 @@ const AdminPanel = () => {
     <>
       <form onSubmit={formik.handleSubmit}>
         <div className="bg-[#f5f5f5] text-center">
-          <div className="flex md:flex-row justify-center items-center md:h-24">
+          <div className="block md:flex md:flex-row justify-center items-center md:h-24">
             <div className="pt-5 md:p-5 md:flex gap-4 text-center md:text-left">
               <input
                 type="text"
@@ -436,7 +436,7 @@ const AdminPanel = () => {
               />
               <select
                 name="status"
-                className="md:w-64 h-8 md:h-9 px-3 bg-[#fff] text-[#9CA4B4] border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0"
+                className="w-64 md:w-64 h-8 md:h-9 px-3 bg-[#fff] text-[#9CA4B4] border-[#C5C6C8] border rounded-md mb-2 ml-2 md:mb-0 md:ml-0"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.status}
@@ -451,14 +451,14 @@ const AdminPanel = () => {
             </div>
             <div className="text-center md:text-left mr-3 md:mr-0">
               <button
-                className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-1 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+                className="ml-2 text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-1 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
                 type="submit"
                 onClick={handleFormSubmit}
               >
                 Search
               </button>
               <button
-                className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-3 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+                className="ml-2 text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-lg uppercase mb-3 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
                 type="submit"
                 onClick={handleFormClear}
               >

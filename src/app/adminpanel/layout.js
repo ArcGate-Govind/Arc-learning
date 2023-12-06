@@ -5,12 +5,12 @@ export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <React.Fragment className="w-fit md:w-auto">
+        <div className="w-fit md:w-auto">
           <UserDetailsProvider>
             <Header />
             {children}
           </UserDetailsProvider>
-        </React.Fragment>
+        </div>
       </body>
     </html>
   );
