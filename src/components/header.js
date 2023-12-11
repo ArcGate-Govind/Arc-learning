@@ -39,7 +39,8 @@ const Header = () => {
         removeUserSession();
         localStorage.removeItem("currentPage");
         localStorage.removeItem("values");
-        localStorage.removeItem("selectedTab");
+        localStorage.removeItem("currentPageVideo");
+        localStorage.removeItem("videoSearchValues");
         router.push("/");
       }
     } catch (error) {

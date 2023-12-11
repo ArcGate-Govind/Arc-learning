@@ -126,7 +126,7 @@ const VideoDetails = ({ params }) => {
         </div>
       ) : (
         <div className=" pt-2 m-auto mb-0 w-11/12 flex flex-wrap">
-          <div className="w-3/4">
+          <div className="w-2/3">
             <div className="m-auto mb-0 mt-5 justify-center items-center w-11/12">
               {dataParams.map((project, index) => {
                 if (params.id == project.id) {
@@ -134,8 +134,7 @@ const VideoDetails = ({ params }) => {
                     <div key={index}>
                       <video
                         ref={videoRefs.current[project.id]}
-                        width={800}
-                        className="py-4"
+                        className="py-4 w-4/5"
                         alt="videoImage"
                         controlsList="nodownload"
                         controls
@@ -186,7 +185,7 @@ const VideoDetails = ({ params }) => {
               })}
             </div>
           </div>
-          <div className="w-3/12">
+          <div className="w-1/3">
             <div className="custom-scrollbar m-auto mb-0 w-3/4  flex flex-wrap justify-center items-center overflow-y-auto max-h-[600px]">
               {dataParams.map((project, index) => {
                 if (params.id != project.id) {
@@ -199,8 +198,7 @@ const VideoDetails = ({ params }) => {
                       <div className="relative">
                         <video
                           ref={videoRefs.current[project.id]}
-                          width={240}
-                          className="py-4 "
+                          className="py-4 w-3/4 "
                           alt="videoImage"
                           controlsList="nodownload"
                           controls
@@ -209,7 +207,7 @@ const VideoDetails = ({ params }) => {
                           <source src={project.VideoImage} type="video/mp4" />
                         </video>
                       </div>
-                      <p className="font-medium text-[#000000] w-3/5 line-clamp-2 text-xs mb-1">
+                      <p className="font-medium text-[#000000] w-3/4 line-clamp-2 text-xs mb-1">
                         {project.description}
                       </p>
                     </div>

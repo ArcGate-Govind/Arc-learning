@@ -1,5 +1,4 @@
 "use client";
-import Sidebar from "@/components/sidebar";
 import React, { createRef, useContext, useEffect, useRef } from "react";
 import { useState } from "react";
 import { useFormik } from "formik";
@@ -11,15 +10,18 @@ import {
   SEARCH_RESULT_MESSAGE,
 } from "../../../message";
 import { projectDetailsContext } from "@/context/videoProjectCreateContext";
+import { API_URL } from "../../../constant";
 
 const VideoContainer = () => {
   const [videoSeen, setVideoSeen] = useState({});
-  const [selectedTab, setSelectedTab] = useContext(projectDetailsContext);
   const [blankInputError, setBlankInputError] = useState(false);
   const [searchClear, setSearchClear] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [showVideo, setShowVideo] = useState(false);
+  const [currentPage, setCurrentPage] = useContext(projectDetailsContext);
+  const [totalPages, setTotalPages] = useState(2);
+
   const projectDetailsAll = [
     {
       id: 1,
@@ -69,12 +71,60 @@ const VideoContainer = () => {
       projectName: "Project3",
       time: "9 days ago",
     },
+    {
+      id: 7,
+      VideoImage: "/video.mp4",
+      description:
+        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
+      projectName: "Project3",
+      time: "9 days ago",
+    },
+    {
+      id: 8,
+      VideoImage: "/video.mp4",
+      description:
+        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
+      projectName: "Project3",
+      time: "9 days ago",
+    },
+    {
+      id: 9,
+      VideoImage: "/video.mp4",
+      description:
+        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
+      projectName: "Project3",
+      time: "9 days ago",
+    },
+    {
+      id: 10,
+      VideoImage: "/video.mp4",
+      description:
+        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
+      projectName: "Project3",
+      time: "9 days ago",
+    },
+    {
+      id: 11,
+      VideoImage: "/video.mp4",
+      description:
+        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
+      projectName: "Project3",
+      time: "9 days ago",
+    },
+    {
+      id: 12,
+      VideoImage: "/video.mp4",
+      description:
+        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
+      projectName: "Project3",
+      time: "9 days ago",
+    },
   ];
 
   useEffect(() => {
     fetchData();
     setLoading(false);
-  }, [selectedTab]);
+  }, [currentPage]);
 
   useEffect(() => {
     const storedVideoSeen = localStorage.getItem("videoSeen");
@@ -111,23 +161,20 @@ const VideoContainer = () => {
       }
     }
 
-    queryParams.push(`project=${selectedTab}`);
+    queryParams.push(`page=${currentPage}`);
     const queryString =
       queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
     const newUrl = `${window.location.pathname}${queryString}`;
     window.history.replaceState({}, "", newUrl);
     videoRefs.current = {};
-    const filteredProjects = projectDetailsAll.filter((projectDetail) => {
-      return (
-        selectedTab === "AllProjects" ||
-        projectDetail.projectName === selectedTab
-      );
-    });
-    filteredProjects.forEach((project) => {
+    projectDetailsAll.forEach((project) => {
       videoRefs.current[project.id] = createRef();
     });
-    setData(filteredProjects);
+    setData(projectDetailsAll);
     setShowVideo(true);
+
+    const response = await fetch(`${API_URL}users/${queryParams}`, {});
+    const json = await response.json();
   }
 
   const validationSchema = Yup.object()
@@ -179,6 +226,7 @@ const VideoContainer = () => {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
+      setCurrentPage(1);
     }
   };
 
@@ -219,10 +267,24 @@ const VideoContainer = () => {
     }
   };
 
-  return (
-    <div className="flex  overflow-y-hidden ">
-      <Sidebar selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+  const handlePrevPage = () => {
+    setCurrentPage(currentPage - 1);
+  };
 
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
+  };
+
+  const getPageNumbers = (totalPages) => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+    return pageNumbers;
+  };
+
+  return (
+    <div className="flex overflow-y-hidden">
       <div className="w-screen ">
         <form onSubmit={formik.handleSubmit}>
           <div className=" bg-[#f5f5f5] text-center">
@@ -267,17 +329,14 @@ const VideoContainer = () => {
             {LOADING_MESSAGE}
           </div>
         ) : (
-          <div className="custom-scrollbar m-auto mb-0 w-5/6 overflow-y-auto max-h-[630px]  flex flex-wrap justify-center items-center ">
-            {data.length > 0 ? (
-              data.map((project, index) => {
-                if (
-                  selectedTab == "AllProjects" ||
-                  project.projectName == selectedTab
-                ) {
+          <div className="custom-scrollbar overflow-y-auto max-h-[600px] ">
+            <div className="m-auto mb-0 w-11/12 flex flex-wrap justify-center items-center ">
+              {data.length > 0 ? (
+                data.map((project, index) => {
                   return (
                     <div
                       key={index}
-                      className="hover:scale-95 w-1/1 md:w-1/3 sm:w-1/2 relative"
+                      className="hover:scale-95 w-1/1 md:w-1/4 sm:w-1/2 relative"
                     >
                       <Link href={`videocontainer/${project.id}`}>
                         <div className=" py-2">
@@ -312,11 +371,45 @@ const VideoContainer = () => {
                       </Link>
                     </div>
                   );
-                }
-              })
-            ) : (
-              <div className="text-red-600 text-center py-3">
-                {SEARCH_RESULT_MESSAGE}
+                })
+              ) : (
+                <div className="text-red-600 text-center py-3">
+                  {SEARCH_RESULT_MESSAGE}
+                </div>
+              )}
+            </div>
+            {totalPages > 1 && (
+              <div className="md:flex md:flex-wrap grid justify-center items-center mt-4">
+                <button
+                  data-testid="previous-button"
+                  className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 my-1 sm:my-0 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                <div className="flex flex-wrap">
+                  {getPageNumbers(totalPages).map((page) => (
+                    <button
+                      key={page}
+                      className={`w-12 text-white p-2 disabled:cursor-not-allowed rounded-md mx-2 my-1 sm:my-0 hover:bg-[#1D2E3E] ${
+                        currentPage === page ? "bg-[#1D2E3E]" : "bg-[#466EA1]"
+                      }`}
+                      disabled={currentPage === page}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  data-testid="next-button"
+                  className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 my-1 sm:my-0 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
               </div>
             )}
           </div>

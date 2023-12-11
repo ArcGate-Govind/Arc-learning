@@ -23,11 +23,11 @@
 
 /* custom-scrollbar.css */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #c9c9c9;
+  background: #9e9595;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
