@@ -1,8 +1,8 @@
 "use client";
 import React, { useContext } from "react";
 import Image from "next/image";
-import Previous from "../../image/left-arrow.png";
-import Next from "../../image/next.png";
+import Previous from "@/image/left-arrow.png";
+import Next from "@/image/next.png";
 import SideBar from "@/components/SideBar";
 import { SidebarContext } from "@/context/sidebarContext";
 
