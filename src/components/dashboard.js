@@ -14,15 +14,14 @@ const Dashboard = () => {
   const selectedData = (data) => {
     if (data == "documents") {
       router.push("/dashboard/documents");
-    } else if (data == "videos") {
-      router.push("/dashboard/videos");
+    } else if (data == "videocontainer") {
+      router.push("/dashboard/videocontainer");
     } else if (data == "questionnaire") {
       router.push("/dashboard/questionnaire");
     }
     setSelectedTab(data);
   };
 
-  console.log("selectedTab", selectedTab);
   return (
     <div>
       <div className="flex justify-between items-center bg-[#E3F2FD] my-3 mx-10 px-10">
@@ -41,8 +40,10 @@ const Dashboard = () => {
 
       <div className="flex justify-around mx-10 my-8">
         <div
-          onClick={() => selectedData("videos")}
-          className="w-full text-center border-r-2 border-[#466EA1] cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] py-3"
+          onClick={() => selectedData("videocontainer")}
+          className={`${
+            selectedTab == "videocontainer" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
+          } w-full text-center cursor-pointer border-r-2 border-[#466EA1] hover:bg-[#bbbbbc] hover:text-[#FFFFFF] py-3`}
         >
           <h1 className="text-2xl font-light">Videos</h1>
         </div>
