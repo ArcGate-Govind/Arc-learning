@@ -1,15 +1,14 @@
 import Header from "@/components/header";
 import React from "react";
-import UserDetailsProvider from "../../context/createContext";
+import Dashboard from "@/components/dashboard";
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
         <div className="w-fit md:w-auto">
-          <UserDetailsProvider>
-            <Header />
-            {children}
-          </UserDetailsProvider>
+          <Header />
+          <Dashboard />
+          {children}
         </div>
       </body>
     </html>

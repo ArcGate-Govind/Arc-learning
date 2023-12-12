@@ -1,20 +1,12 @@
 "use client";
-import React, { useContext } from "react";
+import React from "react";
 import Image from "next/image";
 import Previous from "@/image/left-arrow.png";
 import Next from "@/image/next.png";
-import SideBar from "@/components/SideBar";
-import { SidebarContext } from "@/context/sidebarContext";
 
-const Questionnaire = () => {
-  const { isOpen, setIsOpen } = useContext(SidebarContext);
+const Questions = () => {
   return (
     <div className="relative flex">
-      {isOpen && (
-        <div className="absolute">
-          <SideBar />
-        </div>
-      )}
       <div className="flex flex-col items-center justify-center min-h-[55rem] w-full">
         <div className="bg-[#F8F8F8] md:w-1/2 md:mx-auto mx-5">
           <div>
@@ -152,4 +144,4 @@ const Questionnaire = () => {
   );
 };
 
-export default Questionnaire;
+export default Questions;
