@@ -6,11 +6,11 @@ import * as Yup from "yup";
 import Link from "next/link";
 import {
   LOADING_MESSAGE,
-  SEARCH_FIELD_MESSAGE,
   SEARCH_RESULT_MESSAGE,
-} from "../../../message";
+  SEARCH_FIELD_MESSAGE,
+} from "@/../../message";
 import { projectDetailsContext } from "@/context/videoProjectCreateContext";
-import { API_URL } from "../../../constant";
+import { API_URL } from "@/../../constant";
 
 const VideoContainer = () => {
   const [videoSeen, setVideoSeen] = useState({});
@@ -284,10 +284,10 @@ const VideoContainer = () => {
   };
 
   return (
-    <div className="flex overflow-y-hidden">
-      <div className="w-screen ">
+    <div className="flex">
+      <div className="w-screen bg-[#F8F8F8] ">
         <form onSubmit={formik.handleSubmit}>
-          <div className=" bg-[#f5f5f5] text-center">
+          <div className="text-center">
             <div className="md:flex justify-center items-center md:h-24">
               <div className="pt-5 md:p-5 md:flex gap-4 text-center md:text-left">
                 <input
@@ -302,14 +302,14 @@ const VideoContainer = () => {
               </div>
               <div className=" text-center md:text-left mr-3 md:mr-0">
                 <button
-                  className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-sm uppercase mb-1 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+                  className=" hover:text-[#466EA1]  hover:bg-gray-200 bg-[#466EA1] text-[#FFFFFF]  p-2 rounded-md md:text-sm uppercase mb-1 mx-auto md:ml-2 md:mb-0 "
                   type="submit"
                   onClick={handleFormSubmit}
                 >
                   Search
                 </button>
                 <button
-                  className="text-[#fff] bg-[#466EA1] p-2 rounded-md md:text-sm uppercase mb-3 sm:ml-2 md:mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
+                  className="bg-[#466EA1] text-[#FFFFFF]  hover:bg-gray-200  hover:text-[#466EA1] p-2 rounded-md md:text-sm uppercase mb-3 sm:ml-2 md:mx-auto md:ml-2 md:mb-0 "
                   type="submit"
                   onClick={handleFormClear}
                 >
@@ -329,7 +329,7 @@ const VideoContainer = () => {
             {LOADING_MESSAGE}
           </div>
         ) : (
-          <div className="custom-scrollbar overflow-y-auto max-h-[600px] ">
+          <>
             <div className="m-auto mb-0 w-11/12 flex flex-wrap justify-center items-center ">
               {data.length > 0 ? (
                 data.map((project, index) => {
@@ -378,6 +378,7 @@ const VideoContainer = () => {
                 </div>
               )}
             </div>
+
             {totalPages > 1 && (
               <div className="md:flex md:flex-wrap grid justify-center items-center mt-4">
                 <button
@@ -412,7 +413,7 @@ const VideoContainer = () => {
                 </button>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

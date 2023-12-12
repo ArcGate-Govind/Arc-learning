@@ -1,10 +1,10 @@
 "use client";
 import React, { createRef, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import like from "@/image/Like.png";
-import dislike from "@/image/dislike.png";
-import comment from "@/image/comment1.png";
-import { LOADING_MESSAGE } from "../../../../message";
+import like from "@/./image/Like.png";
+import dislike from "@/./image/dislike.png";
+import comment from "@/./image/comment1.png";
+import { LOADING_MESSAGE } from "@/../../message";
 const VideoDetails = ({ params }) => {
   const [dataParams, setDataParams] = useState([]);
   const [videoSeen, setVideoSeen] = useState({});
