@@ -4,6 +4,8 @@ function middleware(req) {
   const verify = req.cookies.get("accessToken")?.value;
   const pathname = req.nextUrl.pathname;
 
+  console.log("pathname",pathname);
+
   if (verify == undefined && pathname != "/") {
     return NextResponse.redirect(new URL("/", req.url));
   } else if (verify != undefined && pathname == "/") {
