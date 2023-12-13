@@ -8,12 +8,12 @@ function middleware(req) {
     console.log("Redirecting to login form");
     return NextResponse.redirect(new URL("/", req.url));
   } else if (verify != undefined && pathname == "/") {
-    return NextResponse.redirect(new URL("/adminpanel", req.url));
+    return NextResponse.redirect(new URL("/twofaregister", req.url));
   }
 }
 
 export default middleware;
 
 export const config = {
-  matcher: ["/", "/adminpanel"],
+  matcher: ["/","/twofaregister","/twofaverify", "/adminpanel"],
 };

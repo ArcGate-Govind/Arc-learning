@@ -3,7 +3,7 @@ import React, { useEffect, useState, Fragment } from "react";
 import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
-import { getaccessToken } from "/var/www/html/frontend/src/utils/common.js";
+import { getaccessToken  } from "@/utils/common";
 const UserProfile = ({ params }) => {
   const [userinfo, setUserinfo] = useState([]);
   const [filterData, setFilterData] = useState([]);

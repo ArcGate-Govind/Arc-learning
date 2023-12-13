@@ -67,7 +67,7 @@ const Login = () => {
           const token = data.token;
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
-            handleOpenPopup(token.message, "/adminpanel");
+            handleOpenPopup(token.message, "/twofaregister");
           } else {
             handleShowErroMessage(data.non_field_errors[0], "/");
           }
