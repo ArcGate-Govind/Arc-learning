@@ -3,14 +3,13 @@ import React, { createRef, useContext, useEffect, useRef } from "react";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import Link from "next/link";
 import {
   LOADING_MESSAGE,
   SEARCH_RESULT_MESSAGE,
   SEARCH_FIELD_MESSAGE,
 } from "@/../../message";
-import { projectDetailsContext } from "@/context/videoProjectCreateContext";
 import { API_URL } from "@/../../constant";
+import VideoPopup from "@/components/videoPopup";
 
 const VideoContainer = () => {
   const [videoSeen, setVideoSeen] = useState({});
@@ -19,15 +18,17 @@ const VideoContainer = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [showVideo, setShowVideo] = useState(false);
-  const [currentPage, setCurrentPage] = useContext(projectDetailsContext);
-  const [totalPages, setTotalPages] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isPopoutOpen, setPopoutOpen] = useState(false);
+  const [dataParams, setDataParams] = useState();
 
   const projectDetailsAll = [
     {
       id: 1,
       VideoImage: "/video.mp4",
       description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
+        "Lorem Ipsum is simply dummy text of the printing and typesetting m is simply dummy text of the printing and typesetting  industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
       projectName: "Project1",
       time: " 5 days ago",
     },
@@ -127,6 +128,7 @@ const VideoContainer = () => {
   }, [currentPage]);
 
   useEffect(() => {
+    window.addEventListener("scroll", handleScrollBar);
     const storedVideoSeen = localStorage.getItem("videoSeen");
     if (storedVideoSeen) {
       setVideoSeen(JSON.parse(storedVideoSeen));
@@ -142,7 +144,7 @@ const VideoContainer = () => {
     if (showVideo) {
       updateTimeAfterSeenVideo();
     }
-  }, [showVideo]);
+  }, [showVideo, isPopoutOpen]);
 
   const videoRefs = useRef([]);
 
@@ -221,6 +223,20 @@ const VideoContainer = () => {
     },
   });
 
+  const handleScrollBar = () => {
+    const innerHeight = window.innerHeight;
+    const scrollTop = document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    if (innerHeight + scrollTop == scrollHeight) {
+      loadMorePageData();
+    }
+  };
+  const loadMorePageData = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   const handleFormSubmit = () => {
     if (!formik.values.projectSearch) {
       setBlankInputError(true);
@@ -258,7 +274,7 @@ const VideoContainer = () => {
     window.location.reload();
   };
 
-  const getCurrentTime = (index, projectID) => {
+  const getCurrentTime = (projectID) => {
     if (videoRefs.current[projectID]) {
       setVideoSeen((prevVideoSeen) => ({
         ...prevVideoSeen,
@@ -267,20 +283,14 @@ const VideoContainer = () => {
     }
   };
 
-  const handlePrevPage = () => {
-    setCurrentPage(currentPage - 1);
+  const openPopup = (project) => {
+    console.log("id", project);
+    setDataParams(project);
+    setPopoutOpen(true);
   };
 
-  const handleNextPage = () => {
-    setCurrentPage(currentPage + 1);
-  };
-
-  const getPageNumbers = (totalPages) => {
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pageNumbers.push(i);
-    }
-    return pageNumbers;
+  const closePopup = () => {
+    setPopoutOpen(false);
   };
 
   return (
@@ -338,37 +348,42 @@ const VideoContainer = () => {
                       key={index}
                       className="hover:scale-95 w-1/1 md:w-1/4 sm:w-1/2 relative"
                     >
-                      <Link href={`videocontainer/${project.id}`}>
+                      <div>
                         <div className=" py-2">
                           <video
                             ref={videoRefs.current[project.id]}
                             className="py-2 w-3/4 custom-video-player"
                             controls
-                            onPause={() => getCurrentTime(index, project.id)}
+                            onPause={() => getCurrentTime(project.id)}
                             controlsList="nodownload"
                             disablePictureInPicture
                           >
                             <source src={project.VideoImage} type="video/mp4" />
                           </video>
                         </div>
-                        <p
-                          className={`font-medium text-[#000000]  w-4/5 line-clamp-2 text-xs mb-1`}
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => openPopup(project)}
                         >
-                          {project.description}
-                        </p>
-                        <div className="flex">
                           <p
-                            className={`font-medium  text-[#000000] w-4/5 line-clamp-2 text-xs`}
+                            className={`font-medium text-[#000000]  w-4/5 line-clamp-2 text-xs mb-1`}
                           >
-                            {project.projectName}
+                            {project.description}
                           </p>
-                          <p
-                            className={`font-medium text-[#000000] w-4/5 line-clamp-2 text-xs`}
-                          >
-                            {project.time}
-                          </p>
+                          <div className="flex">
+                            <p
+                              className={`font-medium  text-[#000000] w-4/5 line-clamp-2 text-xs`}
+                            >
+                              {project.projectName}
+                            </p>
+                            <p
+                              className={`font-medium text-[#000000] w-4/5 line-clamp-2 text-xs`}
+                            >
+                              {project.time}
+                            </p>
+                          </div>
                         </div>
-                      </Link>
+                      </div>
                     </div>
                   );
                 })
@@ -379,39 +394,8 @@ const VideoContainer = () => {
               )}
             </div>
 
-            {totalPages > 1 && (
-              <div className="md:flex md:flex-wrap grid justify-center items-center mt-4">
-                <button
-                  data-testid="previous-button"
-                  className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 my-1 sm:my-0 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                <div className="flex flex-wrap">
-                  {getPageNumbers(totalPages).map((page) => (
-                    <button
-                      key={page}
-                      className={`w-12 text-white p-2 disabled:cursor-not-allowed rounded-md mx-2 my-1 sm:my-0 hover:bg-[#1D2E3E] ${
-                        currentPage === page ? "bg-[#1D2E3E]" : "bg-[#466EA1]"
-                      }`}
-                      disabled={currentPage === page}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  data-testid="next-button"
-                  className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 my-1 sm:my-0 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </button>
-              </div>
+            {isPopoutOpen && (
+              <VideoPopup data={dataParams} onClose={closePopup} />
             )}
           </>
         )}
