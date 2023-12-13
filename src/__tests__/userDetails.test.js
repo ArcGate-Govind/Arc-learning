@@ -10,6 +10,7 @@ import "@testing-library/jest-dom";
 import UserProfile from "@/app/adminpanel/[id]/page";
 import userEvent from "@testing-library/user-event";
 
+
 const mockData = {
   message: "success",
   code: 200,
@@ -93,7 +94,6 @@ describe("UserProfile component", () => {
   });
 
   it("should handle permission change correctly", async () => {
-    // Mock the required data for the component
     const mockProjects = [
       {
         permissions: {
@@ -104,15 +104,12 @@ describe("UserProfile component", () => {
       },
     ];
 
-    // Render the component with the mocked data
-    render(<UserProfile projects={mockProjects} />); // Pass the mocked data as props
+    render(<UserProfile projects={mockProjects} />);
 
-    // Wait for the checkboxes to appear
     await waitFor(() => {
       return screen.getByText("Read");
     });
 
-    // Find checkboxes within the table rows (tr) and columns (th)
     const readCheckbox = screen
       .getByText("Read")
       .closest("tr")
@@ -126,17 +123,13 @@ describe("UserProfile component", () => {
       .closest("tr")
       .querySelector('input[type="checkbox"]');
 
-    // Ensure checkboxes are found before interacting
     if (readCheckbox && updateCheckbox && deleteCheckbox) {
       userEvent.click(readCheckbox);
       userEvent.click(updateCheckbox);
       userEvent.click(deleteCheckbox);
-
-      // Add your assertions here
     } else {
-      // Log an error or fail the test if checkboxes are not found
       console.error("One or more checkboxes are missing.");
-      expect(false).toBe(true); // Failing the test
+      expect(false).toBe(true);
     }
   });
 
@@ -158,10 +151,9 @@ describe("UserProfile component", () => {
     expect(Table).toBeInTheDocument;
   });
 
-  it("should load two input boxes inside contact", () => {
+  it("should load two input boxes in user details", () => {
     render(<UserProfile />);
     const inputBoxes = screen.getAllByRole("checkbox");
-    console.log(inputBoxes.length);
     expect(inputBoxes.length).not.toBe(8);
   });
 
@@ -171,11 +163,6 @@ describe("UserProfile component", () => {
     const readCheckbox = getByTestId("read-checkbox");
 
     fireEvent.click(readCheckbox);
-
-    // You can add assertions based on the expected state changes and behavior in the component
-    // For example, checking the state after the checkbox click
-    expect(readCheckbox.checked).toBe(true); // or whatever your expected behavior is
-
-    // Add other necessary assertions based on the logic in your handleallPermissionsByType function
+    expect(readCheckbox.checked).toBe(true);
   });
 });

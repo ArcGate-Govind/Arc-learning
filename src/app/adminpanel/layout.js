@@ -6,7 +6,6 @@ export default function RootLayout({ children }) {
     <html>
       <body>
         <div className="w-fit md:w-auto">
-          {" "}
           <UserDetailsProvider>
             <Header />
             {children}

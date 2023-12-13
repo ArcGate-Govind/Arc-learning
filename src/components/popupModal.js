@@ -11,7 +11,6 @@ const PopupModal = ({ closeModal, confirmModal }) => {
 
       <div className="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
         <div className="modal-content py-4 text-left px-6">
-          {/* <div className="text-xl font-bold">Modal Title</div> */}
           <p className="text-gray-700 my-4">{UNSAVED_ALERT_MESSAGE}</p>
           <div className="text-right mt-4">
             <button

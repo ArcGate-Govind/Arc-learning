@@ -5,7 +5,6 @@ function middleware(req) {
   const pathname = req.nextUrl.pathname;
 
   if (verify == undefined && pathname != "/") {
-    console.log("Redirecting to login form");
     return NextResponse.redirect(new URL("/", req.url));
   } else if (verify != undefined && pathname == "/") {
     return NextResponse.redirect(new URL("/twofaregister", req.url));
@@ -15,5 +14,11 @@ function middleware(req) {
 export default middleware;
 
 export const config = {
-  matcher: ["/","/twofaregister","/twofaverify", "/adminpanel"],
+  matcher: [
+    "/",
+    "/twofaregister",
+    "/twofaverify",
+    "/adminpanel",
+    "/videocontainer",
+  ],
 };

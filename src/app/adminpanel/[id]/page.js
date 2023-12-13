@@ -1,12 +1,11 @@
 "use client";
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState } from "react";
 import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
-import { getaccessToken  } from "@/utils/common";
+import { getAccessToken } from "@/utils/common";
 const UserProfile = ({ params }) => {
-  const [userinfo, setUserinfo] = useState([]);
-  const [filterData, setFilterData] = useState([]);
+  const [userInfo, setUserInfo] = useState([]);
   const [checkedAllRead, setCheckedAllRead] = useState(false);
   const [checkedAllUpdate, setCheckedAllUpdate] = useState(false);
   const [checkedAllDelete, setCheckedAllDelete] = useState(false);
@@ -14,7 +13,7 @@ const UserProfile = ({ params }) => {
   const [allCheckbox, setAllCheckbox] = useState(false);
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  let accessToken = getaccessToken();
+  let accessToken = getAccessToken();
   const router = useRouter();
 
   useEffect(() => {
@@ -25,22 +24,27 @@ const UserProfile = ({ params }) => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
+
         const data = await response?.json();
-        setUserinfo(data);
-        setFilterData(data);
-        handledefultpermissions(data);
+        console.log("response", response, data);
+        if (data.code == 200) {
+          setUserInfo(data);
+          handleDefaultPermissions(data);
+        } else {
+          router.push("/adminpanel");
+        }
       } catch (error) {
         console.error("Error:", error);
       }
     })();
   }, []);
 
-  const handledefultpermissions = (userinfo) => {
-    let allread = true;
-    let allupdate = true;
-    let alldelete = true;
+  const handleDefaultPermissions = (userInfo) => {
+    let allRead = true;
+    let allUpdate = true;
+    let allDelete = true;
     let projectAllPermissions = [];
-    userinfo?.projects?.map((project) => {
+    userInfo?.projects?.map((project) => {
       if (
         project.permissions["read"] &&
         project.permissions["update"] &&
@@ -52,31 +56,31 @@ const UserProfile = ({ params }) => {
       }
 
       if (!project.permissions["read"]) {
-        allread = false;
+        allRead = false;
       }
       if (!project.permissions["update"]) {
-        allupdate = false;
+        allUpdate = false;
       }
       if (!project.permissions["delete"]) {
-        alldelete = false;
+        allDelete = false;
       }
     });
 
     setProjectAllPermissions(projectAllPermissions);
 
-    if (allread) {
-      setCheckedAllRead(allread);
+    if (allRead) {
+      setCheckedAllRead(allRead);
     }
-    if (allupdate) {
-      setCheckedAllUpdate(allupdate);
+    if (allUpdate) {
+      setCheckedAllUpdate(allUpdate);
     }
-    if (alldelete) {
-      setAllCheckbox(alldelete);
+    if (allDelete) {
+      setAllCheckbox(allDelete);
     }
   };
 
   const handlePermissionChange = (projectIndex, permissionType) => {
-    const updatedData = { ...userinfo };
+    const updatedData = { ...userInfo };
     const project = updatedData.projects[projectIndex];
     project.permissions[permissionType] = !project.permissions[permissionType];
     if (
@@ -84,47 +88,47 @@ const UserProfile = ({ params }) => {
       project.permissions["update"] &&
       project.permissions["delete"]
     ) {
-      let updatedallPermississio = [...projectAllPermissions];
-      updatedallPermississio[projectIndex] = true;
-      setProjectAllPermissions(updatedallPermississio);
+      let updatedAllPermissions = [...projectAllPermissions];
+      updatedAllPermissions[projectIndex] = true;
+      setProjectAllPermissions(updatedAllPermissions);
     } else {
-      let updatedallPermississio = [...projectAllPermissions];
-      updatedallPermississio[projectIndex] = false;
-      setProjectAllPermissions(updatedallPermississio);
+      let updatedAllPermissions = [...projectAllPermissions];
+      updatedAllPermissions[projectIndex] = false;
+      setProjectAllPermissions(updatedAllPermissions);
     }
 
-    setUserinfo(updatedData);
-    let allread = true;
-    let allupdate = true;
-    let alldelete = true;
-    userinfo?.projects?.map((project) => {
+    setUserInfo(updatedData);
+    let allRead = true;
+    let allUpdate = true;
+    let allDelete = true;
+    userInfo?.projects?.map((project) => {
       if (!project.permissions[permissionType]) {
         switch (permissionType) {
           case "read":
-            allread = false;
+            allRead = false;
             break;
 
           case "update":
-            allupdate = false;
+            allUpdate = false;
             break;
 
           case "delete":
-            alldelete = false;
+            allDelete = false;
             break;
         }
       }
     });
     switch (permissionType) {
       case "read":
-        setCheckedAllRead(allread);
+        setCheckedAllRead(allRead);
         break;
 
       case "update":
-        setCheckedAllUpdate(allupdate);
+        setCheckedAllUpdate(allUpdate);
         break;
 
       case "delete":
-        setCheckedAllDelete(alldelete);
+        setCheckedAllDelete(allDelete);
         break;
     }
     if (!checkedAllRead || !checkedAllUpdate || !checkedAllDelete) {
@@ -134,11 +138,11 @@ const UserProfile = ({ params }) => {
     }
   };
 
-  const handleallPermissionsByType = (permissionType, checkboxvalues) => {
+  const handleAllPermissionsByType = (permissionType, checkboxValues) => {
     let projectPermission = [];
-    userinfo?.projects?.map((project, index) => {
+    userInfo?.projects?.map((project, index) => {
       const updatedProject = { ...project };
-      updatedProject.permissions[permissionType] = !checkboxvalues;
+      updatedProject.permissions[permissionType] = !checkboxValues;
       if (
         project.permissions["read"] &&
         project.permissions["update"] &&
@@ -169,34 +173,34 @@ const UserProfile = ({ params }) => {
       setAllCheckbox(true);
     }
   };
-  const handleprojects = (index) => {
-    const updatedData = { ...userinfo };
+  const handleProjects = (index) => {
+    const updatedData = { ...userInfo };
     const project = updatedData.projects[index];
 
-    let updatedallPermississio = [...projectAllPermissions];
-    updatedallPermississio[index] = !updatedallPermississio[index];
-    setProjectAllPermissions(updatedallPermississio);
-    project.permissions["read"] = updatedallPermississio[index];
-    project.permissions["update"] = updatedallPermississio[index];
-    project.permissions["delete"] = updatedallPermississio[index];
-    setUserinfo(updatedData);
+    let updatedAllPermissions = [...projectAllPermissions];
+    updatedAllPermissions[index] = !updatedAllPermissions[index];
+    setProjectAllPermissions(updatedAllPermissions);
+    project.permissions["read"] = updatedAllPermissions[index];
+    project.permissions["update"] = updatedAllPermissions[index];
+    project.permissions["delete"] = updatedAllPermissions[index];
+    setUserInfo(updatedData);
     let allRead = true;
     let allUpdate = true;
     let allDelete = true;
-    let allcheckbox = true;
+    let allCheckbox = true;
 
-    userinfo?.projects?.map((project) => {
+    userInfo?.projects?.map((project) => {
       if (!project.permissions["read"]) {
         allRead = false;
-        allcheckbox = false;
+        allCheckbox = false;
       }
       if (!project.permissions["update"]) {
         allUpdate = false;
-        allcheckbox = false;
+        allCheckbox = false;
       }
       if (!project.permissions["delete"]) {
         allDelete = false;
-        allcheckbox = false;
+        allCheckbox = false;
       }
     });
 
@@ -211,8 +215,7 @@ const UserProfile = ({ params }) => {
   };
   const handleAllSaveChanges = async () => {
     try {
-      const updatedData = userinfo.projects;
-      console.log(updatedData, "updatadata1234");
+      const updatedData = userInfo.projects;
 
       const response = await fetch(`${API_URL}user/update/`, {
         method: "PUT",
@@ -224,7 +227,6 @@ const UserProfile = ({ params }) => {
         body: JSON.stringify(updatedData),
       });
       const json = await response.json();
-      console.log(json, "json");
       if (json.code == 200) {
         setShowPopupMessage(json.message);
         setShowPopup(true);
@@ -255,12 +257,11 @@ const UserProfile = ({ params }) => {
   const handleSelectAll = () => {
     setAllCheckbox(!allCheckbox);
     let projectPermission = [];
-    userinfo?.projects?.map((project, index) => {
+    userInfo?.projects?.map((project, index) => {
       const updatedProject = { ...project };
       updatedProject.permissions["read"] = !allCheckbox;
       updatedProject.permissions["update"] = !allCheckbox;
       updatedProject.permissions["delete"] = !allCheckbox;
-      console.log((updatedProject.permissions["delete"] = !allCheckbox), "nnn");
       projectPermission.push(!allCheckbox);
     });
     setProjectAllPermissions(projectPermission);
@@ -281,7 +282,7 @@ const UserProfile = ({ params }) => {
       </button>
       <div className="lg:flex w-[100%]">
         <div className="w-full lg:w-[15%] bg-white p-4">
-          {userinfo?.projects?.map((item, index) => {
+          {userInfo?.projects?.map((item, index) => {
             return (
               <React.Fragment key={index}>
                 <div
@@ -329,7 +330,7 @@ const UserProfile = ({ params }) => {
                       className="m-2 form-checkbox h-4 w-4 text-indigo-600"
                       checked={checkedAllRead}
                       onChange={() =>
-                        handleallPermissionsByType("read", checkedAllRead)
+                        handleAllPermissionsByType("read", checkedAllRead)
                       }
                     />
                   </th>
@@ -340,7 +341,7 @@ const UserProfile = ({ params }) => {
                       className="form-checkbox m-2 h-4 w-4 text-indigo-600"
                       checked={checkedAllUpdate}
                       onChange={() =>
-                        handleallPermissionsByType("update", checkedAllUpdate)
+                        handleAllPermissionsByType("update", checkedAllUpdate)
                       }
                     />
                   </th>
@@ -351,14 +352,14 @@ const UserProfile = ({ params }) => {
                       className="form-checkbox m-2 h-4 w-4 text-indigo-600"
                       checked={checkedAllDelete}
                       onChange={() =>
-                        handleallPermissionsByType("delete", checkedAllDelete)
+                        handleAllPermissionsByType("delete", checkedAllDelete)
                       }
                     />
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {userinfo?.projects?.map((userdata, index) => {
+                {userInfo?.projects?.map((userData, index) => {
                   return (
                     <tr key={index}>
                       <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
@@ -366,20 +367,20 @@ const UserProfile = ({ params }) => {
                           type="checkbox"
                           className="m-2 form-checkbox h-4 w-4 text-indigo-600"
                           checked={projectAllPermissions[index]}
-                          onChange={() => handleprojects(index)}
+                          onChange={() => handleProjects(index)}
                         />
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
-                        {userdata.project}
+                        {userData.project}
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
-                        {userdata.role}
+                        {userData.role}
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap border-b border-gray-300">
                         <input
                           type="checkbox"
                           className=" m-2 form-checkbox h-4 w-4 text-indigo-600"
-                          checked={userdata.permissions.read}
+                          checked={userData.permissions.read}
                           onChange={() => handlePermissionChange(index, "read")}
                         />
                       </td>
@@ -387,7 +388,7 @@ const UserProfile = ({ params }) => {
                         <input
                           type="checkbox"
                           className=" m-2 form-checkbox h-4 w-4 text-indigo-600"
-                          checked={userdata.permissions.update}
+                          checked={userData.permissions.update}
                           onChange={() =>
                             handlePermissionChange(index, "update")
                           }
@@ -397,7 +398,7 @@ const UserProfile = ({ params }) => {
                         <input
                           type="checkbox"
                           className=" m-2 form-checkbox h-4 w-4 text-indigo-600"
-                          checked={userdata.permissions.delete}
+                          checked={userData.permissions.delete}
                           onChange={() =>
                             handlePermissionChange(index, "delete")
                           }

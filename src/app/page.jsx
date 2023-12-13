@@ -68,29 +68,28 @@ const Login = () => {
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
             handleOpenPopup(token.message, "/twofaregister");
+            handleOpenPopup("/adminpanel");
           } else {
-            handleShowErroMessage(data.non_field_errors[0], "/");
+            handleShowErrorMessage(data.non_field_errors[0], "/");
           }
         })
         .catch((error) => {
           removeUserSession();
           localStorage.removeItem("currentPage");
           localStorage.removeItem("values");
-          handleShowErroMessage(LOGIN_FAILED_MESSAGE, "/");
-          // console.error("Login error:", error);
+          handleShowErrorMessage(LOGIN_FAILED_MESSAGE, "/");
         });
     },
   });
 
-  const handleShowErroMessage = (message, path) => {
+  const handleShowErrorMessage = (message, path) => {
     setShowMessage(message);
     setShowErrorMessage(true);
     router.push(path);
   };
 
-  const handleOpenPopup = (message, path) => {
+  const handleOpenPopup = (path) => {
     router.push(path);
-    setShowMessage(message);
   };
 
   return (
