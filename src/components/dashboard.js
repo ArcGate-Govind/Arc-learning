@@ -26,24 +26,28 @@ const Dashboard = () => {
     <div>
       <div className="flex justify-between items-center bg-[#E3F2FD] my-3 mx-10 px-10">
         <div>
-          <h1 className="text-4xl font-light">Welcome,</h1>
-          <p className="text-lg">Username</p>
+          <h1 className="text-xl md:text-4xl font-light">Welcome,</h1>
+          <p className="text-md md:text-lg">Username</p>
         </div>
         <div className="flex flex-col text-center">
-          <h1 className="text-2xl font-bold">Project Name</h1>
-          <p className="text-lg">Role</p>
+          <h1 className="text-xl md:text-2xl font-bold">Project Name</h1>
+          <p className="text-md md:text-lg">Role</p>
         </div>
         <div>
-          <Image src={UserProfile} alt="UserProfile" className="w-40" />
+          <Image
+            src={UserProfile}
+            alt="UserProfile"
+            className="w-24 md:w-40 py-2 md:py-0"
+          />
         </div>
       </div>
 
-      <div className="flex justify-around mx-10 my-8">
+      <div className="flex gap-x-6 mx-10 my-8">
         <div
           onClick={() => selectedData("videocontainer")}
           className={`${
             selectedTab == "videocontainer" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } w-full text-center cursor-pointer border-r-2 border-[#466EA1] hover:bg-[#bbbbbc] hover:text-[#FFFFFF] py-3`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
         >
           <h1 className="text-2xl font-light">Videos</h1>
         </div>
@@ -51,7 +55,7 @@ const Dashboard = () => {
           onClick={() => selectedData("questionnaire")}
           className={`${
             selectedTab == "questionnaire" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } w-full text-center cursor-pointer border-r-2 border-[#466EA1] hover:bg-[#bbbbbc] hover:text-[#FFFFFF] py-3`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
         >
           <h1 className="text-2xl font-light">Questionnaire</h1>
         </div>
@@ -59,7 +63,7 @@ const Dashboard = () => {
           onClick={() => selectedData("documents")}
           className={`${
             selectedTab == "documents" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } w-full text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] py-3`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
         >
           <h1 className="text-2xl font-light">Documents</h1>
         </div>
