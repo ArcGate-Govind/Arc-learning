@@ -1,5 +1,5 @@
 "use client";
-import React, { createRef, useContext, useEffect, useRef } from "react";
+import React, { createRef, useEffect, useRef } from "react";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -10,6 +10,12 @@ import {
 } from "@/../../message";
 import { API_URL } from "@/../../constant";
 import VideoPopup from "@/components/videoPopup";
+import { getAccessToken } from "@/utils/common";
+
+import "aos/dist/aos.css";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import moment from "moment";
 
 const VideoContainer = () => {
   const [videoSeen, setVideoSeen] = useState({});
@@ -23,111 +29,14 @@ const VideoContainer = () => {
   const [isPopoutOpen, setPopoutOpen] = useState(false);
   const [dataParams, setDataParams] = useState();
 
-  const projectDetailsAll = [
-    {
-      id: 1,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting m is simply dummy text of the printing and typesetting  industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
-      projectName: "Project1",
-      time: " 5 days ago",
-    },
-    {
-      id: 2,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
-      projectName: "Project1",
-      time: " 3 days ago",
-    },
-    {
-      id: 3,
-      VideoImage: "/video.mp4",
-      description:
-        " when an unknown printer took a galleyof type and scrambled it to make a type specimen book",
-      projectName: "Project2",
-      time: "4 days ago",
-    },
-    {
-      id: 4,
-      VideoImage: "/video.mp4",
-      description:
-        "a galleyof type and scrambled it to make a type specimen book",
-      projectName: "Project2",
-      time: "6 days ago",
-    },
-    {
-      id: 5,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-    {
-      id: 6,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-    {
-      id: 7,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-    {
-      id: 8,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-    {
-      id: 9,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-    {
-      id: 10,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-    {
-      id: 11,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-    {
-      id: 12,
-      VideoImage: "/video.mp4",
-      description:
-        "Lorem Ipsum is lllllllll lllllllll simply dummy text of the printing and typesetting a type specimen book",
-      projectName: "Project3",
-      time: "9 days ago",
-    },
-  ];
+  const accessToken = getAccessToken();
 
   useEffect(() => {
     fetchData();
-    setLoading(false);
   }, [currentPage]);
 
   useEffect(() => {
+    AOS.init({});
     window.addEventListener("scroll", handleScrollBar);
     const storedVideoSeen = localStorage.getItem("videoSeen");
     if (storedVideoSeen) {
@@ -169,14 +78,25 @@ const VideoContainer = () => {
     const newUrl = `${window.location.pathname}${queryString}`;
     window.history.replaceState({}, "", newUrl);
     videoRefs.current = {};
-    projectDetailsAll.forEach((project) => {
-      videoRefs.current[project.id] = createRef();
-    });
-    setData(projectDetailsAll);
-    setShowVideo(true);
 
-    const response = await fetch(`${API_URL}users/${queryParams}`, {});
+    const response = await fetch(
+      `${API_URL}dashboard/media-list/${queryString}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
     const json = await response.json();
+    console.log("json", json);
+    if (json.results.length > 0) {
+      json.results.forEach((project) => {
+        videoRefs.current[project.id] = createRef();
+      });
+    }
+    setData(json.results);
+    setShowVideo(true);
+    setLoading(false);
   }
 
   const validationSchema = Yup.object()
@@ -284,7 +204,6 @@ const VideoContainer = () => {
   };
 
   const openPopup = (project) => {
-    console.log("id", project);
     setDataParams(project);
     setPopoutOpen(true);
   };
@@ -294,112 +213,107 @@ const VideoContainer = () => {
   };
 
   return (
-    <div className="flex">
-      <div className="w-screen bg-[#F8F8F8] ">
-        <form onSubmit={formik.handleSubmit}>
-          <div className="text-center">
-            <div className="md:flex justify-center items-center md:h-24">
-              <div className="pt-5 md:p-5 md:flex gap-4 text-center md:text-left">
-                <input
-                  type="text"
-                  name="projectSearch"
-                  className="w-44 sm:w-80  h-8 md:h-9 px-3 border-[#C5C6C8] border rounded-md mb-2 md:mb-0"
-                  placeholder="Search"
-                  onChange={formik.handleChange}
-                  value={formik.values.projectSearch}
-                  onBlur={formik.handleBlur}
-                />
-              </div>
-              <div className=" text-center md:text-left mr-3 md:mr-0">
-                <button
-                  className=" hover:text-[#466EA1]  hover:bg-gray-200 bg-[#466EA1] text-[#FFFFFF]  p-2 rounded-md md:text-sm uppercase mb-1 mx-auto md:ml-2 md:mb-0 "
-                  type="submit"
-                  onClick={handleFormSubmit}
-                >
-                  Search
-                </button>
-                <button
-                  className="bg-[#466EA1] text-[#FFFFFF]  hover:bg-gray-200  hover:text-[#466EA1] p-2 rounded-md md:text-sm uppercase mb-3 sm:ml-2 md:mx-auto md:ml-2 md:mb-0 "
-                  type="submit"
-                  onClick={handleFormClear}
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-            {blankInputError && (
-              <div className="text-red-500 block pb-3 md:-mt-5">
-                {SEARCH_FIELD_MESSAGE}
-              </div>
-            )}
-          </div>
-        </form>
-        {loading ? (
-          <div className="text-black-600 text-center font-semibold py-3">
-            {LOADING_MESSAGE}
-          </div>
-        ) : (
-          <>
-            <div className="m-auto mb-0 w-11/12 flex flex-wrap justify-center items-center ">
-              {data.length > 0 ? (
-                data.map((project, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="hover:scale-95 w-1/1 md:w-1/4 sm:w-1/2 relative"
-                    >
-                      <div>
-                        <div className=" py-2">
-                          <video
-                            ref={videoRefs.current[project.id]}
-                            className="py-2 w-3/4 custom-video-player"
-                            controls
-                            onPause={() => getCurrentTime(project.id)}
-                            controlsList="nodownload"
-                            disablePictureInPicture
-                          >
-                            <source src={project.VideoImage} type="video/mp4" />
-                          </video>
-                        </div>
-                        <div
-                          className="cursor-pointer"
-                          onClick={() => openPopup(project)}
-                        >
-                          <p
-                            className={`font-medium text-[#000000]  w-4/5 line-clamp-2 text-xs mb-1`}
-                          >
-                            {project.description}
-                          </p>
-                          <div className="flex">
-                            <p
-                              className={`font-medium  text-[#000000] w-4/5 line-clamp-2 text-xs`}
-                            >
-                              {project.projectName}
-                            </p>
-                            <p
-                              className={`font-medium text-[#000000] w-4/5 line-clamp-2 text-xs`}
-                            >
-                              {project.time}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="text-red-600 text-center py-3">
-                  {SEARCH_RESULT_MESSAGE}
-                </div>
-              )}
-            </div>
+    <div className="mx-5 md:mx-10 my-10 bg-[#F8F8F8] p-4 md:p-10">
+      <form onSubmit={formik.handleSubmit}>
+        <div className="flex justify-center gap-x-3 mb-8">
+          <input
+            type="text"
+            name="projectSearch"
+            className="w-1/2 md:w-1/4 rounded px-5 border-2 border-gray-200"
+            placeholder="Search"
+            onChange={formik.handleChange}
+            value={formik.values.projectSearch}
+            onBlur={formik.handleBlur}
+          />
 
-            {isPopoutOpen && (
-              <VideoPopup data={dataParams} onClose={closePopup} />
-            )}
-          </>
+          <button
+            className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
+            type="submit"
+            onClick={handleFormSubmit}
+          >
+            Search
+          </button>
+          <button
+            className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
+            type="submit"
+            onClick={handleFormClear}
+          >
+            Clear
+          </button>
+        </div>
+        {blankInputError && (
+          <div className="text-red-500 block  text-center  pb-3 md:-mt-5">
+            {SEARCH_FIELD_MESSAGE}
+          </div>
         )}
-      </div>
+      </form>
+      {loading ? (
+        <div className="text-black-600 text-center font-semibold py-3">
+          {LOADING_MESSAGE}
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap justify-center items-center ">
+            {data.length > 0 ? (
+              data.map((project, index) => {
+                let converTime = moment(project.modified).fromNow();
+                let videoPath = `http://127.0.0.1:8000/${project.file}`;
+
+                return (
+                  <div
+                    key={index}
+                    data-aos="fade-up"
+                    data-aos-duration="1400"
+                    className="hover:scale-95 m-auto mb-0  md:w-1/4 sm:w-1/2 relative"
+                  >
+                    <video
+                      ref={videoRefs.current[project.id]}
+                      className="py-2 w-3/4 custom-video-player"
+                      controls
+                      onPause={() => getCurrentTime(project.id)}
+                      controlsList="nodownload"
+                      disablePictureInPicture
+                    >
+                      <source src={videoPath} type="video/mp4" />
+                    </video>
+
+                    <div
+                      className="cursor-pointer "
+                      onClick={() => openPopup(project)}
+                    >
+                      <div className="flex w-10/12 ">
+                        <p
+                          title={project.title}
+                          className="font-medium  text-[#000000] w-3/4  line-clamp-2 text-xs"
+                        >
+                          {project.title}
+                        </p>
+                        <p className="font-medium text-[#000000] w-3/4  line-clamp-2 text-xs">
+                          {converTime}
+                        </p>
+                      </div>
+                      <p
+                        title={project.description}
+                        className={`font-medium text-[#000000] w-3/4  line-clamp-2 text-xs mb-1  mb-4`}
+                      >
+                        {project.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-red-600 text-center py-3">
+                {SEARCH_RESULT_MESSAGE}
+              </div>
+            )}
+          </div>
+
+          {isPopoutOpen && (
+            <VideoPopup data={dataParams} onClose={closePopup} />
+          )}
+        </>
+      )}
     </div>
   );
 };
