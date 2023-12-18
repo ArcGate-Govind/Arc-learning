@@ -1,18 +1,17 @@
 "use client";
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { API_URL } from "../../../constant";
 import axios from "axios";
-import { getaccessToken  } from "@/utils/common";
-let accessToken = getaccessToken();
+import { getAccessToken } from "@/utils/common";
+let accessToken = getAccessToken();
 
 const VideoUpload = () => {
   const [video, setVideo] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [username, setUsername] = useState("");
-  const [projectName, setProjectName] = useState(""); 
-  const [projects,setProjects] = useState([])
-
+  const [projectName, setProjectName] = useState("");
+  const [projects, setProjects] = useState([]);
 
   const handleVideoChange = (e) => {
     setVideo(e.target.files[0]);
@@ -33,7 +32,6 @@ const VideoUpload = () => {
     setProjectName(e.target.value);
   };
 
-
   useEffect(() => {
     (async () => {
       try {
@@ -43,14 +41,13 @@ const VideoUpload = () => {
           },
         });
         const data = await response?.json();
-        setProjects(data)
-        console.log(data,"data");
+        setProjects(data);
+        console.log(data, "data");
       } catch (error) {
         console.error("Error:", error);
       }
     })();
   }, []);
-
 
   const handleUpload = async () => {
     if (!video || !title || !description || !username) {
@@ -65,15 +62,19 @@ const VideoUpload = () => {
     formData.append("username", username);
     formData.append("projectName", projectName); // Append category to the form data
 
-    console.log(formData,"formdata");
+    console.log(formData, "formdata");
 
     try {
-      await axios.post("http://127.0.0.1:8000/api/v1/dashboard/upload/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      await axios.post(
+        "http://127.0.0.1:8000/api/v1/dashboard/upload/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       console.log("Video uploaded successfully");
     } catch (error) {
       console.error("Error uploading video:", error);
@@ -82,7 +83,8 @@ const VideoUpload = () => {
   };
 
   return (
-    <div className="container mx-auto mt-8">
+  
+      <div className="container mx-auto bg-[#f8f8f8] ">
       <div className="max-w-md mx-auto bg-white p-6 rounded-md shadow-md">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Upload Video
@@ -101,7 +103,7 @@ const VideoUpload = () => {
             name="title"
             value={title}
             onChange={handleTitleChange}
-            className="w-full py-2 px-3 border rounded-md"
+            className="w-full py-2 px-3 border-b-2 outline-none"
           />
         </div>
         <div className="mb-4">
@@ -116,30 +118,23 @@ const VideoUpload = () => {
             name="projectName"
             value={projectName}
             onChange={handleprojectNameChange}
-            className="w-full py-2 px-3 border rounded-md"
+            className="w-full py-2 px-3 border-b-2 outline-none"
           >
-             <option value="">Select a projectName</option>
-          {
-            projects?.map((project)=>{
-              return(
-
-           <>
-        
-            <option value="technology">{project?.project_name}</option>
-           </>
-           
-         
-              )
-            })
-          }
+            <option>Select a projectName</option>
+            {projects?.map((project) => {
+              return (
+                <>
+                  <option>{project?.project_name}</option>
+                </>
+              );
+            })}
           </select>
-          
         </div>
 
         <div className="mb-4">
           <label
             htmlFor="description"
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-gray-700 text-sm font-bold mb-2 outline-none"
           >
             Description:
           </label>
@@ -148,7 +143,7 @@ const VideoUpload = () => {
             name="description"
             value={description}
             onChange={handleDescriptionChange}
-            className="w-full py-2 px-3 border rounded-md"
+            className="w-full py-2 px-3 border-b-2  outline-none"
           ></textarea>
         </div>
 
@@ -165,14 +160,14 @@ const VideoUpload = () => {
             name="username"
             value={username}
             onChange={handleUsernameChange}
-            className="w-full py-2 px-3 border rounded-md"
+            className="w-full py-2 px-3 border-b-2  outline-none"
           />
         </div>
 
         <div className="mb-4">
           <label
             htmlFor="video"
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-gray-700 text-sm font-bold mb-2 "
           >
             Choose a video:
           </label>
@@ -181,7 +176,7 @@ const VideoUpload = () => {
             id="video"
             name="video"
             onChange={handleVideoChange}
-            className="w-full py-2 px-3 border rounded-md"
+            className="w-full py-2 px-3 border-b-2 outline-none"
           />
         </div>
 
@@ -189,14 +184,16 @@ const VideoUpload = () => {
           <button
             onClick={handleUpload}
             type="submit"
-            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue active:bg-blue-800"
+            className="bg-[#466EA1]  text-white py-2 px-4 rounded-md cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
           >
             Upload
           </button>
         </div>
       </div>
     </div>
+  
   );
 };
 
 export default VideoUpload;
+;

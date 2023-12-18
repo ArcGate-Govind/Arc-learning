@@ -1,10 +1,10 @@
 "use client"
 import React,{ useState } from 'react';
-import { getaccessToken  } from "@/utils/common";
+import { getAccessToken  } from "@/utils/common";
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import Lock from "@/image/lock.png"
-let accessToken = getaccessToken();
+let accessToken = getAccessToken();
 
 const Page = () => {
   const router = useRouter(); 

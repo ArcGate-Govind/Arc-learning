@@ -1,12 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { getaccessToken } from "@/utils/common";
+import { getAccessToken } from "@/utils/common";
 import QRCode from "qrcode.react";
 import { useRouter } from "next/navigation";
 
-let accessToken = getaccessToken();
+let accessToken = getAccessToken();
 
-const page = () => {
+const page = ({data}) => {
+  console.log("datavv",data);
   const router = useRouter();
   const [otpUrl, setOtpUrl] = useState("");
 
