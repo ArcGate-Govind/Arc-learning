@@ -23,3 +23,8 @@ export const USER_NOT_FOUND = "User details not found.";
 export const PAGE_NOT_FOUND = "Page not found.";
 
 export const NO_CHANGES_MESSAGE = "No changes to save.";
+
+export const NO_OPTIONS_SELECTED_MESSAGE =
+  "Please select at least one option before submitting.";
+
+export const SEARCH_INPUT_MESSAGE = "Please fill in search box.";
