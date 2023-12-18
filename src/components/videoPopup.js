@@ -8,6 +8,7 @@ import comment from "@/image/comment1.png";
 import { LOADING_MESSAGE } from "@/../../message";
 import ModalBox from "./modalBox";
 import moment from "moment";
+import { Backend_Localhost_Path } from "../../constant";
 
 const VideoPopup = ({ onClose, data }) => {
   const [dataParams, setDataParams] = useState([data]);
@@ -85,7 +86,7 @@ const VideoPopup = ({ onClose, data }) => {
             {dataParams.length > 0 &&
               dataParams.map((project, index) => {
                 let converTime = moment(project.modified).fromNow();
-                let videoPath = `http://127.0.0.1:8000/${project.file}`;
+                let videoPath = `${Backend_Localhost_Path}${project.file}`;
                 return (
                   <div
                     key={index}

@@ -8,7 +8,7 @@ import {
   SEARCH_RESULT_MESSAGE,
   SEARCH_FIELD_MESSAGE,
 } from "@/../../message";
-import { API_URL } from "@/../../constant";
+import { API_URL, Backend_Localhost_Path } from "@/../../constant";
 import VideoPopup from "@/components/videoPopup";
 import { getAccessToken } from "@/utils/common";
 
@@ -257,7 +257,7 @@ const VideoContainer = () => {
             {data.length > 0 ? (
               data.map((project, index) => {
                 let converTime = moment(project.modified).fromNow();
-                let videoPath = `http://127.0.0.1:8000/${project.file}`;
+                let videoPath = `${Backend_Localhost_Path}${project.file}`;
 
                 return (
                   <div

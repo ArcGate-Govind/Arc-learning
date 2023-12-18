@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { getAccessToken } from "@/utils/common";
 import ModalBox from "./modalBox";
+import { API_URL } from "../../constant";
 let accessToken = getAccessToken();
 
-const VideoUploadForm = ({onClose}) => {
+const VideoUploadForm = ({ onClose }) => {
   const [video, setVideo] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -35,7 +36,7 @@ const VideoUploadForm = ({onClose}) => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/v1/projects/", {
+        const response = await fetch(`${API_URL}projects/`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -65,20 +66,15 @@ const VideoUploadForm = ({onClose}) => {
     console.log(formData, "formdata");
 
     try {
-      await axios.post(
-        "http://127.0.0.1:8000/api/v1/dashboard/upload/",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      await axios.post(`${API_URL}dashboard/upload/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       console.log("Video uploaded successfully");
     } catch (error) {
       console.error("Error uploading video:", error);
-      // Handle error (e.g., retrying the upload)
     }
   };
 
