@@ -3,12 +3,14 @@ import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import UserProfile from "@/image/profile.png";
 import { usePathname, useRouter } from "next/navigation";
+import VideoUploadForm from "./videoUploadForm";
 
 const Dashboard = () => {
   const pathname = usePathname();
 
   const path = pathname.split("/dashboard/");
   const [selectedTab, setSelectedTab] = useState(path[1]);
+  const [openPopup, setOpenPopup] = useState(false);
   const router = useRouter();
 
   const selectedData = (data) => {
@@ -20,6 +22,10 @@ const Dashboard = () => {
       router.push("/dashboard/questionnaire");
     }
     setSelectedTab(data);
+  };
+
+  const onClose = () => {
+    setOpenPopup(false);
   };
 
   return (
@@ -67,7 +73,16 @@ const Dashboard = () => {
         >
           <h1 className="text-2xl font-light">Documents</h1>
         </div>
+
+        <div
+          onClick={() => setOpenPopup(true)}
+          className="text-center cursor-pointer hover:bg-[#466EA1] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2 ml-auto"
+        >
+          <h1 className="text-2xl font-light">Upload</h1>
+        </div>
       </div>
+
+      {openPopup && <VideoUploadForm onClose={onClose} />}
     </div>
   );
 };
