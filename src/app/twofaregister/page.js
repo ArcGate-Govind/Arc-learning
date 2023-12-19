@@ -33,13 +33,14 @@ const page = ({data}) => {
 
   return (
     <>
-    <h1 className="text-center mt-5">Please Scan</h1>
-    <div className="flex justify-center mt-10 mb-10">
-      
-      <QRCode size="200" value={otpUrl} />
-    </div>
-   <div className="flex justify-center">
-   <button className="bg-[#E3F2FD] px-10 py-2"
+    {/* <h1 className="text-center mt-5">Please Scan</h1> */}
+    <div className="flex items-center justify-center mt-8">
+        <div className="bg-white p-10 rounded-lg shadow-xl">
+        <QRCode  size="200" value={otpUrl} />
+        </div>
+      </div>
+   <div className="flex justify-center mt-8">
+   <button className="bg-[#466EA1] text-white py-2 px-4 rounded-md cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
         onClick={() => {
           router.push("/twofaverify");
         }}
