@@ -43,7 +43,6 @@ const VideoUploadForm = ({ onClose }) => {
         });
         const data = await response?.json();
         setProjects(data);
-        console.log(data, "data");
       } catch (error) {
         console.error("Error:", error);
       }
@@ -62,9 +61,6 @@ const VideoUploadForm = ({ onClose }) => {
     formData.append("description", description);
     formData.append("username", username);
     formData.append("projectName", projectName); // Append category to the form data
-
-    console.log(formData, "formdata");
-
     try {
       await axios.post(`${API_URL}dashboard/upload/`, formData, {
         headers: {
@@ -72,7 +68,6 @@ const VideoUploadForm = ({ onClose }) => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      console.log("Video uploaded successfully");
     } catch (error) {
       console.error("Error uploading video:", error);
     }

@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 let accessToken = getAccessToken();
 
 const page = ({data}) => {
-  console.log("datavv",data);
   const router = useRouter();
   const [otpUrl, setOtpUrl] = useState("");
 
@@ -15,7 +14,7 @@ const page = ({data}) => {
     (async () => {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/v1/otp-verification/",
+          `${API_URL}/otp-verification/1`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -24,7 +23,6 @@ const page = ({data}) => {
         );
         const data = await response?.json();
         setOtpUrl(data.otp_url);
-        console.log(data, "data");
       } catch (error) {
         console.error("Error:", error);
       }

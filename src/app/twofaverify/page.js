@@ -12,7 +12,7 @@ const Page = () => {
 
   const handleButtonClick = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/v1/otp-verification/", {
+      const response = await fetch(`${API_URL}/otp-verification/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,7 +36,6 @@ const Page = () => {
        else{
         alert("You are the beast")
        }
-      console.log(data, "data");
     } catch (error) {
       console.error("Error:", error);
     }

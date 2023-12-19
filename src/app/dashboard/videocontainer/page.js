@@ -88,7 +88,6 @@ const VideoContainer = () => {
       }
     );
     const json = await response.json();
-    console.log("json", json);
     if (json.results.length > 0) {
       json.results.forEach((project) => {
         videoRefs.current[project.id] = createRef();
