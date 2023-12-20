@@ -114,7 +114,7 @@ const VideoPopup = ({ onClose, data }) => {
                         src={like}
                       />
                       <p className="font-medium text-[#000000] line-clamp-2 text-xs">
-                        2K
+                        {project.likes}
                       </p>
                       <Image
                         className="cursor-pointer"
