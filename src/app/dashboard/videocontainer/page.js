@@ -48,15 +48,26 @@ const VideoContainer = () => {
     if (storedVideoSeen) {
       setVideoSeen(JSON.parse(storedVideoSeen));
     }
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollBar);
+    };
   }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScrollBar);
     const storedVideoSeen = localStorage.getItem("videoSeen");
     if (storedVideoSeen) {
       setVideoSeen(JSON.parse(storedVideoSeen));
     }
   }, [totalPages]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScrollBar);
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollBar);
+    };
+  }, [totalPages, currentPage]);
 
   useEffect(() => {
     localStorage.setItem("videoSeen", JSON.stringify(videoSeen));
@@ -107,7 +118,6 @@ const VideoContainer = () => {
 
     setTotalPages(json.pagination.total_pages);
     setData((prev) => [...prev, ...json.results]);
-    // setData(json.results);
     setShowVideo(true);
     setLoading(false);
   }
@@ -159,7 +169,7 @@ const VideoContainer = () => {
     const innerHeight = window.innerHeight;
     const scrollTop = document.documentElement.scrollTop;
     const scrollHeight = document.documentElement.scrollHeight;
-    if (innerHeight + scrollTop == scrollHeight) {
+    if (innerHeight + scrollTop + 1 >= scrollHeight) {
       loadMorePageData();
     }
   };
