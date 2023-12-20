@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Logo from "@/image/arcgate-logo.png";
 import LogoutImage from "@/image/logout.png";
+import Backbutton from "@/image/backbutton.png";
 import {
   getToken,
   getUser,
@@ -47,9 +48,21 @@ const Header = () => {
     }
   };
 
+  const goBack = () => {
+    router.push("/adminpanel");
+  };
+
   return (
     <>
       <div className="header bg-[#1D2E3E] p-4 flex items-center justify-between">
+        <Image
+          className="cursor-pointer"
+          alt="Arcgate"
+          onClick={goBack}
+          width={30}
+          src={Backbutton}
+        />
+
         <div className="logo w-36 md:w-32 text-center md:text-left md:m-auto">
           <Image
             src={Logo}
