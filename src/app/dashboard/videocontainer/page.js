@@ -115,9 +115,12 @@ const VideoContainer = () => {
         videoRefs.current[project.id] = createRef();
       });
     }
-
     setTotalPages(json.pagination.total_pages);
-    setData((prev) => [...prev, ...json.results]);
+    if (currentPage != 1) {
+      setData((prev) => [...prev, ...json.results]);
+    } else {
+      setData(json.results);
+    }
     setShowVideo(true);
     setLoading(false);
   }
