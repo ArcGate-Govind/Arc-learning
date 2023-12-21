@@ -50,32 +50,32 @@ const Dashboard = () => {
           onClick={() => selectedData("videocontainer")}
           className={`${
             selectedTab == "videocontainer" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2`}
         >
-          <h1 className="text-2xl font-light">Videos</h1>
+          <h1 className="text-lg md:text-2xl font-light">Videos</h1>
         </div>
         <div
           onClick={() => selectedData("questionnaire")}
           className={`${
             selectedTab == "questionnaire" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2`}
         >
-          <h1 className="text-2xl font-light">Questionnaire</h1>
+          <h1 className="text-lg md:text-2xl font-light">Questionnaire</h1>
         </div>
         <div
           onClick={() => selectedData("documents")}
           className={`${
             selectedTab == "documents" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2`}
         >
-          <h1 className="text-2xl font-light">Documents</h1>
+          <h1 className="text-lg md:text-2xl font-light">Documents</h1>
         </div>
 
         <div
           onClick={() => setOpenPopup(true)}
-          className="text-center cursor-pointer hover:bg-[#466EA1] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2 ml-auto"
+          className="text-center cursor-pointer hover:bg-[#466EA1] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2 ml-auto"
         >
-          <h1 className="text-2xl font-light">Upload</h1>
+          <h1 className="text-lg md:text-2xl font-light">Upload</h1>
         </div>
       </div>
 
