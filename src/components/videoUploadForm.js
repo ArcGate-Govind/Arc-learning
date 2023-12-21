@@ -5,6 +5,8 @@ import { getAccessToken } from "@/utils/common";
 import ModalBox from "./modalBox";
 import { API_URL } from "../../constant";
 let accessToken = getAccessToken();
+import Image from "next/image";
+import videoUpload from "@/image/video.png";
 
 const VideoUploadForm = ({ onClose }) => {
   const [video, setVideo] = useState(null);
@@ -61,7 +63,7 @@ const VideoUploadForm = ({ onClose }) => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("username", username);
-    formData.append("projectName", projectName); // Append category to the form data
+    formData.append("projectName", projectName);
 
     console.log(formData, "formdata");
 
@@ -80,16 +82,23 @@ const VideoUploadForm = ({ onClose }) => {
 
   return (
     <ModalBox onClose={onClose}>
-      <div className="container mx-auto bg-[#f8f8f8] ">
-        <div className="max-w-md mx-auto bg-white p-6 rounded-md shadow-md">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Upload Video
-          </h2>
+      <div className="container mx-auto p-5">
+        <div className="max-w-md mx-auto bg-[#F8F8F8] p-6 rounded-md shadow-md">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              Upload Video
+            </h2>
+            <Image
+              src={videoUpload}
+              alt="videoUpload"
+              className="w-12 md:w-16 pt-1"
+            />
+          </div>
 
           <div className="mb-4">
             <label
               htmlFor="title"
-              className="block text-gray-700 text-sm font-bold mb-2"
+              className="block text-gray-700 font-semibold mb-1"
             >
               Title:
             </label>
@@ -97,26 +106,27 @@ const VideoUploadForm = ({ onClose }) => {
               type="text"
               id="title"
               name="title"
+              placeholder="Title"
               value={title}
               onChange={handleTitleChange}
-              className="w-full py-2 px-3 border-b-2 outline-none"
+              className="w-full py-2 px-3 shadow-md"
             />
           </div>
           <div className="mb-4">
             <label
               htmlFor="category"
-              className="block text-gray-700 text-sm font-bold mb-2"
+              className="block text-gray-700 font-semibold mb-1"
             >
-              ProjectName:
+              Project Name:
             </label>
             <select
               id="projectName"
               name="projectName"
               value={projectName}
               onChange={handleprojectNameChange}
-              className="w-full py-2 px-3 border-b-2 outline-none"
+              className="w-full py-2 px-3 bg-[#FFFFFF] cursor-pointer shadow-md outline-none"
             >
-              <option>Select a projectName</option>
+              <option>Select a project name</option>
               {projects?.map((project) => {
                 return (
                   <>
@@ -130,23 +140,24 @@ const VideoUploadForm = ({ onClose }) => {
           <div className="mb-4">
             <label
               htmlFor="description"
-              className="block text-gray-700 text-sm font-bold mb-2 outline-none"
+              className="block text-gray-700 font-semibold outline-none mb-1"
             >
               Description:
             </label>
             <textarea
               id="description"
               name="description"
+              placeholder="Description"
               value={description}
               onChange={handleDescriptionChange}
-              className="w-full py-2 px-3 border-b-2 outline-none"
+              className="w-full py-2 px-3 shadow-md outline-none"
             ></textarea>
           </div>
 
           <div className="mb-4">
             <label
               htmlFor="username"
-              className="block text-gray-700 text-sm font-bold mb-2"
+              className="block text-gray-700 font-semibold mb-1"
             >
               Username:
             </label>
@@ -154,16 +165,17 @@ const VideoUploadForm = ({ onClose }) => {
               type="text"
               id="username"
               name="username"
+              placeholder="Username"
               value={username}
               onChange={handleUsernameChange}
-              className="w-full py-2 px-3 border-b-2 outline-none"
+              className="w-full py-2 px-3 shadow-md outline-none"
             />
           </div>
 
           <div className="mb-4">
             <label
               htmlFor="video"
-              className="block text-gray-700 text-sm font-bold mb-2 "
+              className="block text-gray-700 font-semibold mb-1"
             >
               Choose a video:
             </label>
@@ -172,7 +184,7 @@ const VideoUploadForm = ({ onClose }) => {
               id="video"
               name="video"
               onChange={handleVideoChange}
-              className="w-full py-2 px-3 border-b-2 outline-none"
+              className="w-full py-2 px-3 bg-[#FFFFFF] cursor-pointer shadow-md outline-none"
             />
           </div>
 
