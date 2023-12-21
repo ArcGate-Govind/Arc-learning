@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { getAccessToken } from "@/utils/common";
 import QRCode from "qrcode.react";
 import { useRouter } from "next/navigation";
+import { API_URL } from "../../../constant";
 
 let accessToken = getAccessToken();
 
@@ -14,7 +15,7 @@ const page = ({data}) => {
     (async () => {
       try {
         const response = await fetch(
-          `${API_URL}/otp-verification/1`,
+          `${API_URL}otp-verification/`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

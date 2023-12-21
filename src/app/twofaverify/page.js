@@ -1,18 +1,20 @@
 "use client"
 import React,{ useState } from 'react';
 import { getAccessToken  } from "@/utils/common";
+import { API_URL } from '../../../constant';
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import Lock from "@/image/lock.png"
+import Link from 'next/link';
 let accessToken = getAccessToken();
 
 const Page = () => {
   const router = useRouter(); 
   const [otp, setOtp] = useState('');
-
+  const [faStatus,setFastatus] = useState()
   const handleButtonClick = async () => {
     try {
-      const response = await fetch(`${API_URL}/otp-verification/`, {
+      const response = await fetch( `${API_URL}otp-verification/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -20,6 +22,8 @@ const Page = () => {
         },
         body: JSON.stringify({
             otp: otp,
+            faStatus:true
+         
         
         }),
       });
@@ -30,6 +34,7 @@ const Page = () => {
       }
 
       const data = await response.json();
+      console.log(data,"fa");
       if(data.message ==="OTP verification successful"){
         router.push("/adminpanel");
        }

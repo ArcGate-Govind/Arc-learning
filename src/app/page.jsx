@@ -66,12 +66,20 @@ const Login = () => {
           return response.json();
         })
         .then((data) => {
-          setToken(data.token)
+          console.log(data,"data");
+           setToken(data.token)
           const token = data.token;
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
-            handleOpenPopup(token.message, "/twofaregister");
-            handleOpenPopup("/twofaregister");
+            if(token.is_2fa === false){
+              handleOpenPopup(token.message, "/twofaregister");
+              handleOpenPopup("/twofaregister");
+            }
+            else{
+              handleOpenPopup(token.message, "/twofaverify");
+            handleOpenPopup("/twofaverify");
+            }
+            
           } else {
             handleShowErrorMessage(data.non_field_errors[0], "/");
           }
@@ -92,6 +100,7 @@ const Login = () => {
   };
 
   const handleOpenPopup = (path) => {
+    console.log(path,"path");
     router.push(path);
   };
 
