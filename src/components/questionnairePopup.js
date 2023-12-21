@@ -181,7 +181,7 @@ const Questions = ({ paramsId, onClose }) => {
         setSelectedOptions((prevSelected) =>
           prevSelected.filter((selected) => selected !== option.id)
         );
-      } else if (selectedOptions.length < 3) {
+      } else {
         setSelectedOptions((prevSelected) => [...prevSelected, option.id]);
       }
     }
@@ -239,10 +239,7 @@ const Questions = ({ paramsId, onClose }) => {
           <div className="flex flex-col items-center justify-center mt-10 w-full">
             <div className="bg-[#F8F8F8] w-full md:w-3/4 md:mx-auto mx-5">
               <div>
-                <h1 className="text-xl text-center pt-4">{`Q. ${questions[currentQuestionIndex].question}`}</h1>
-                <h3 className="text-right mx-10 mt-3 mb-1">
-                  Select up to 3 options
-                </h3>
+                <h1 className="text-xl text-center pt-4 mb-5">{`Q. ${questions[currentQuestionIndex].question}`}</h1>
                 <div className="bg-[#F8F8F8] mx-auto mt-1 pb-5">
                   <div className="grid grid-cols-2 gap-5 mx-10 mt-1">
                     {questions[currentQuestionIndex].options.map((option) => (
@@ -266,10 +263,6 @@ const Questions = ({ paramsId, onClose }) => {
                           value={`option${option.id}`}
                           onChange={() => handleCheckboxChange(option)}
                           checked={selectedOptions.includes(option.id)}
-                          disabled={
-                            selectedOptions.length === 3 &&
-                            !selectedOptions.includes(option.id)
-                          }
                         />
                         <label
                           className="ml-4 cursor-pointer"
