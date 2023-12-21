@@ -1,9 +1,10 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import UserProfile from "@/image/profile.png";
 import { usePathname, useRouter } from "next/navigation";
 import VideoUploadForm from "./videoUploadForm";
+import { getProjectName } from "@/utils/common";
 
 const Dashboard = () => {
   const pathname = usePathname();
@@ -13,14 +14,10 @@ const Dashboard = () => {
   const [openPopup, setOpenPopup] = useState(false);
   const router = useRouter();
 
+  const projectName = getProjectName();
+
   const selectedData = (data) => {
-    if (data == "documents") {
-      router.push("/dashboard/documents");
-    } else if (data == "videocontainer") {
-      router.push("/dashboard/videocontainer");
-    } else if (data == "questionnaire") {
-      router.push("/dashboard/questionnaire");
-    }
+    router.push(`/dashboard/${data}?projectname=${projectName}`);
     setSelectedTab(data);
   };
 
