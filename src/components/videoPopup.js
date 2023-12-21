@@ -8,13 +8,18 @@ import comment from "@/image/comment1.png";
 import { LOADING_MESSAGE } from "@/../../message";
 import ModalBox from "./modalBox";
 import moment from "moment";
-import { Backend_Localhost_Path } from "../../constant";
+import { API_URL, Backend_Localhost_Path } from "../../constant";
+import { getAccessToken } from "@/utils/common";
 
 const VideoPopup = ({ onClose, data }) => {
   const [dataParams, setDataParams] = useState([data]);
   const [videoSeen, setVideoSeen] = useState({});
   const [loading, setLoading] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
+  const [likeData, setLikeData] = useState(1);
+  const [showLike, setShowLike] = useState(false);
+  const [showIcon, setShowIcon] = useState(true);
+  const accessToken = getAccessToken();
 
   useEffect(() => {
     const storedVideoSeen = localStorage.getItem("videoSeen");
@@ -74,6 +79,29 @@ const VideoPopup = ({ onClose, data }) => {
     }
   };
 
+  const handleLikeUpdate = async (totalLike, projectId) => {
+    const response = await fetch(`${API_URL}dashboard/likes/${149}/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const json = await response.json();
+    console.log("json", json);
+
+    if (totalLike >= 0 && json.status == 200) {
+      setLikeData(totalLike + 1);
+      setShowLike(true);
+    }
+  };
+
+  const handleUnlikeUpdate = async (totalLike, projectId) => {
+    if (totalLike > 0) {
+      setLikeData(totalLike - 1);
+      setShowLike(true);
+    }
+  };
+
   return (
     <>
       <ModalBox onClose={onClose}>
@@ -107,27 +135,64 @@ const VideoPopup = ({ onClose, data }) => {
                     </p>
 
                     <div className="flex w-11/12  justify-around ">
-                      <Image
-                        className="mb-1 cursor-pointer"
+                      <span
+                        onClick={() =>
+                          handleLikeUpdate(project.total_likes, project.id)
+                        }
+                        className="mb-1 text-lg"
+                      >
+                        <i
+                          className={`${
+                            showIcon
+                              ? " fa fa-thumbs-up cursor-not-allowed"
+                              : " fa fa-thumbs-o-up cursor-pointer"
+                          }`}
+                        ></i>
+                      </span>
+
+                      {/* <Image
+                        onClick={() =>
+                          handleLikeUpdate(project.total_likes, project.id)
+                        }
+                        className={` mb-1 ${
+                          showLike ? "cursor-not-allowed" : " cursor-pointer"
+                        }`}
                         alt="like"
                         width={20}
                         src={like}
-                      />
+                      /> */}
                       <p className="font-medium text-[#000000] line-clamp-2 text-xs">
-                        {project.likes}
+                        {showLike ? likeData : project.total_likes}
                       </p>
-                      <Image
+
+                      <span className="mb-1 text-lg">
+                        <i
+                          className={`${
+                            !showIcon
+                              ? " fa fa-thumbs-up cursor-not-allowed"
+                              : " fa fa-thumbs-o-up cursor-pointer"
+                          }`}
+                        ></i>
+                      </span>
+
+                      {/* <Image
+                        onClick={() =>
+                          handleUnlikeUpdate(project.total_likes, project.id)
+                        }
                         className="cursor-pointer"
                         width={20}
                         alt="dislike"
                         src={dislike}
-                      />
-                      <Image
+                      /> */}
+                      {/* <Image
                         className="cursor-pointer"
                         width={20}
                         alt="comment"
                         src={comment}
-                      />
+                      /> */}
+                      <span className="mb-1 text-lg">
+                        <i className="fa fa-commenting-o"></i>
+                      </span>
                       <p className="font-medium text-[#000000] line-clamp-2 text-xs">
                         {converTime}
                       </p>
