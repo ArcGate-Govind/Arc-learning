@@ -6,6 +6,8 @@ import Questions from "@/components/questionnairePopup";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { SEARCH_INPUT_MESSAGE } from "../../../../message";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Questionnaire = () => {
   const [params, setParams] = useState();
@@ -19,7 +21,26 @@ const Questionnaire = () => {
     { id: 3, title: "Assessment-3" },
     { id: 4, title: "Assessment-4" },
     { id: 5, title: "Assessment-5" },
+    { id: 6, title: "Assessment-6" },
+    { id: 7, title: "Assessment-7" },
+    { id: 8, title: "Assessment-8" },
+    { id: 9, title: "Assessment-9" },
+    { id: 10, title: "Assessment-10" },
+    { id: 11, title: "Assessment-11" },
+    { id: 12, title: "Assessment-12" },
+    { id: 13, title: "Assessment-13" },
+    { id: 14, title: "Assessment-14" },
+    { id: 15, title: "Assessment-15" },
   ];
+
+  useEffect(() => {
+    AOS.init({
+      offset: 200,
+      duration: 600,
+      easing: "ease-in-out",
+      once: true,
+    });
+  }, []);
 
   const openPopup = (id) => {
     setParams(id);
@@ -31,39 +52,45 @@ const Questionnaire = () => {
   };
 
   const handleFormSubmit = () => {
-    if (!formik.values.search) {
+    if (!formik.values.assessmentSearch) {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      localStorage.setItem("questionnaireSearchValue", formik.values.search);
+      localStorage.setItem(
+        "questionnaireSearchValue",
+        formik.values.assessmentSearch
+      );
     }
   };
 
   useEffect(() => {
     const storedSearchValue = localStorage.getItem("questionnaireSearchValue");
     if (storedSearchValue) {
-      formik.setValues({ ...formik.values, search: storedSearchValue });
+      formik.setValues({
+        ...formik.values,
+        assessmentSearch: storedSearchValue,
+      });
     }
   }, []);
 
   const handleFormClear = () => {
     setSearchClear(true);
     setBlankInputError(false);
-    formik.setValues({ ...formik.values, search: "" });
+    formik.setValues({ ...formik.values, assessmentSearch: "" });
     localStorage.removeItem("questionnaireSearchValue");
   };
 
   const validationSchema = Yup.object().shape({
-    search: Yup.string().required(SEARCH_INPUT_MESSAGE),
+    assessmentSearch: Yup.string().required(SEARCH_INPUT_MESSAGE),
   });
 
   const formik = useFormik({
     initialValues: {
-      search: "",
+      question: "",
     },
     validationSchema,
     onSubmit: (values) => {
-      console.log(values.search);
+      console.log(values.assessmentSearch);
     },
   });
 
@@ -73,12 +100,12 @@ const Questionnaire = () => {
         <div className="flex justify-center gap-x-3">
           <input
             type="text"
-            name="search"
+            name="assessmentSearch"
             className="w-1/2 md:w-1/4 rounded px-5 border-2 border-gray-200"
             placeholder="Search"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            value={formik.values.search}
+            value={formik.values.assessmentSearch}
           />
           <button
             type="button"
@@ -99,12 +126,13 @@ const Questionnaire = () => {
           <div className="text-red-500 text-center">{SEARCH_INPUT_MESSAGE}</div>
         )}
       </form>
-      <div className="flex justify-around space-x-2 mt-8">
+      <div className="grid grid-cols-5 gap-4 justify-items-center mt-10">
         {questionnaireData.map((item) => (
           <div
+            data-aos="fade-up"
             onClick={() => openPopup(item.id)}
             key={item.id}
-            className="bg-[#FFFFFF] p-3 cursor-pointer hover:shadow-lg"
+            className="bg-[#FFFFFF] p-3 cursor-pointer hover:shadow-lg md:w-40 md:h-40 flex flex-col items-center justify-center"
           >
             <Image
               src={questionnaireLogo}
