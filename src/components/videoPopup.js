@@ -1,15 +1,12 @@
 "use client";
 
 import React, { createRef, useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import like from "@/image/Like.png";
-import dislike from "@/image/dislike.png";
-import comment from "@/image/comment1.png";
-import { LOADING_MESSAGE } from "@/../../message";
+import { LOADING_MESSAGE } from "../../message";
 import ModalBox from "./modalBox";
 import moment from "moment";
 import { API_URL, Backend_Localhost_Path } from "../../constant";
 import { getAccessToken } from "@/utils/common";
+import Comment from "./comment";
 
 const VideoPopup = ({ onClose, data }) => {
   const [dataParams, setDataParams] = useState([data]);
@@ -18,7 +15,7 @@ const VideoPopup = ({ onClose, data }) => {
   const [showVideo, setShowVideo] = useState(false);
   const [likeData, setLikeData] = useState(1);
   const [showLike, setShowLike] = useState(false);
-  const [showIcon, setShowIcon] = useState(true);
+  const [showCommentMessage, setShowCommentMessage] = useState(false);
   const accessToken = getAccessToken();
 
   useEffect(() => {
@@ -95,10 +92,11 @@ const VideoPopup = ({ onClose, data }) => {
     }
   };
 
-  const handleUnlikeUpdate = async (totalLike, projectId) => {
-    if (totalLike > 0) {
-      setLikeData(totalLike - 1);
-      setShowLike(true);
+  const handleUpdateComment = (value) => {
+    if (value) {
+      setShowCommentMessage(false);
+    } else {
+      setShowCommentMessage(true);
     }
   };
 
@@ -134,72 +132,38 @@ const VideoPopup = ({ onClose, data }) => {
                       {data.id}____ {project.description}
                     </p>
 
-                    <div className="flex w-11/12  justify-around ">
+                    <div className="flex w-11/12 ">
                       <span
                         onClick={() =>
                           handleLikeUpdate(project.total_likes, project.id)
                         }
-                        className="mb-1 text-lg"
+                        className="mb-1 mr-8 sm:text-sm md:text-3xl"
                       >
                         <i
                           className={`${
-                            showIcon
-                              ? " fa fa-thumbs-up cursor-not-allowed"
-                              : " fa fa-thumbs-o-up cursor-pointer"
+                            // showIcon
+                            //   ? " fa fa-thumbs-up cursor-not-allowed"
+                            " fa fa-thumbs-o-up cursor-pointer"
                           }`}
                         ></i>
                       </span>
-
-                      {/* <Image
-                        onClick={() =>
-                          handleLikeUpdate(project.total_likes, project.id)
-                        }
-                        className={` mb-1 ${
-                          showLike ? "cursor-not-allowed" : " cursor-pointer"
-                        }`}
-                        alt="like"
-                        width={20}
-                        src={like}
-                      /> */}
-                      <p className="font-medium text-[#000000] line-clamp-2 text-xs">
+                      <p className="font-medium text-[#000000] line-clamp-2 sm:text-sm md:text-lg mr-8">
                         {showLike ? likeData : project.total_likes}
                       </p>
 
-                      <span className="mb-1 text-lg">
-                        <i
-                          className={`${
-                            !showIcon
-                              ? " fa fa-thumbs-up cursor-not-allowed"
-                              : " fa fa-thumbs-o-up cursor-pointer"
-                          }`}
-                        ></i>
+                      <span
+                        onClick={() => handleUpdateComment(showCommentMessage)}
+                        className="mb-1 sm:text-sm md:text-3xl"
+                      >
+                        <i className="fa fa-commenting-o cursor-pointer"></i>
                       </span>
-
-                      {/* <Image
-                        onClick={() =>
-                          handleUnlikeUpdate(project.total_likes, project.id)
-                        }
-                        className="cursor-pointer"
-                        width={20}
-                        alt="dislike"
-                        src={dislike}
-                      /> */}
-                      {/* <Image
-                        className="cursor-pointer"
-                        width={20}
-                        alt="comment"
-                        src={comment}
-                      /> */}
-                      <span className="mb-1 text-lg">
-                        <i className="fa fa-commenting-o"></i>
-                      </span>
-                      <p className="font-medium text-[#000000] line-clamp-2 text-xs">
-                        {converTime}
-                      </p>
                     </div>
                   </div>
                 );
               })}
+            {showCommentMessage && (
+              <Comment onClose={() => setShowCommentMessage(false)} />
+            )}
           </div>
         )}
       </ModalBox>
