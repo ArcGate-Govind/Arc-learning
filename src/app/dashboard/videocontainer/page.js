@@ -7,12 +7,15 @@ import {
   LOADING_MESSAGE,
   SEARCH_RESULT_MESSAGE,
   SEARCH_FIELD_MESSAGE,
-} from "@/../../message";
-import { API_URL, Backend_Localhost_Path } from "@/../../constant";
+} from "../../../../message";
+import { API_URL, Backend_Localhost_Path } from "../../../../constant";
 import VideoPopup from "@/components/videoPopup";
-import { getAccessToken, getProjectName } from "@/utils/common";
-
-import "aos/dist/aos.css";
+import {
+  getAccessToken,
+  getProjectName,
+  removeUserSession,
+} from "@/utils/common";
+import { useRouter } from "next/navigation";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import moment from "moment";
@@ -31,6 +34,7 @@ const VideoContainer = () => {
 
   const accessToken = getAccessToken();
   const projectName = getProjectName();
+  const router = useRouter();
   const videoRefs = useRef([]);
 
   useEffect(() => {
@@ -93,7 +97,7 @@ const VideoContainer = () => {
       }
     }
 
-    queryParams.push(`projectname=${projectName}`);
+    queryParams.push(`project=${projectName}`);
     const queryString =
       queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
     const newUrl = `${window.location.pathname}${queryString}`;
@@ -101,7 +105,7 @@ const VideoContainer = () => {
     videoRefs.current = {};
 
     const response = await fetch(
-      `${API_URL}dashboard/media-list/${queryString}&page=${currentPage}`,
+      `${API_URL}dashboard/media-list/${queryString}&page_size=5&page=${currentPage}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -109,20 +113,35 @@ const VideoContainer = () => {
       }
     );
     const json = await response.json();
+    console.log("json", json);
+    if (json.code == 200) {
+      if (json.results.length > 0) {
+        json.results.forEach((project) => {
+          videoRefs.current[project.id] = createRef();
+        });
 
-    if (json.results.length > 0) {
-      json.results.forEach((project) => {
-        videoRefs.current[project.id] = createRef();
-      });
+        if (currentPage != 1) {
+          setData((prev) => [...prev, ...json.results]);
+        } else {
+          setData(json.results);
+        }
+      } else if (json.results.length == 0) {
+        setData(json.results);
+      } else {
+        removeUserSession();
+        localStorage.removeItem("videoSearchValues");
+        router.push("/");
+      }
+
+      setTotalPages(json.pagination.total_pages);
+
+      setShowVideo(true);
+      setLoading(false);
+    } else if (json.code == "token_not_valid") {
+      removeUserSession();
+      localStorage.removeItem("videoSearchValues");
+      router.push("/");
     }
-    setTotalPages(json.pagination.total_pages);
-    if (currentPage != 1) {
-      setData((prev) => [...prev, ...json.results]);
-    } else {
-      setData(json.results);
-    }
-    setShowVideo(true);
-    setLoading(false);
   }
   const validationSchema = Yup.object()
     .shape({
@@ -240,7 +259,7 @@ const VideoContainer = () => {
   };
 
   return (
-    <div className=" bg-[#F8F8F8] ">
+    <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
       <form
         className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
         onSubmit={formik.handleSubmit}
@@ -283,7 +302,7 @@ const VideoContainer = () => {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap p-4 ml-20  justify-center items-center ">
+          <div className="flex flex-wrap  ml-20 ">
             {data.length > 0 ? (
               data.map((project, index) => {
                 let converTime = moment(project.modified).fromNow();
@@ -294,7 +313,7 @@ const VideoContainer = () => {
                     key={index}
                     data-aos="fade-up"
                     data-aos-duration="1400"
-                    className="hover:scale-95 m-auto mb-0  md:w-1/4 sm:w-1/2 relative"
+                    className="hover:scale-95  mb-0  md:w-3/12 sm:w-1/2 relative"
                   >
                     <video
                       ref={videoRefs.current[project.id]}
