@@ -23,9 +23,7 @@ const ErrorMessage = (props) => {
 
 const Login = () => {
   const router = useRouter();
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [token,setToken] = useState('')
-  console.log("token",token);
+  const [showErrorMessage, setShowErrorMessage] = useState(false)
   const [showMessage, setShowMessage] = useState("");
 
   const formik = useFormik({
@@ -66,8 +64,6 @@ const Login = () => {
           return response.json();
         })
         .then((data) => {
-          console.log(data,"data");
-           setToken(data.token)
           const token = data.token;
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
