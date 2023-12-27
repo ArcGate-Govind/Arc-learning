@@ -78,6 +78,7 @@ const Questionnaire = () => {
     setBlankInputError(false);
     formik.setValues({ ...formik.values, assessmentSearch: "" });
     localStorage.removeItem("questionnaireSearchValue");
+    window.location.reload();
   };
 
   const validationSchema = Yup.object().shape({
@@ -86,7 +87,7 @@ const Questionnaire = () => {
 
   const formik = useFormik({
     initialValues: {
-      question: "",
+      assessmentSearch: "",
     },
     validationSchema,
     onSubmit: (values) => {
