@@ -12,13 +12,17 @@ export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <div className="w-fit md:w-auto">
-          <UserDetailsProvider>
-            {pathname != "/" ? <Header /> : ""}
-            {dashboardPart[1] == "dashboard" ? <Dashboard /> : ""}
-            {children}
-          </UserDetailsProvider>
-        </div>
+        {pathname != "/" ? (
+          <div className="w-fit md:w-auto">
+            <UserDetailsProvider>
+              <Header />
+              {dashboardPart[1] == "dashboard" ? <Dashboard /> : ""}
+              {children}
+            </UserDetailsProvider>
+          </div>
+        ) : (
+          <div>{children}</div>
+        )}
       </body>
     </html>
   );
