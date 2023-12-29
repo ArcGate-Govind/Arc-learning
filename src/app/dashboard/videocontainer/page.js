@@ -16,9 +16,9 @@ import {
   removeUserSession,
 } from "@/utils/common";
 import { useRouter } from "next/navigation";
-import AOS from "aos";
-import "aos/dist/aos.css";
+
 import moment from "moment";
+import AOSWrapper from "@/components/aosWrapper";
 
 const VideoContainer = () => {
   const [videoSeen, setVideoSeen] = useState({});
@@ -46,7 +46,6 @@ const VideoContainer = () => {
   }, [data]);
 
   useEffect(() => {
-    AOS.init({});
     window.addEventListener("scroll", handleScrollBar);
     const storedVideoSeen = localStorage.getItem("videoSeen");
     if (storedVideoSeen) {
@@ -113,7 +112,6 @@ const VideoContainer = () => {
       }
     );
     const json = await response.json();
-    console.log("json", json);
     if (json.code == 200) {
       if (json.results.length > 0) {
         json.results.forEach((project) => {
@@ -133,15 +131,16 @@ const VideoContainer = () => {
         router.push("/");
       }
 
-      setTotalPages(json.pagination.total_pages);
-
-      setShowVideo(true);
       setLoading(false);
+      setTotalPages(json.pagination.total_pages);
+      setShowVideo(true);
     } else if (json.code == "token_not_valid") {
       removeUserSession();
       localStorage.removeItem("videoSearchValues");
       router.push("/");
     }
+
+    // setLoading(false);
   }
   const validationSchema = Yup.object()
     .shape({
@@ -259,111 +258,113 @@ const VideoContainer = () => {
   };
 
   return (
-    <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
-      <form
-        className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
-        onSubmit={formik.handleSubmit}
-      >
-        <div className="flex justify-center gap-x-3 mb-8">
-          <input
-            type="text"
-            name="projectSearch"
-            className="w-1/2 md:w-1/4 rounded px-5 border-2 border-gray-200"
-            placeholder="Search"
-            onChange={formik.handleChange}
-            value={formik.values.projectSearch}
-            onBlur={formik.handleBlur}
-          />
+    <AOSWrapper>
+      <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
+        <form
+          className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
+          onSubmit={formik.handleSubmit}
+        >
+          <div className="flex justify-center gap-x-3 mb-8">
+            <input
+              type="text"
+              name="projectSearch"
+              className="w-1/2 md:w-1/4 rounded px-5 border-2 border-gray-200"
+              placeholder="Search"
+              onChange={formik.handleChange}
+              value={formik.values.projectSearch}
+              onBlur={formik.handleBlur}
+            />
 
-          <button
-            className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
-            type="submit"
-            onClick={handleFormSubmit}
-          >
-            Search
-          </button>
-          <button
-            className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
-            type="submit"
-            onClick={handleFormClear}
-          >
-            Clear
-          </button>
-        </div>
-        {blankInputError && (
-          <div className="text-red-500 block  text-center  pb-3 md:-mt-5">
-            {SEARCH_FIELD_MESSAGE}
+            <button
+              className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
+              type="submit"
+              onClick={handleFormSubmit}
+            >
+              Search
+            </button>
+            <button
+              className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
+              type="submit"
+              onClick={handleFormClear}
+            >
+              Clear
+            </button>
           </div>
-        )}
-      </form>
-      {loading ? (
-        <div className="text-black-600 text-center font-semibold py-3">
-          {LOADING_MESSAGE}
-        </div>
-      ) : (
-        <>
-          <div className="flex flex-wrap  ml-20 ">
-            {data.length > 0 ? (
-              data.map((project, index) => {
-                let converTime = moment(project.modified).fromNow();
-                let videoPath = `${Backend_Localhost_Path}${project.file}`;
+          {blankInputError && (
+            <div className="text-red-500 block  text-center  pb-3 md:-mt-5">
+              {SEARCH_FIELD_MESSAGE}
+            </div>
+          )}
+        </form>
+        {loading ? (
+          <div className="text-black-600 text-center font-semibold py-3">
+            {LOADING_MESSAGE}
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap  ml-20 ">
+              {data.length > 0 ? (
+                data.map((project, index) => {
+                  let converTime = moment(project.modified).fromNow();
+                  let videoPath = `${Backend_Localhost_Path}${project.file}`;
 
-                return (
-                  <div
-                    key={index}
-                    data-aos="fade-up"
-                    data-aos-duration="1400"
-                    className="hover:scale-95  mb-0  md:w-3/12 sm:w-1/2 relative"
-                  >
-                    <video
-                      ref={videoRefs.current[project.id]}
-                      className="py-2 w-3/4 custom-video-player"
-                      controls
-                      onPause={() => getCurrentTime(project.id)}
-                      controlsList="nodownload"
-                      disablePictureInPicture
-                    >
-                      <source src={videoPath} type="video/mp4" />
-                    </video>
-
+                  return (
                     <div
-                      className="cursor-pointer "
-                      onClick={() => openPopup(project)}
+                      key={index}
+                      data-aos="fade-up"
+                      data-aos-duration="1400"
+                      className="hover:scale-95  mb-0  md:w-3/12 sm:w-1/2 relative"
                     >
-                      <div className="flex w-10/12 ">
+                      <video
+                        ref={videoRefs.current[project.id]}
+                        className="py-2 w-3/4 custom-video-player"
+                        controls
+                        onPause={() => getCurrentTime(project.id)}
+                        controlsList="nodownload"
+                        disablePictureInPicture
+                      >
+                        <source src={videoPath} type="video/mp4" />
+                      </video>
+
+                      <div
+                        className="cursor-pointer "
+                        onClick={() => openPopup(project)}
+                      >
+                        <div className="flex w-10/12 ">
+                          <p
+                            title={project.title}
+                            className="font-medium  text-[#000000] w-3/4  line-clamp-2 text-xs"
+                          >
+                            {project.title}
+                          </p>
+                          <p className="font-medium text-[#000000] w-3/4  line-clamp-2 text-xs">
+                            {converTime}
+                          </p>
+                        </div>
                         <p
-                          title={project.title}
-                          className="font-medium  text-[#000000] w-3/4  line-clamp-2 text-xs"
+                          title={project.description}
+                          className={`font-medium text-[#000000] w-3/4  line-clamp-2 text-xs mb-1  mb-4`}
                         >
-                          {project.title}
-                        </p>
-                        <p className="font-medium text-[#000000] w-3/4  line-clamp-2 text-xs">
-                          {converTime}
+                          {project.description}
                         </p>
                       </div>
-                      <p
-                        title={project.description}
-                        className={`font-medium text-[#000000] w-3/4  line-clamp-2 text-xs mb-1  mb-4`}
-                      >
-                        {project.description}
-                      </p>
                     </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="text-red-600 text-center py-3">
-                {SEARCH_RESULT_MESSAGE}
-              </div>
-            )}
-          </div>
+                  );
+                })
+              ) : (
+                <div className="text-red-600 text-center py-3">
+                  {SEARCH_RESULT_MESSAGE}
+                </div>
+              )}
+            </div>
 
-          {isPopoutOpen && (
-            <VideoPopup data={dataParams} onClose={closePopup} />
-          )}
-        </>
-      )}
-    </div>
+            {isPopoutOpen && (
+              <VideoPopup data={dataParams} onClose={closePopup} />
+            )}
+          </>
+        )}
+      </div>
+    </AOSWrapper>
   );
 };
 
