@@ -278,13 +278,13 @@ const UserProfile = ({ params }) => {
 
   return (
     <div className="md:w-[90%] sm:tabel lg:flex lg:ml-auto md:flex md:ml-auto mt-14 ">
-      <div className="bg-[#F5F5F5] mt-2 h-48 md:w-[24%] w-full">
+      <div className=" bg-[#F5F5F5] mt-2 h-48 md:w-[24%] w-full">
         {userInfo?.projects?.map((item, index) => {
           return (
             <div key={index}>
               {index == 0 && (
                 <div className=" md:mt-6 lg:mt-6" key={item.user_id}>
-                  <div className="flex items-center ">
+                  <div className="flex items-center">
                     <h3 className="text-sm font-semibold  md:text-base px-4 py-2">
                       Employee id:
                     </h3>
@@ -314,7 +314,7 @@ const UserProfile = ({ params }) => {
         <table className="border-2 border-[#F5F5F5] shadow-lg">
           <thead>
             <tr className="bg-[#E3F2FD] h-12">
-              <th className="mr-1 md:w-20 h-12 flex justify-center items-center ml-1">
+              <th className="mr-1 w-20 h-12 flex justify-center items-center ml-1">
                 <input
                   type="checkbox"
                   data-testid="read-checkbox"
@@ -323,10 +323,10 @@ const UserProfile = ({ params }) => {
                   onChange={() => handleSelectAll()}
                 />
               </th>
-              <th className="text-sm md:w-44 md:text-base">Project Name</th>
+              <th className="text-sm w-44 md:text-base">Project Name</th>
               <th className="md:w-52 text-sm md:text-base">Role</th>
 
-              <th className="md:w-36 h-12 text-center text-sm md:text-base">
+              <th className="w-36 h-12 text-center text-sm md:text-base">
                 <div className="flex items-center justify-center mr-2">
                   <span className="md:mr-2">Read</span>
                   <input
@@ -339,7 +339,7 @@ const UserProfile = ({ params }) => {
                   />
                 </div>
               </th>
-              <th className="md:w-36 h-12 text-center text-sm md:text-base">
+              <th className="w-36 h-12 text-center text-sm md:text-base">
                 <div className="flex items-center justify-center mr-2">
                   <span className="md:mr-2">Update</span>
                   <input
@@ -352,7 +352,7 @@ const UserProfile = ({ params }) => {
                   />
                 </div>
               </th>
-              <th className="md:w-36 h-12 text-center text-sm md:text-base">
+              <th className="w-36 h-12 text-center text-sm md:text-base">
                 <div className="flex items-center justify-center">
                   <span className="md:mr-2">Delete</span>
                   <input
@@ -374,7 +374,7 @@ const UserProfile = ({ params }) => {
                   className="border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0 "
                   key={index}
                 >
-                  <td className="md:w-20 h-12 flex justify-center items-center">
+                  <td className="w-20 h-12 flex justify-center items-center">
                     <input
                       type="checkbox"
                       className="w-4 h-4"
@@ -393,7 +393,7 @@ const UserProfile = ({ params }) => {
                   <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
                     {userData.role}
                   </td>
-                  <td className="md:w-36 h-12">
+                  <td className="w-36 h-12">
                     <div className="flex items-center justify-center">
                       <input
                         type="checkbox"
@@ -403,7 +403,7 @@ const UserProfile = ({ params }) => {
                       />
                     </div>
                   </td>
-                  <td className="md:w-36 h-12">
+                  <td className="w-36 h-12">
                     <div className="flex items-center justify-center">
                       <input
                         type="checkbox"
@@ -413,7 +413,7 @@ const UserProfile = ({ params }) => {
                       />
                     </div>
                   </td>
-                  <td className="md:w-36 h-12">
+                  <td className="w-36 h-12">
                     <div className="flex items-center justify-center">
                       <input
                         type="checkbox"
