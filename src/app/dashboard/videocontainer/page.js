@@ -255,6 +255,7 @@ const VideoContainer = () => {
 
   const closePopup = () => {
     setPopoutOpen(false);
+    // window.location.reload();
   };
 
   return (
@@ -305,7 +306,7 @@ const VideoContainer = () => {
             <div className="flex flex-wrap  ml-20 ">
               {data.length > 0 ? (
                 data.map((project, index) => {
-                  let converTime = moment(project.modified).fromNow();
+                  let converTime = moment(project.created).fromNow();
                   let videoPath = `${Backend_Localhost_Path}${project.file}`;
 
                   return (

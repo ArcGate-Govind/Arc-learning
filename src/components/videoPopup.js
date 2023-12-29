@@ -76,19 +76,20 @@ const VideoPopup = ({ onClose, data }) => {
     }
   };
 
-  const handleLikeUpdate = async (totalLike, projectId) => {
-    const response = await fetch(`${API_URL}dashboard/likes/${149}/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const json = await response.json();
-    console.log("json", json);
+  const handleLikeUpdate = async (totalLike, projectId, isLiked) => {
+    if (!isLiked && !showLike) {
+      const response = await fetch(`${API_URL}dashboard/likes/${178}/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const json = await response.json();
 
-    if (totalLike >= 0 && json.status == 200) {
-      setLikeData(totalLike + 1);
-      setShowLike(true);
+      if (totalLike >= 0 && json.status == 200) {
+        setLikeData(totalLike + 1);
+        setShowLike(!isLiked);
+      }
     }
   };
 
@@ -111,7 +112,7 @@ const VideoPopup = ({ onClose, data }) => {
           <div className="m-auto mb-0 mt-2 w-full">
             {dataParams.length > 0 &&
               dataParams.map((project, index) => {
-                let converTime = moment(project.modified).fromNow();
+                let converTime = moment(project.created).fromNow();
                 let videoPath = `${Backend_Localhost_Path}${project.file}`;
                 return (
                   <div
@@ -135,15 +136,19 @@ const VideoPopup = ({ onClose, data }) => {
                     <div className="flex w-11/12 ">
                       <span
                         onClick={() =>
-                          handleLikeUpdate(project.total_likes, project.id)
+                          handleLikeUpdate(
+                            project.total_likes,
+                            project.id,
+                            project.is_liked
+                          )
                         }
                         className="mb-1 mr-8 sm:text-sm md:text-3xl"
                       >
                         <i
                           className={`${
-                            // showIcon
-                            //   ? " fa fa-thumbs-up cursor-not-allowed"
-                            " fa fa-thumbs-o-up cursor-pointer"
+                            showLike || project.is_liked
+                              ? " fa fa-thumbs-up cursor-not-allowed"
+                              : " fa fa-thumbs-o-up cursor-pointer"
                           }`}
                         ></i>
                       </span>
