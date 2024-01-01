@@ -5,8 +5,10 @@ import UserProfile from "@/image/profile.png";
 import { usePathname, useRouter } from "next/navigation";
 import VideoUploadForm from "./videoUploadForm";
 import { getProjectName } from "@/utils/common";
+import QuestionnaireUploadForm from "./questionnaireUploadForm";
 
-const Dashboard = () => {
+const Dashboard = ({ dashboardData }) => {
+  // console.log("dashboardData", dashboardData);
   const pathname = usePathname();
 
   const path = pathname.split("/dashboard/");
@@ -79,7 +81,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {openPopup && <VideoUploadForm onClose={onClose} />}
+      {openPopup && path[1] == "videocontainer" && (
+        <VideoUploadForm onClose={onClose} />
+      )}
+      {openPopup && path[1] == "questionnaire" && (
+        <QuestionnaireUploadForm onClose={onClose} />
+      )}
     </div>
   );
 };
