@@ -24,9 +24,10 @@
     "formik": "^2.4.5",
     "jest-environment-jsdom": "^29.7.0",
     "js-cookie": "^3.0.5",
-    "qrcode.react": "^3.1.0",
     "moment": "^2.29.4",
     "next": "latest",
+    "node-fetch": "^3.3.2",
+    "qrcode.react": "^3.1.0",
     "react": "latest",
     "react-dom": "latest",
     "react-dropzone": "^14.2.3",
@@ -38,7 +39,9 @@
     "eslint-config-next": "latest",
     "jest": "^29.7.0",
     "jest-fetch-mock": "^3.0.3",
+    "msw": "^2.0.11",
     "postcss": "latest",
-    "tailwindcss": "latest"
+    "tailwindcss": "latest",
+    "text-encoding": "^0.7.0"
   }
 }

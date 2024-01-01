@@ -37,14 +37,14 @@ const Page = () => {
             faStatus: true,
           }),
         });
-
+       console.log(response,"response");
         const data = await response.json();
 
         if (response.ok) {
           setPopupMessage(data?.message);
           router.push("/adminpanel");
         } else {
-          setPopupMessage(data?.error);
+          setPopupMessage(data?.message);
         }
 
         setShowPopup(true);

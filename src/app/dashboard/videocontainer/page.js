@@ -10,7 +10,7 @@ import {
 } from "@/../../message";
 import { API_URL, Backend_Localhost_Path } from "@/../../constant";
 import VideoPopup from "@/components/videoPopup";
-import { getAccessToken } from "@/utils/common";
+import { getAccessToken, getProjectName } from "@/utils/common";
 
 import "aos/dist/aos.css";
 import AOS from "aos";
@@ -30,10 +30,16 @@ const VideoContainer = () => {
   const [dataParams, setDataParams] = useState();
 
   const accessToken = getAccessToken();
+  const projectName = getProjectName();
+  const videoRefs = useRef([]);
 
   useEffect(() => {
     fetchData();
   }, [currentPage]);
+
+  useEffect(() => {
+    updateTimeAfterSeenVideo();
+  }, [data]);
 
   useEffect(() => {
     AOS.init({});
@@ -42,7 +48,26 @@ const VideoContainer = () => {
     if (storedVideoSeen) {
       setVideoSeen(JSON.parse(storedVideoSeen));
     }
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollBar);
+    };
   }, []);
+
+  useEffect(() => {
+    const storedVideoSeen = localStorage.getItem("videoSeen");
+    if (storedVideoSeen) {
+      setVideoSeen(JSON.parse(storedVideoSeen));
+    }
+  }, [totalPages]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScrollBar);
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollBar);
+    };
+  }, [totalPages, currentPage]);
 
   useEffect(() => {
     localStorage.setItem("videoSeen", JSON.stringify(videoSeen));
@@ -55,24 +80,20 @@ const VideoContainer = () => {
     }
   }, [showVideo, isPopoutOpen]);
 
-  const videoRefs = useRef([]);
-
   async function fetchData() {
     const queryParams = [];
     const isLocalStorageAvailable =
       typeof window !== "undefined" && window.localStorage;
-
     let values = isLocalStorageAvailable
       ? JSON.parse(localStorage.getItem("videoSearchValues"))
       : null;
-
     if (values != null) {
       if (values.projectSearch) {
-        queryParams.push(`projectSearch=${values.projectSearch}`);
+        queryParams.push(`search=${values.projectSearch}`);
       }
     }
 
-    queryParams.push(`page=${currentPage}`);
+    queryParams.push(`projectname=${projectName}`);
     const queryString =
       queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
     const newUrl = `${window.location.pathname}${queryString}`;
@@ -80,7 +101,7 @@ const VideoContainer = () => {
     videoRefs.current = {};
 
     const response = await fetch(
-      `${API_URL}dashboard/media-list/${queryString}`,
+      `${API_URL}dashboard/media-list/${queryString}&page=${currentPage}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -93,11 +114,15 @@ const VideoContainer = () => {
         videoRefs.current[project.id] = createRef();
       });
     }
-    setData(json.results);
+    setTotalPages(json.pagination.total_pages);
+    if (currentPage != 1) {
+      setData((prev) => [...prev, ...json.results]);
+    } else {
+      setData(json.results);
+    }
     setShowVideo(true);
     setLoading(false);
   }
-
   const validationSchema = Yup.object()
     .shape({
       projectSearch: Yup.string(),
@@ -146,7 +171,7 @@ const VideoContainer = () => {
     const innerHeight = window.innerHeight;
     const scrollTop = document.documentElement.scrollTop;
     const scrollHeight = document.documentElement.scrollHeight;
-    if (innerHeight + scrollTop == scrollHeight) {
+    if (innerHeight + scrollTop + 1 >= scrollHeight) {
       loadMorePageData();
     }
   };
@@ -178,8 +203,10 @@ const VideoContainer = () => {
           videoIdgetFromSData.filter((projectId) => {
             if (projectId == key) {
               const videoElement = videoRefs.current[key];
-              const videoCurren = videoElement?.current;
-              videoCurren.currentTime = videoSeen[key];
+              if (videoElement && videoElement.current) {
+                const videoCurren = videoElement?.current;
+                videoCurren.currentTime = videoSeen[key];
+              }
             }
           });
         }
@@ -212,8 +239,11 @@ const VideoContainer = () => {
   };
 
   return (
-    <div className="mx-5 md:mx-10 my-10 bg-[#F8F8F8] p-4 md:p-10">
-      <form onSubmit={formik.handleSubmit}>
+    <div className=" bg-[#F8F8F8] ">
+      <form
+        className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
+        onSubmit={formik.handleSubmit}
+      >
         <div className="flex justify-center gap-x-3 mb-8">
           <input
             type="text"
@@ -252,7 +282,7 @@ const VideoContainer = () => {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap justify-center items-center ">
+          <div className="flex flex-wrap p-4 ml-20  justify-center items-center ">
             {data.length > 0 ? (
               data.map((project, index) => {
                 let converTime = moment(project.modified).fromNow();

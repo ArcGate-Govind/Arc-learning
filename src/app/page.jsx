@@ -64,6 +64,7 @@ const Login = () => {
           return response.json();
         })
         .then((data) => {
+          console.log(data,"Bbb");
           const token = data.token;
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);

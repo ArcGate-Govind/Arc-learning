@@ -1,9 +1,10 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import UserProfile from "@/image/profile.png";
 import { usePathname, useRouter } from "next/navigation";
 import VideoUploadForm from "./videoUploadForm";
+import { getProjectName } from "@/utils/common";
 
 const Dashboard = () => {
   const pathname = usePathname();
@@ -13,14 +14,10 @@ const Dashboard = () => {
   const [openPopup, setOpenPopup] = useState(false);
   const router = useRouter();
 
+  const projectName = getProjectName();
+
   const selectedData = (data) => {
-    if (data == "documents") {
-      router.push("/dashboard/documents");
-    } else if (data == "videocontainer") {
-      router.push("/dashboard/videocontainer");
-    } else if (data == "questionnaire") {
-      router.push("/dashboard/questionnaire");
-    }
+    router.push(`/dashboard/${data}?projectname=${projectName}`);
     setSelectedTab(data);
   };
 
@@ -53,32 +50,32 @@ const Dashboard = () => {
           onClick={() => selectedData("videocontainer")}
           className={`${
             selectedTab == "videocontainer" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2`}
         >
-          <h1 className="text-2xl font-light">Videos</h1>
+          <h1 className="text-lg md:text-2xl font-light">Videos</h1>
         </div>
         <div
           onClick={() => selectedData("questionnaire")}
           className={`${
             selectedTab == "questionnaire" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2`}
         >
-          <h1 className="text-2xl font-light">Questionnaire</h1>
+          <h1 className="text-lg md:text-2xl font-light">Questionnaire</h1>
         </div>
         <div
           onClick={() => selectedData("documents")}
           className={`${
             selectedTab == "documents" ? "bg-[#466EA1] text-[#FFFFFF]" : ""
-          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2`}
+          } text-center cursor-pointer hover:bg-[#bbbbbc] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2`}
         >
-          <h1 className="text-2xl font-light">Documents</h1>
+          <h1 className="text-lg md:text-2xl font-light">Documents</h1>
         </div>
 
         <div
           onClick={() => setOpenPopup(true)}
-          className="text-center cursor-pointer hover:bg-[#466EA1] hover:text-[#FFFFFF] shadow-xl rounded-xl p-2 ml-auto"
+          className="text-center cursor-pointer hover:bg-[#466EA1] hover:text-[#FFFFFF] shadow-xl rounded-xl p-1 md:p-2 ml-auto"
         >
-          <h1 className="text-2xl font-light">Upload</h1>
+          <h1 className="text-lg md:text-2xl font-light">Upload</h1>
         </div>
       </div>
 
