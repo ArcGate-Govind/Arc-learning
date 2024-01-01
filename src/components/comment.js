@@ -57,12 +57,12 @@ const Comment = ({ onClose }) => {
       <div className="mt-4">
         <div className="flex flex-col">
           {showAllCommentMessage.map((comment, index) => (
-            <div
-              title={comment}
-              key={index}
-              className="p-1 text-xs rounded  line-clamp-2"
-            >
-              {comment}
+            <div key={index} className="p-1 text-xs rounded ">
+              <p className="mb-1 line-clamp-2">{comment}</p>
+              <div className="flex items-center justify-between text-gray-500">
+                <p className="mr-2">username</p>
+                <p>time</p>
+              </div>
             </div>
           ))}
         </div>

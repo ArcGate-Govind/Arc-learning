@@ -6,7 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import VideoUploadForm from "./videoUploadForm";
 import { getProjectName } from "@/utils/common";
 
-const Dashboard = () => {
+const Dashboard = ({ dashboardData }) => {
+  // console.log("dashboardData", dashboardData);
   const pathname = usePathname();
 
   const path = pathname.split("/dashboard/");
