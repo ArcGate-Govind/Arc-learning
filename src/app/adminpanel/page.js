@@ -92,11 +92,14 @@ const AdminPanel = () => {
         setData(cachedData[queryString]);
         setLoading(false);
       } else {
-        const response = await fetch(`${API_URL}users/${queryString}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await fetch(
+          `${API_URL}users/${queryString}&page_size=4`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         const json = await response.json();
         let authorizationData;
         if (json.results.length > 0) {
@@ -396,11 +399,24 @@ const AdminPanel = () => {
     window.location.reload();
   };
 
-  const getPageNumbers = (totalPages) => {
+  const getPageNumbers = (totalPages, currentPage) => {
+    const maxVisiblePages = 3;
     const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (totalPages <= maxVisiblePages) {
+      startPage = 1;
+      endPage = totalPages;
+    } else if (endPage === totalPages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
+
     return pageNumbers;
   };
 
@@ -474,7 +490,36 @@ const AdminPanel = () => {
         </div>
       </form>
 
-      <div className="table mx-auto md:mt-10 mt-5">
+      <div className="table mx-auto md:mt-5 mt-5">
+        <div className="flex justify-end">
+          {data.length > 0 && (
+            <button
+              name="Save Changes"
+              data-testid="save-changes-button"
+              className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#466EA1] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
+              type="button"
+              onClick={() => {
+                if (unsavedChanges) {
+                  const selectedUsersToSave = data.filter(
+                    (item) => item.unsavedChanges && selectedUsers[item.user_id]
+                  );
+                  if (selectedUsersToSave.length > 0) {
+                    handleSaveChanges(selectedUsersToSave);
+                  }
+                }
+              }}
+              disabled={
+                isSaving ||
+                Object.values(selectedUsers).every(
+                  (selected) => !selected || !unsavedChanges
+                )
+              }
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
+            </button>
+          )}
+        </div>
+
         <table
           className="border-2 border-[#F5F5F5] shadow-lg"
           data-testid="admin-panel"
@@ -678,7 +723,7 @@ const AdminPanel = () => {
           </tbody>
         </table>
         {totalPages > 1 && (
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-center mt-4">
             <button
               data-testid="previous-button"
               className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
@@ -688,7 +733,7 @@ const AdminPanel = () => {
               Previous
             </button>
             <div>
-              {getPageNumbers(totalPages).map((page) => (
+              {getPageNumbers(totalPages, currentPage).map((page) => (
                 <button
                   key={page}
                   className={`w-12 text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] ${
@@ -709,33 +754,6 @@ const AdminPanel = () => {
               Next
             </button>
           </div>
-        )}
-
-        {data.length > 0 && (
-          <button
-            name="Save Changes"
-            data-testid="save-changes-button"
-            className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#466EA1] rounded-md md:text-lg uppercase my-4 mx-auto md:ml-2 md:mb-0 hover:bg-[#1D2E3E]"
-            type="button"
-            onClick={() => {
-              if (unsavedChanges) {
-                const selectedUsersToSave = data.filter(
-                  (item) => item.unsavedChanges && selectedUsers[item.user_id]
-                );
-                if (selectedUsersToSave.length > 0) {
-                  handleSaveChanges(selectedUsersToSave);
-                }
-              }
-            }}
-            disabled={
-              isSaving ||
-              Object.values(selectedUsers).every(
-                (selected) => !selected || !unsavedChanges
-              )
-            }
-          >
-            {isSaving ? "Saving..." : "Save Changes"}
-          </button>
         )}
       </div>
       {isOpenModal && (
