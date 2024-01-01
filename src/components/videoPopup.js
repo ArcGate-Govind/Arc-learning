@@ -78,7 +78,7 @@ const VideoPopup = ({ onClose, data }) => {
 
   const handleLikeUpdate = async (totalLike, projectId, isLiked) => {
     if (!isLiked && !showLike) {
-      const response = await fetch(`${API_URL}dashboard/likes/${178}/`, {
+      const response = await fetch(`${API_URL}dashboard/likes/${projectId}/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
