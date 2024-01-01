@@ -16,7 +16,6 @@ export default function RootLayout({ children }) {
           <div className="w-fit md:w-auto">
             <UserDetailsProvider>
               <Header />
-              {dashboardPart[1] == "dashboard" ? <Dashboard /> : ""}
               {children}
             </UserDetailsProvider>
           </div>

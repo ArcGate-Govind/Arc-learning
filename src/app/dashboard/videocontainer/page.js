@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 import moment from "moment";
 import AOSWrapper from "@/components/aosWrapper";
+import Dashboard from "@/components/dashboard";
 
 const VideoContainer = () => {
   const [videoSeen, setVideoSeen] = useState({});
@@ -264,6 +265,7 @@ const VideoContainer = () => {
 
   return (
     <AOSWrapper>
+      <Dashboard dashboardData={data}/>
       <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
         <form
           className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
