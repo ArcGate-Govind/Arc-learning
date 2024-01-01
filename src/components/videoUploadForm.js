@@ -6,8 +6,8 @@ import axios from "axios";
 import { getAccessToken } from "@/utils/common";
 import ModalBox from "./modalBox";
 import { API_URL } from "../../constant";
-// import Image from "next/image";
-// import videoUpload from "@/image/video.png";
+import Image from "next/image";
+import videoUpload from "@/image/video.png";
 import PopupMessage from "@/components/popupMessage";
 
 const accessToken = getAccessToken();
@@ -17,24 +17,23 @@ const VideoUploadForm = ({ onClose }) => {
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
+  
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
-        const response = await axios.get(`${API_URL}projects/`, {
+        const response = await fetch(`${API_URL}projects/`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-
-        setProjects(response.data);
-        console.log(response.data, 'data');
+        const data = await response?.json();
+        setProjects(data);
+        console.log(data, "data");
       } catch (error) {
-        console.error('Error:', error);
+        console.error("Error:", error);
       }
-    };
-
-    fetchData();
-  }, []); 
+    })();
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -95,11 +94,11 @@ const VideoUploadForm = ({ onClose }) => {
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
               Upload Video
             </h2>
-            {/* <Image
+            <Image
               src={videoUpload}
               alt="videoUpload"
               className="w-12 md:w-16 pt-1"
-            /> */}
+            />
           </div>
 
           <form onSubmit={formik.handleSubmit}>
