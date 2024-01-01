@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 import moment from "moment";
 import AOSWrapper from "@/components/aosWrapper";
+import Dashboard from "@/components/dashboard";
 
 const VideoContainer = () => {
   const [videoSeen, setVideoSeen] = useState({});
@@ -259,10 +260,12 @@ const VideoContainer = () => {
 
   const closePopup = () => {
     setPopoutOpen(false);
+    // window.location.reload();
   };
 
   return (
     <AOSWrapper>
+      <Dashboard dashboardData={data}/>
       <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
         <form
           className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
@@ -309,7 +312,7 @@ const VideoContainer = () => {
             <div className="flex flex-wrap  ml-20 ">
               {data.length > 0 ? (
                 data.map((project, index) => {
-                  let converTime = moment(project.modified).fromNow();
+                  let converTime = moment(project.created).fromNow();
                   let videoPath = `${Backend_Localhost_Path}${project.file}`;
 
                   return (
