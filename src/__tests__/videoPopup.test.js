@@ -3,8 +3,20 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import VideoPopup from "@/components/videoPopup";
 import { act } from "react-dom/test-utils";
+import { getAccessToken } from "@/utils/common";
+import { API_URL } from "../../constant";
+
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () => Promise.resolve({ status: 200 }),
+  })
+);
 
 describe("VideoPopup", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test("renders VideoPopup with loading state and handles video interactions", async () => {
     const mockOnClose = jest.fn();
     const mockData = {
@@ -58,5 +70,34 @@ describe("VideoPopup", () => {
     expect(
       screen.getByText(/2\s*____\s*Dummy test case\./)
     ).toBeInTheDocument();
+  });
+
+  test("renders VideoPopup with loading state and handles video interactions", async () => {
+    const data = {
+      id: 1,
+      total_likes: 10,
+      is_liked: false,
+    };
+
+    const { getByText } = render(<VideoPopup data={data} />);
+
+    const element = screen.getByTestId("like-button");
+
+    act(() => {
+      fireEvent.click(element);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(fetch).toHaveBeenCalledWith(
+      `${API_URL}dashboard/likes/${data.id}/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+      }
+    );
+
+    expect(getByText("10")).toBeInTheDocument();
   });
 });

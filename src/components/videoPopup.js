@@ -135,6 +135,7 @@ const VideoPopup = ({ onClose, data }) => {
 
                     <div className="flex w-11/12 ">
                       <span
+                        data-testid="like-button"
                         onClick={() =>
                           handleLikeUpdate(
                             project.total_likes,
