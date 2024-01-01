@@ -20,7 +20,7 @@ export const removeUserSession = () => {
   Cookies.remove("accessToken");
 };
 
-export const setUserSession = (refreshToken, accessToken, user) => {
+export const setUserSession = (refreshToken, accessToken, user,) => {
   const expirationTimeInSeconds = 30 * 60;
 
   const expirationDate = new Date();
