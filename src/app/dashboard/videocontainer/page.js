@@ -46,6 +46,10 @@ const VideoContainer = () => {
   }, [data]);
 
   useEffect(() => {
+    updateTimeAfterSeenVideo();
+  }, [data]);
+
+  useEffect(() => {
     window.addEventListener("scroll", handleScrollBar);
     const storedVideoSeen = localStorage.getItem("videoSeen");
     if (storedVideoSeen) {

@@ -5,6 +5,8 @@ import UserProfile from "@/image/profile.png";
 import { usePathname, useRouter } from "next/navigation";
 import VideoUploadForm from "./videoUploadForm";
 import { getProjectName } from "@/utils/common";
+import QuestionnaireUploadForm from "./questionnaireUploadForm";
+
 
 const Dashboard = () => {
   const pathname = usePathname();
@@ -15,7 +17,7 @@ const Dashboard = () => {
   const router = useRouter();
 
   const projectName = getProjectName();
-
+  
   const selectedData = (data) => {
     router.push(`/dashboard/${data}?projectname=${projectName}`);
     setSelectedTab(data);
@@ -79,7 +81,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {openPopup && <VideoUploadForm onClose={onClose} />}
+      {openPopup && path[1] == "videocontainer" && (
+        <VideoUploadForm onClose={onClose} />
+      )}
+      {openPopup && path[1] == "questionnaire" && (
+        <QuestionnaireUploadForm onClose={onClose} />
+      )}
     </div>
   );
 };
