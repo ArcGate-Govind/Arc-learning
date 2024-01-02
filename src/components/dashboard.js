@@ -8,7 +8,6 @@ import { getProjectName } from "@/utils/common";
 import QuestionnaireUploadForm from "./questionnaireUploadForm";
 
 const Dashboard = ({ dashboardData }) => {
-  // console.log("dashboardData", dashboardData);
   const pathname = usePathname();
 
   const path = pathname.split("/dashboard/");
