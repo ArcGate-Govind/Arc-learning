@@ -7,6 +7,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { SEARCH_INPUT_MESSAGE } from "../../../../message";
 import AOSWrapper from "@/components/aosWrapper";
+import Dashboard from "@/components/dashboard";
 
 const Questionnaire = () => {
   const [params, setParams] = useState();
@@ -87,6 +88,7 @@ const Questionnaire = () => {
 
   return (
     <AOSWrapper>
+      <Dashboard />
       <div className="mx-5 md:mx-10 my-10 bg-[#F8F8F8] p-4">
         <form onSubmit={formik.handleSubmit}>
           <div className="flex justify-center gap-x-3">
