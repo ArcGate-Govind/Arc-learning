@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 const Comment = ({ onClose }) => {
   const [showCommentMessage, setShowCommentMessage] = useState("");
   const [showAllCommentMessage, setShowAllCommentMessage] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(null);
 
   useEffect(() => {
     const storedComments = localStorage.getItem("comments");
@@ -21,9 +22,30 @@ const Comment = ({ onClose }) => {
 
   const getCommentValue = () => {
     if (showCommentMessage.trim() !== "") {
-      setShowAllCommentMessage([...showAllCommentMessage, showCommentMessage]);
+      if (editingIndex !== null) {
+        const updatedComments = [...showAllCommentMessage];
+        updatedComments[editingIndex] = showCommentMessage;
+        setShowAllCommentMessage(updatedComments);
+        setEditingIndex(null);
+      } else {
+        setShowAllCommentMessage([
+          ...showAllCommentMessage,
+          showCommentMessage,
+        ]);
+      }
       setShowCommentMessage("");
     }
+  };
+
+  const handleEdit = (comment, index) => {
+    setShowCommentMessage(comment);
+    setEditingIndex(index);
+  };
+
+  const handleDelete = (index) => {
+    const updatedComments = [...showAllCommentMessage];
+    updatedComments.splice(index, 1);
+    setShowAllCommentMessage(updatedComments);
   };
 
   return (
@@ -42,13 +64,13 @@ const Comment = ({ onClose }) => {
             onClick={getCommentValue}
             className={`${
               showCommentMessage ? "cursor-pointer" : " cursor-not-allowed"
-            } hover:text-[#466EA1] bg-[#466EA1] hover:bg-gray-200 text-[#FFFFFF] p-2 rounded-md px-4 rounded`}
+            } hover:text-[#466EA1] bg-[#466EA1] hover:bg-gray-200 text-[#FFFFFF] text-sm p-1 rounded-md px-2 py-2 rounded `}
           >
-            Comment
+            {editingIndex !== null ? "Update" : "Comment"}
           </button>
           <button
             onClick={onClose}
-            className="hover:text-[#466EA1] bg-[#466EA1] hover:bg-gray-200 text-[#FFFFFF] p-2 cursor-pointer rounded-md px-4 rounded"
+            className="hover:text-[#466EA1] bg-[#466EA1] hover:bg-gray-200 text-[#FFFFFF] text-sm p-1 cursor-pointer rounded-md px-2 py-2 rounded"
           >
             Cancel
           </button>
@@ -58,10 +80,28 @@ const Comment = ({ onClose }) => {
         <div className="flex flex-col">
           {showAllCommentMessage.map((comment, index) => (
             <div key={index} className="p-1 text-xs rounded ">
-              <p className="mb-1 line-clamp-2">{comment}</p>
-              <div className="flex items-center justify-between text-gray-500">
+              <div className="flex items-center">
+                <p className="mb-1 line-clamp-2 flex-grow mr-2">{comment}</p>
+                <button
+                 data-testid="Edit"
+                  onClick={() => handleEdit(comment, index)}
+                  className="mr-4 text-lg"
+                >
+                  <i className="fa fa-pencil-square-o"></i>
+                </button>
+
+                <button
+                 data-testid="Delete"
+                  onClick={() => handleDelete(index)}
+                  className="text-lg "
+                >
+                  <i className="fa fa-trash-o"></i>
+                </button>
+              </div>
+
+              <div className="flex items-center  text-gray-500">
                 <p className="mr-2">username</p>
-                <p>time</p>
+                <p>12/12/2023</p>
               </div>
             </div>
           ))}

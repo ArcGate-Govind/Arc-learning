@@ -7,9 +7,7 @@ import VideoUploadForm from "./videoUploadForm";
 import { getProjectName } from "@/utils/common";
 import QuestionnaireUploadForm from "./questionnaireUploadForm";
 
-
 const Dashboard = ({ dashboardData }) => {
-  // console.log("dashboardData", dashboardData);
   const pathname = usePathname();
 
   const path = pathname.split("/dashboard/");
@@ -18,7 +16,7 @@ const Dashboard = ({ dashboardData }) => {
   const router = useRouter();
 
   const projectName = getProjectName();
-  
+
   const selectedData = (data) => {
     router.push(`/dashboard/${data}?projectname=${projectName}`);
     setSelectedTab(data);
