@@ -23,7 +23,7 @@ const ErrorMessage = (props) => {
 
 const Login = () => {
   const router = useRouter();
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false)
   const [showMessage, setShowMessage] = useState("");
 
   const formik = useFormik({
@@ -64,10 +64,19 @@ const Login = () => {
           return response.json();
         })
         .then((data) => {
+          console.log(data,"Bbb");
           const token = data.token;
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
-            handleOpenPopup("/adminpanel");
+            if(token.is_2fa === false){
+              handleOpenPopup(token.message, "/twofaregister");
+              handleOpenPopup("/twofaregister");
+            }
+            else{
+              handleOpenPopup(token.message, "/twofaverify");
+            handleOpenPopup("/twofaverify");
+            }
+            
           } else {
             handleShowErrorMessage(data.non_field_errors[0], "/");
           }
@@ -88,10 +97,12 @@ const Login = () => {
   };
 
   const handleOpenPopup = (path) => {
+    console.log(path,"path");
     router.push(path);
   };
 
   return (
+    
     <section className="relative flex flex-col items-center justify-center min-h-screen">
       <div className="login_back-ground absolute inset-0"></div>
       <div className="bg-white  sm:w-1/2 md:w-1/3 lg:w-1/3 p-6 md:p-12 rounded-lg shadow-lg relative z-1">

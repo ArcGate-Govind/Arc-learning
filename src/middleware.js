@@ -6,7 +6,7 @@ function middleware(req) {
 
   if (verify == undefined && pathname != "/") {
     return NextResponse.redirect(new URL("/", req.url));
-  } else if (verify != undefined && pathname == "/") {
+  } else if (verify != undefined && pathname == "/"  ) {
     return NextResponse.redirect(new URL("/adminpanel", req.url));
   }
 }
@@ -14,5 +14,11 @@ function middleware(req) {
 export default middleware;
 
 export const config = {
-  matcher: ["/", "/adminpanel", "/videocontainer"],
+  matcher: [
+    "/",
+    "/adminpanel",
+    "/dashboard/documents",
+    "/dashboard/videocontainer",
+    "/dashboard/questionnaire",
+  ],
 };
