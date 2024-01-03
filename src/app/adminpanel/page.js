@@ -87,7 +87,7 @@ const AdminPanel = () => {
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const newUrl = `${window.location.pathname}${queryString}`;
       window.history.replaceState({}, "", newUrl);
-
+      console.log("queryString", queryString);
       if (cachedData[queryString]) {
         setData(cachedData[queryString]);
         setLoading(false);
@@ -231,7 +231,7 @@ const AdminPanel = () => {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      fetchData();
+      // fetchData();
       setCurrentPage(1);
     }
   };
@@ -283,6 +283,8 @@ const AdminPanel = () => {
         setBlankInputError(true);
       } else {
         setBlankInputError(false);
+        setCurrentPage(1);
+        // fetchData();
         const queryParams = [];
         if (values.employeeId)
           queryParams.push(`employee_id=${values.employeeId}`);
@@ -295,11 +297,28 @@ const AdminPanel = () => {
   });
 
   const handlePermissionUpdate = (index, field, value) => {
-    const updatedData = [...data];
-    updatedData[index].permissions[field] = value;
-    updatedData[index].unsavedChanges = true;
-    setData(updatedData);
-    setUnsavedChanges(true);
+    const allReadChecked = [];
+    data.map((item) => {
+      console.log("item.permissions.read", item.permissions.read);
+      allReadChecked.push(item.permissions.read);
+    });
+    console.log("allReadChecked", allReadChecked);
+    console.log("index, field, value", index, field, value);
+    if (field == "read") {
+      const updatedData = [...data];
+      updatedData[index].permissions[field] = value;
+      updatedData[index].unsavedChanges = true;
+      setData(updatedData);
+      setUnsavedChanges(true);
+    } else {
+      if (field != "read" && allReadChecked[index] == true) {
+        const updatedData = [...data];
+        updatedData[index].permissions[field] = value;
+        updatedData[index].unsavedChanges = true;
+        setData(updatedData);
+        setUnsavedChanges(true);
+      }
+    }
   };
 
   const handleToggleAllPermissions = (checked) => {
@@ -343,32 +362,38 @@ const AdminPanel = () => {
 
   const handleToggleAllUpdatePermissions = () => {
     const allUpdateChecked = data.every((item) => item.permissions.update);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permissions: {
-        ...user.permissions,
-        update: !allUpdateChecked,
-      },
-      unsavedChanges: true,
-    }));
-    setData(updatedData);
-    setUpdatePermissionAll(!allUpdateChecked);
-    setUnsavedChanges(true);
+    const allReadChecked = data.every((item) => item.permissions.read);
+    if (allReadChecked == true) {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          update: !allUpdateChecked,
+        },
+        unsavedChanges: true,
+      }));
+      setData(updatedData);
+      setUpdatePermissionAll(!allUpdateChecked);
+      setUnsavedChanges(true);
+    }
   };
 
   const handleToggleAllDeletePermissions = () => {
     const allDeleteChecked = data.every((item) => item.permissions.delete);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permissions: {
-        ...user.permissions,
-        delete: !allDeleteChecked,
-      },
-      unsavedChanges: true,
-    }));
-    setData(updatedData);
-    setDeletePermissionAll(!allDeleteChecked);
-    setUnsavedChanges(true);
+    const allReadChecked = data.every((item) => item.permissions.read);
+    if (allReadChecked == true) {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          delete: !allDeleteChecked,
+        },
+        unsavedChanges: true,
+      }));
+      setData(updatedData);
+      setDeletePermissionAll(!allDeleteChecked);
+      setUnsavedChanges(true);
+    }
   };
 
   useEffect(() => {
@@ -496,7 +521,7 @@ const AdminPanel = () => {
             <button
               name="Save Changes"
               data-testid="save-changes-button"
-              className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#466EA1] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
+              className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#728daf] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
               type="button"
               onClick={() => {
                 if (unsavedChanges) {
@@ -557,8 +582,10 @@ const AdminPanel = () => {
                   <span className="md:mr-2">Update</span>
                   <input
                     type="checkbox"
-                    className="w-4 h-4 ml-1"
-                    checked={updatePermissionAll}
+                    className={`${
+                      readPermissionAll ? "" : "cursor-not-allowed"
+                    } w-4 h-4 ml-1`}
+                    checked={readPermissionAll ? updatePermissionAll : false}
                     onChange={handleToggleAllUpdatePermissions}
                     data-testid="update-checkbox"
                   />
@@ -569,8 +596,10 @@ const AdminPanel = () => {
                   <span className="md:mr-2">Delete</span>
                   <input
                     type="checkbox"
-                    className="w-4 h-4 ml-1"
-                    checked={deletePermissionAll}
+                    className={`${
+                      readPermissionAll ? "" : "cursor-not-allowed"
+                    } w-4 h-4 ml-1`}
+                    checked={readPermissionAll ? deletePermissionAll : false}
                     onChange={handleToggleAllDeletePermissions}
                     data-testid="delete-checkbox"
                   />
@@ -667,11 +696,17 @@ const AdminPanel = () => {
                       </div>
                     </td>
                     <td className="md:w-36 h-12">
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center ">
                         <input
                           type="checkbox"
-                          className="w-4 h-4"
-                          checked={item.permissions.update}
+                          className={`${
+                            item.permissions.read ? "" : "cursor-not-allowed"
+                          } w-4 h-4`}
+                          checked={
+                            item.permissions.read
+                              ? item.permissions.update
+                              : false
+                          }
                           onChange={(e) =>
                             handlePermissionUpdate(
                               index,
@@ -686,8 +721,14 @@ const AdminPanel = () => {
                       <div className="flex items-center justify-center">
                         <input
                           type="checkbox"
-                          className="w-4 h-4"
-                          checked={item.permissions.delete}
+                          className={`${
+                            item.permissions.read ? "" : "cursor-not-allowed"
+                          } w-4 h-4`}
+                          checked={
+                            item.permissions.read
+                              ? item.permissions.delete
+                              : false
+                          }
                           onChange={(e) =>
                             handlePermissionUpdate(
                               index,
@@ -710,7 +751,7 @@ const AdminPanel = () => {
                         <button
                           data-testid="disable-save-button"
                           disabled
-                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed"
+                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed disabled:hover:bg-[#728daf] "
                         >
                           Save
                         </button>
