@@ -87,7 +87,6 @@ const AdminPanel = () => {
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const newUrl = `${window.location.pathname}${queryString}`;
       window.history.replaceState({}, "", newUrl);
-      console.log("queryString", queryString);
       if (cachedData[queryString]) {
         setData(cachedData[queryString]);
         setLoading(false);
@@ -231,7 +230,6 @@ const AdminPanel = () => {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      // fetchData();
       setCurrentPage(1);
     }
   };
@@ -299,11 +297,8 @@ const AdminPanel = () => {
   const handlePermissionUpdate = (index, field, value) => {
     const allReadChecked = [];
     data.map((item) => {
-      console.log("item.permissions.read", item.permissions.read);
       allReadChecked.push(item.permissions.read);
     });
-    console.log("allReadChecked", allReadChecked);
-    console.log("index, field, value", index, field, value);
     if (field == "read") {
       const updatedData = [...data];
       updatedData[index].permissions[field] = value;
