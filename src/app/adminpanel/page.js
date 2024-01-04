@@ -159,7 +159,7 @@ const AdminPanel = () => {
   const handleSaveChanges = async (user = null) => {
     setIsSaving(true);
     try {
-      if (unsavedChanges) {
+      // if (unsavedChanges) {
         let updatedData = data.filter((user) => user.unsavedChanges);
 
         if (Object.keys(selectedUsers).length > 0) {
@@ -213,7 +213,7 @@ const AdminPanel = () => {
             setShowPopupMessage(response.statusText);
           }
         }
-      }
+      // }
     } catch (error) {
       console.error(error);
     } finally {
@@ -299,6 +299,14 @@ const AdminPanel = () => {
     data.map((item) => {
       allReadChecked.push(item.permissions.read);
     });
+    if (field == "read" && allReadChecked[index] == true) {
+      const updatedData = [...data];
+      updatedData[index].permissions["delete"] = value;
+      updatedData[index].permissions["update"] = value;
+      updatedData[index].unsavedChanges = true;
+      setData(updatedData);
+      setUnsavedChanges(true);
+    }
     if (field == "read") {
       const updatedData = [...data];
       updatedData[index].permissions[field] = value;
@@ -342,17 +350,33 @@ const AdminPanel = () => {
 
   const handleToggleAllReadPermissions = () => {
     const allReadChecked = data.every((item) => item.permissions.read);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permissions: {
-        ...user.permissions,
-        read: !allReadChecked,
-      },
-      unsavedChanges: true,
-    }));
-    setData(updatedData);
-    setReadPermissionAll(!allReadChecked);
-    setUnsavedChanges(true);
+    if (allReadChecked == true) {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          read: false,
+          delete: false,
+          update: false,
+        },
+        unsavedChanges: true,
+      }));
+      setData(updatedData);
+      setReadPermissionAll(!allReadChecked);
+      setUnsavedChanges(true);
+    } else {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          read: !allReadChecked,
+        },
+        unsavedChanges: true,
+      }));
+      setData(updatedData);
+      setReadPermissionAll(!allReadChecked);
+      setUnsavedChanges(true);
+    }
   };
 
   const handleToggleAllUpdatePermissions = () => {
