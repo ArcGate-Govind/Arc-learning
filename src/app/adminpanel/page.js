@@ -71,10 +71,10 @@ const AdminPanel = () => {
       } else if (values != null) {
         if (values.employeeId || values.employeeName || values.status) {
           if (values.employeeId) {
-            queryParams.push(`employee_id=${values.employeeId}`);
+            queryParams.push(`employee_id=${values.employeeId.trim()}`);
           }
           if (values.employeeName) {
-            queryParams.push(`full_name=${values.employeeName}`);
+            queryParams.push(`full_name=${values.employeeName.trim()}`);
           }
           if (values.status) {
             const statusText = values.status === "Active" ? "true" : "false";
