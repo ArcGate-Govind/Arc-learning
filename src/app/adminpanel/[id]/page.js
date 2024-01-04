@@ -86,7 +86,11 @@ const UserProfile = ({ params }) => {
     }
     if (allDelete) {
       setCheckedAllDelete(allDelete)
-      setAllCheckbox(allDelete);
+    }
+    if (!allRead || !allUpdate || !allDelete) {
+      setAllCheckbox(false);
+    } else {
+      setAllCheckbox(true);
     }
   };
 
@@ -112,19 +116,23 @@ const UserProfile = ({ params }) => {
     let allRead = true;
     let allUpdate = true;
     let allDelete = true;
+    let allCheckboxCustom = true;
     userInfo?.projects?.map((project) => {
       if (!project.permissions[permissionType]) {
         switch (permissionType) {
           case "read":
             allRead = false;
+            allCheckboxCustom = false;
             break;
 
           case "update":
             allUpdate = false;
+            allCheckboxCustom = false;
             break;
 
           case "delete":
             allDelete = false;
+            allCheckboxCustom = false;
             break;
         }
       }
@@ -142,7 +150,30 @@ const UserProfile = ({ params }) => {
         setCheckedAllDelete(allDelete);
         break;
     }
-    if (!checkedAllRead || !checkedAllUpdate || !checkedAllDelete) {
+    // console.log("!checkedAllRead || !checkedAllUpdate || !checkedAllDelete",checkedAllRead ,checkedAllUpdate,checkedAllDelete)
+    // if (allRead && allUpdate && allDelete) {
+    //   setAllCheckbox(true);
+    // } else {
+    //   setAllCheckbox(false);
+    // }
+
+    let allReadCustom = true;
+    let allUpdateCustom = true;
+    let allDeleteCustom = true;
+
+    userInfo?.projects?.map((project) => {
+      if (!project.permissions["read"]) {
+        allReadCustom = false;
+      }
+      if (!project.permissions["update"]) {
+        allUpdateCustom = false;
+      }
+      if (!project.permissions["delete"]) {
+        allDeleteCustom = false;
+      }
+    });
+
+    if (!allReadCustom || !allUpdateCustom || !allDeleteCustom) {
       setAllCheckbox(false);
     } else {
       setAllCheckbox(true);
@@ -178,7 +209,28 @@ const UserProfile = ({ params }) => {
         setCheckedAllDelete(!checkedAllDelete);
         break;
     }
-    if (!checkedAllRead || !checkedAllUpdate || !checkedAllDelete) {
+    // if (!checkedAllRead || !checkedAllUpdate || !checkedAllDelete) {
+    //   setAllCheckbox(true);
+    // } else {
+    //   setAllCheckbox(false);
+    // }
+    let allReadCustom = true;
+    let allUpdateCustom = true;
+    let allDeleteCustom = true;
+
+    userInfo?.projects?.map((project) => {
+      if (!project.permissions["read"]) {
+        allReadCustom = false;
+      }
+      if (!project.permissions["update"]) {
+        allUpdateCustom = false;
+      }
+      if (!project.permissions["delete"]) {
+        allDeleteCustom = false;
+      }
+    });
+
+    if (!allReadCustom || !allUpdateCustom || !allDeleteCustom) {
       setAllCheckbox(false);
     } else {
       setAllCheckbox(true);
