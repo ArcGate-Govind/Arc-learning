@@ -4,6 +4,10 @@ import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../../../constant";
 import { getAccessToken, setProjectName } from "@/utils/common";
+import {
+  LOADING_MESSAGE,
+ 
+} from "../../../../message";
 
 const UserProfile = ({ params }) => {
   const [userInfo, setUserInfo] = useState([]);
@@ -14,9 +18,11 @@ const UserProfile = ({ params }) => {
   const [allCheckbox, setAllCheckbox] = useState(false);
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const accessToken = getAccessToken();
   const router = useRouter();
+  console.log(checkedAllUpdate,checkedAllDelete)
 
   useEffect(() => {
     (async () => {
@@ -36,6 +42,9 @@ const UserProfile = ({ params }) => {
         }
       } catch (error) {
         console.error("Error:", error);
+      }
+      finally {
+        setLoading(false);
       }
     })();
   }, []);
@@ -76,6 +85,7 @@ const UserProfile = ({ params }) => {
       setCheckedAllUpdate(allUpdate);
     }
     if (allDelete) {
+      setCheckedAllDelete(allDelete)
       setAllCheckbox(allDelete);
     }
   };
@@ -276,6 +286,8 @@ const UserProfile = ({ params }) => {
     router.push(`/dashboard/videocontainer`);
   };
 
+
+
   return (
     <div className="md:w-[90%] sm:tabel lg:flex lg:ml-auto md:flex md:ml-auto mt-14 ">
       <div className=" bg-[#F5F5F5] mt-2 h-48 md:w-[24%] w-full">
@@ -367,8 +379,20 @@ const UserProfile = ({ params }) => {
               </th>
             </tr>
           </thead>
+         
           <tbody>
-            {userInfo?.projects?.map((userData, index) => {
+          {
+            loading ? (
+              <tr>
+                <td
+                  data-testid="loading-row"
+                  colSpan="8"
+                  className="text-black-600 text-center font-semibold py-3"
+                >
+                  {LOADING_MESSAGE}
+                </td>
+              </tr>
+            ) :  userInfo?.projects?.map((userData, index) => {
               return (
                 <tr
                   className="border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0 "
@@ -425,7 +449,10 @@ const UserProfile = ({ params }) => {
                   </td>
                 </tr>
               );
-            })}
+            })
+          }
+         
+           
           </tbody>
         </table>
         <div className="flex justify-center lg:justify-end mt-6">
