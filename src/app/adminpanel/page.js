@@ -362,7 +362,7 @@ const AdminPanel = () => {
           delete: false,
           update: false,
         },
-        unsavedChanges: false,
+        unsavedChanges: true,
       }));
       setData(updatedData);
       setReadPermissionAll(!allReadChecked);
@@ -374,7 +374,7 @@ const AdminPanel = () => {
           ...user.permissions,
           read: !allReadChecked,
         },
-        unsavedChanges: true,
+        unsavedChanges: false,
       }));
       setData(updatedData);
       setReadPermissionAll(!allReadChecked);
