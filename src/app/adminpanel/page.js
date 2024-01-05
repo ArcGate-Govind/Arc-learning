@@ -260,7 +260,7 @@ const AdminPanel = () => {
         employeeName: "",
         status: "",
       };
-      let valueTrimob = {
+      const trimedValue = {
         employeeId: values.employeeId.trim(),
         employeeName: values.employeeName.trim(),
         status: values.status,
@@ -268,14 +268,14 @@ const AdminPanel = () => {
 
       localStorage.setItem(
         "values",
-        JSON.stringify(searchClear ? searchValues : valueTrimob)
+        JSON.stringify(searchClear ? searchValues : trimedValue)
       );
       if (searchClear) {
         setBlankInputError(false);
       } else if (
-        !valueTrimob.employeeId &&
-        !valueTrimob.employeeName &&
-        !valueTrimob.status &&
+        !trimedValue.employeeId &&
+        !trimedValue.employeeName &&
+        !trimedValue.status &&
         !searchClear
       ) {
         setBlankInputError(true);
