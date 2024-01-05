@@ -71,10 +71,10 @@ const AdminPanel = () => {
       } else if (values != null) {
         if (values.employeeId || values.employeeName || values.status) {
           if (values.employeeId) {
-            queryParams.push(`employee_id=${values.employeeId.trim()}`);
+            queryParams.push(`employee_id=${values.employeeId}`);
           }
           if (values.employeeName) {
-            queryParams.push(`full_name=${values.employeeName.trim()}`);
+            queryParams.push(`full_name=${values.employeeName}`);
           }
           if (values.status) {
             const statusText = values.status === "Active" ? "true" : "false";
@@ -159,61 +159,55 @@ const AdminPanel = () => {
   const handleSaveChanges = async (user = null) => {
     setIsSaving(true);
     try {
-      // if (unsavedChanges) {
-        let updatedData = data.filter((user) => user.unsavedChanges);
+      let updatedData = data.filter((user) => user.unsavedChanges);
 
-        if (Object.keys(selectedUsers).length > 0) {
-          updatedData = updatedData.filter(
-            (user) => selectedUsers[user.user_id]
-          );
-        }
+      if (Object.keys(selectedUsers).length > 0) {
+        updatedData = updatedData.filter((user) => selectedUsers[user.user_id]);
+      }
 
-        if (user) {
-          if (Array.isArray(user)) {
-            updatedData = user;
-          } else {
-            updatedData = [user];
-          }
+      if (user) {
+        if (Array.isArray(user)) {
+          updatedData = user;
+        } else {
+          updatedData = [user];
         }
-        if (Object.keys(selectedUsers).length > 0) {
-          updatedData = updatedData.filter(
-            (user) => selectedUsers[user.user_id]
-          );
-        }
+      }
+      if (Object.keys(selectedUsers).length > 0) {
+        updatedData = updatedData.filter((user) => selectedUsers[user.user_id]);
+      }
 
-        if (user) {
-          if (Array.isArray(user)) {
-            updatedData = user;
-          } else {
-            updatedData = [user];
-          }
+      if (user) {
+        if (Array.isArray(user)) {
+          updatedData = user;
+        } else {
+          updatedData = [user];
         }
+      }
 
-        if (updatedData.length > 0) {
-          const response = await fetch(`${API_URL}user/update/`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(updatedData),
-          });
-          const json = await response.json();
+      if (updatedData.length > 0) {
+        const response = await fetch(`${API_URL}user/update/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(updatedData),
+        });
+        const json = await response.json();
 
-          if (json.code === 200) {
-            setUnsavedChanges(false);
-            setShowPopupMessage(json.message);
-            setShowPopup(true);
-            setTimeout(() => {
-              setShowPopup(false);
-            }, 1500);
-            setSelectAllPermissionsMap({});
-            setSelectedUsers({});
-          } else {
-            setShowPopupMessage(response.statusText);
-          }
+        if (json.code === 200) {
+          setUnsavedChanges(false);
+          setShowPopupMessage(json.message);
+          setShowPopup(true);
+          setTimeout(() => {
+            setShowPopup(false);
+          }, 1500);
+          setSelectAllPermissionsMap({});
+          setSelectedUsers({});
+        } else {
+          setShowPopupMessage(response.statusText);
         }
-      // }
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -266,29 +260,28 @@ const AdminPanel = () => {
         employeeName: "",
         status: "",
       };
+      let valueTrimob = {
+        employeeId: values.employeeId.trim(),
+        employeeName: values.employeeName.trim(),
+        status: values.status,
+      };
+
       localStorage.setItem(
         "values",
-        JSON.stringify(searchClear ? searchValues : values)
+        JSON.stringify(searchClear ? searchValues : valueTrimob)
       );
       if (searchClear) {
         setBlankInputError(false);
       } else if (
-        !values.employeeId &&
-        !values.employeeName &&
-        !values.status &&
+        !valueTrimob.employeeId &&
+        !valueTrimob.employeeName &&
+        !valueTrimob.status &&
         !searchClear
       ) {
         setBlankInputError(true);
       } else {
         setBlankInputError(false);
         setCurrentPage(1);
-        // fetchData();
-        const queryParams = [];
-        if (values.employeeId)
-          queryParams.push(`employee_id=${values.employeeId}`);
-        if (values.employeeName)
-          queryParams.push(`fullname=${values.employeeName}`);
-        if (values.status) queryParams.push(`status=${values.status}`);
         fetchData();
       }
     },
@@ -313,14 +306,12 @@ const AdminPanel = () => {
       updatedData[index].unsavedChanges = true;
       setData(updatedData);
       setUnsavedChanges(true);
-    } else {
-      if (field != "read" && allReadChecked[index] == true) {
-        const updatedData = [...data];
-        updatedData[index].permissions[field] = value;
-        updatedData[index].unsavedChanges = true;
-        setData(updatedData);
-        setUnsavedChanges(true);
-      }
+    } else if (allReadChecked[index] == true) {
+      const updatedData = [...data];
+      updatedData[index].permissions[field] = value;
+      updatedData[index].unsavedChanges = true;
+      setData(updatedData);
+      setUnsavedChanges(true);
     }
   };
 
