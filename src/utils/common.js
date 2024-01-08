@@ -1,5 +1,8 @@
 import Cookies from "js-cookie";
 
+const isLocalStorageAvailable =
+  typeof window !== "undefined" && window.localStorage;
+
 export const getUser = () => {
   const userStr = Cookies.get("user");
   if (userStr) return JSON.parse(userStr);
@@ -20,7 +23,7 @@ export const removeUserSession = () => {
   Cookies.remove("accessToken");
 };
 
-export const setUserSession = (refreshToken, accessToken, user,) => {
+export const setUserSession = (refreshToken, accessToken, user) => {
   const expirationTimeInSeconds = 30 * 60;
 
   const expirationDate = new Date();
@@ -56,4 +59,22 @@ export const setProjectName = (projectname) => {
   Cookies.set("projectname", JSON.stringify(projectname), {
     expires: expirationDate,
   });
+};
+
+export const getLocalStorageValues = () => {
+  return isLocalStorageAvailable
+    ? JSON.parse(localStorage.getItem("values"))
+    : null;
+};
+
+export const removeValuesLocalStorage = () => {
+  isLocalStorageAvailable ? localStorage.removeItem("values") : null;
+};
+
+export const removeCurrentPageValues = () => {
+  isLocalStorageAvailable ? localStorage.removeItem("currentPage") : null;
+};
+
+export const setLocalStoragevalues = (values) => {
+  localStorage.setItem("values", JSON.stringify(values));
 };

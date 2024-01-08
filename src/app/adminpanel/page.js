@@ -2,7 +2,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { getAccessToken, removeUserSession } from "@/utils/common";
+import {
+  getAccessToken,
+  getLocalStorageValues,
+  removeCurrentPageValues,
+  removeUserSession,
+  removeValuesLocalStorage,
+  setLocalStoragevalues,
+} from "@/utils/common";
 import { useRouter } from "next/navigation";
 import {
   LOADING_MESSAGE,
@@ -14,9 +21,15 @@ import Link from "next/link";
 import { userDetailsContext } from "../../context/createContext";
 import PopupModal from "@/components/popupModal";
 import PopupMessage from "@/components/popupMessage";
+import ResultPrePage from "@/components/resultPrePage";
+import Pagination from "@/components/pagination";
 
 const AdminPanel = () => {
-  const [currentPage, setCurrentPage] = useContext(userDetailsContext);
+  const { currentPageContext, selectedPerPageResultContext } =
+    useContext(userDetailsContext);
+  const [currentPage, setCurrentPage] = currentPageContext;
+  const [selectedPerPageResult, setShowSelectedPerPageResult] =
+    selectedPerPageResultContext;
   const router = useRouter();
   const [data, setData] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -25,7 +38,6 @@ const AdminPanel = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedUsers, setSelectedUsers] = useState(false);
   const [selectAllPermissionsMap, setSelectAllPermissionsMap] = useState(false);
-  const [cachedData, setCachedData] = useState({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isConfirmModal, setIsConfirmModal] = useState(true);
@@ -43,13 +55,14 @@ const AdminPanel = () => {
 
   useEffect(() => {
     fetchData();
+
     if (currentPage && !selectAllPermissionsMap[currentPage]) {
       setSelectAllPermissionsMap({
         ...selectAllPermissionsMap,
         [currentPage]: false,
       });
     }
-  }, [currentPage]);
+  }, [currentPage, selectedPerPageResult]);
 
   const accessToken = getAccessToken();
   async function fetchData() {
@@ -59,15 +72,11 @@ const AdminPanel = () => {
     try {
       setLoading(true);
       const queryParams = [];
-      const isLocalStorageAvailable =
-        typeof window !== "undefined" && window.localStorage;
 
-      let values = isLocalStorageAvailable
-        ? JSON.parse(localStorage.getItem("values"))
-        : null;
+      let values = getLocalStorageValues();
 
       if (queryStringUrl == undefined) {
-        localStorage.removeItem("values");
+        removeValuesLocalStorage();
       } else if (values != null) {
         if (values.employeeId || values.employeeName || values.status) {
           if (values.employeeId) {
@@ -87,58 +96,37 @@ const AdminPanel = () => {
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const newUrl = `${window.location.pathname}${queryString}`;
       window.history.replaceState({}, "", newUrl);
-      if (cachedData[queryString]) {
-        setData(cachedData[queryString]);
-        setLoading(false);
-      } else {
-        const response = await fetch(
-          `${API_URL}users/${queryString}&page_size=4`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        const json = await response.json();
-        let authorizationData;
-        if (json.results.length > 0) {
-          authorizationData = json.results ? json.results : [];
-          setCachedData({ ...cachedData, [queryString]: authorizationData });
-          setLoading(false);
-          setTotalPages(json.pagination.total_pages);
-        } else if (json.results.length == 0) {
-          authorizationData = json.results ? json.results : [];
-          setTotalPages(json.pagination ? json.pagination.total_pages : 0);
-        } else {
-          removeUserSession();
-          localStorage.removeItem("currentPage");
-          localStorage.removeItem("values");
-          router.push("/");
-          authorizationData = [];
+
+      const response = await fetch(
+        `${API_URL}users/${queryString}&page_size=${selectedPerPageResult}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-        setData(authorizationData);
+      );
+      const json = await response.json();
+      let authorizationData;
+      if (json.results.length > 0) {
+        authorizationData = json.results ? json.results : [];
         setLoading(false);
+        setTotalPages(json.pagination.total_pages);
+      } else if (json.results.length == 0) {
+        authorizationData = json.results ? json.results : [];
+        setTotalPages(json.pagination ? json.pagination.total_pages : 0);
+      } else {
+        removeUserSession();
+        removeCurrentPageValues();
+        removeValuesLocalStorage();
+        router.push("/");
+        authorizationData = [];
       }
+      setData(authorizationData);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
   }
-
-  const handlePrevPage = () => {
-    if (unsavedChanges) {
-      setIsOpenModal(true);
-    } else if (isConfirmModal && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (unsavedChanges) {
-      setIsOpenModal(true);
-    } else if (isConfirmModal && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
 
   const confirmModal = () => {
     setIsOpenModal(false);
@@ -238,11 +226,7 @@ const AdminPanel = () => {
       return !!values.employeeId || !!values.employeeName || !!values.status;
     });
 
-  const isLocalStorageAvailable =
-    typeof window !== "undefined" && window.localStorage;
-  let searchValue = isLocalStorageAvailable
-    ? JSON.parse(localStorage.getItem("values"))
-    : null;
+  let searchValue = getLocalStorageValues();
   if (searchValue == null) {
     searchValue = { employeeId: "", employeeName: "", status: "" };
   }
@@ -265,11 +249,8 @@ const AdminPanel = () => {
         employeeName: values.employeeName.trim(),
         status: values.status,
       };
-
-      localStorage.setItem(
-        "values",
-        JSON.stringify(searchClear ? searchValues : trimedValue)
-      );
+      let storageValueData = searchClear ? searchValues : trimedValue;
+      setLocalStoragevalues(storageValueData);
       if (searchClear) {
         setBlankInputError(false);
       } else if (
@@ -430,35 +411,12 @@ const AdminPanel = () => {
 
   const handleFormClear = () => {
     setSearchClear(true);
-    localStorage.removeItem("values");
+    removeValuesLocalStorage();
     window.location.reload();
   };
 
-  const getPageNumbers = (totalPages, currentPage) => {
-    const maxVisiblePages = 3;
-    const pageNumbers = [];
-
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (totalPages <= maxVisiblePages) {
-      startPage = 1;
-      endPage = totalPages;
-    } else if (endPage === totalPages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
-    }
-
-    return pageNumbers;
-  };
-
   const sortedData = data.sort((a, b) => {
-    const employeeIdA = parseInt(a.employee_id.replace("emp_", ""), 10);
-    const employeeIdB = parseInt(b.employee_id.replace("emp_", ""), 10);
-    return employeeIdA - employeeIdB;
+    return a?.employee_id.localeCompare(b?.employee_id);
   });
 
   return (
@@ -528,30 +486,38 @@ const AdminPanel = () => {
       <div className="table mx-auto md:mt-5 mt-5">
         <div className="flex justify-end">
           {data.length > 0 && (
-            <button
-              name="Save Changes"
-              data-testid="save-changes-button"
-              className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#728daf] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
-              type="button"
-              onClick={() => {
-                if (unsavedChanges) {
-                  const selectedUsersToSave = data.filter(
-                    (item) => item.unsavedChanges && selectedUsers[item.user_id]
-                  );
-                  if (selectedUsersToSave.length > 0) {
-                    handleSaveChanges(selectedUsersToSave);
+            <div className="flex items-center justify-between">
+              <ResultPrePage
+                setShowSelectedPerPageResult={setShowSelectedPerPageResult}
+                selectedPerPageResult={selectedPerPageResult}
+                setCurrentPage={setCurrentPage}
+              />
+              <button
+                name="Save Changes"
+                data-testid="save-changes-button"
+                className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#728daf] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
+                type="button"
+                onClick={() => {
+                  if (unsavedChanges) {
+                    const selectedUsersToSave = data.filter(
+                      (item) =>
+                        item.unsavedChanges && selectedUsers[item.user_id]
+                    );
+                    if (selectedUsersToSave.length > 0) {
+                      handleSaveChanges(selectedUsersToSave);
+                    }
                   }
+                }}
+                disabled={
+                  isSaving ||
+                  Object.values(selectedUsers).every(
+                    (selected) => !selected || !unsavedChanges
+                  )
                 }
-              }}
-              disabled={
-                isSaving ||
-                Object.values(selectedUsers).every(
-                  (selected) => !selected || !unsavedChanges
-                )
-              }
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
           )}
         </div>
 
@@ -773,38 +739,15 @@ const AdminPanel = () => {
             )}
           </tbody>
         </table>
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-4">
-            <button
-              data-testid="previous-button"
-              className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <div>
-              {getPageNumbers(totalPages, currentPage).map((page) => (
-                <button
-                  key={page}
-                  className={`w-12 text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] ${
-                    currentPage === page ? "bg-[#1D2E3E]" : "bg-[#466EA1]"
-                  }`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-            <button
-              data-testid="next-button"
-              className="w-20 bg-[#466EA1] text-white p-2 rounded-md mx-2 hover:bg-[#1D2E3E] disabled:cursor-not-allowed disabled:hover:bg-[#466EA1]"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
+
+        {data.length > 0 && totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalPages={totalPages}
+            unsavedChanges={unsavedChanges}
+            isConfirmModal={isConfirmModal}
+          />
         )}
       </div>
       {isOpenModal && (
