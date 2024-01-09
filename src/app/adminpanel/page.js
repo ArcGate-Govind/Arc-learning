@@ -2,14 +2,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import {
-  getAccessToken,
-  getLocalStorageValues,
-  removeCurrentPageValues,
-  removeUserSession,
-  removeValuesLocalStorage,
-  setLocalStoragevalues,
-} from "@/utils/common";
+import { getAccessToken, removeUserSession } from "@/utils/common";
 import { useRouter } from "next/navigation";
 import {
   LOADING_MESSAGE,
@@ -25,11 +18,16 @@ import ResultPrePage from "@/components/resultPrePage";
 import Pagination from "@/components/pagination";
 
 const AdminPanel = () => {
-  const { currentPageContext, selectedPerPageResultContext } =
-    useContext(userDetailsContext);
+  const {
+    currentPageContext,
+    selectedPerPageResultContext,
+    selectedSearchValuesContext,
+  } = useContext(userDetailsContext);
   const [currentPage, setCurrentPage] = currentPageContext;
   const [selectedPerPageResult, setShowSelectedPerPageResult] =
     selectedPerPageResultContext;
+  const [selectedSearchValues, setShowSelectedSearchValues] =
+    selectedSearchValuesContext;
   const router = useRouter();
   const [data, setData] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -55,14 +53,13 @@ const AdminPanel = () => {
 
   useEffect(() => {
     fetchData();
-
     if (currentPage && !selectAllPermissionsMap[currentPage]) {
       setSelectAllPermissionsMap({
         ...selectAllPermissionsMap,
         [currentPage]: false,
       });
     }
-  }, [currentPage, selectedPerPageResult]);
+  }, [currentPage, selectedPerPageResult, selectedSearchValues]);
 
   const accessToken = getAccessToken();
   async function fetchData() {
@@ -72,21 +69,21 @@ const AdminPanel = () => {
     try {
       setLoading(true);
       const queryParams = [];
-
-      let values = getLocalStorageValues();
-
-      if (queryStringUrl == undefined) {
-        removeValuesLocalStorage();
-      } else if (values != null) {
-        if (values.employeeId || values.employeeName || values.status) {
-          if (values.employeeId) {
-            queryParams.push(`employee_id=${values.employeeId}`);
+      if (selectedSearchValues != null) {
+        if (
+          selectedSearchValues.employeeId ||
+          selectedSearchValues.employeeName ||
+          selectedSearchValues.status
+        ) {
+          if (selectedSearchValues.employeeId) {
+            queryParams.push(`employee_id=${selectedSearchValues.employeeId}`);
           }
-          if (values.employeeName) {
-            queryParams.push(`full_name=${values.employeeName}`);
+          if (selectedSearchValues.employeeName) {
+            queryParams.push(`full_name=${selectedSearchValues.employeeName}`);
           }
-          if (values.status) {
-            const statusText = values.status === "Active" ? "true" : "false";
+          if (selectedSearchValues.status) {
+            const statusText =
+              selectedSearchValues.status === "Active" ? "true" : "false";
             queryParams.push(`status=${statusText}`);
           }
         }
@@ -116,8 +113,6 @@ const AdminPanel = () => {
         setTotalPages(json.pagination ? json.pagination.total_pages : 0);
       } else {
         removeUserSession();
-        removeCurrentPageValues();
-        removeValuesLocalStorage();
         router.push("/");
         authorizationData = [];
       }
@@ -226,31 +221,26 @@ const AdminPanel = () => {
       return !!values.employeeId || !!values.employeeName || !!values.status;
     });
 
-  let searchValue = getLocalStorageValues();
-  if (searchValue == null) {
-    searchValue = { employeeId: "", employeeName: "", status: "" };
-  }
-
   const formik = useFormik({
     initialValues: {
-      employeeId: searchValue.employeeId,
-      employeeName: searchValue.employeeName,
-      status: searchValue.status,
+      employeeId: selectedSearchValues.employeeId,
+      employeeName: selectedSearchValues.employeeName,
+      status: selectedSearchValues.status,
     },
     validationSchema,
     onSubmit: (values) => {
-      let searchValues = {
-        employeeId: "",
-        employeeName: "",
-        status: "",
-      };
       const trimedValue = {
         employeeId: values.employeeId.trim(),
         employeeName: values.employeeName.trim(),
         status: values.status,
       };
-      let storageValueData = searchClear ? searchValues : trimedValue;
-      setLocalStoragevalues(storageValueData);
+      if (
+        trimedValue.employeeId != "" ||
+        trimedValue.employeeName != "" ||
+        trimedValue.status != ""
+      ) {
+        setShowSelectedSearchValues(trimedValue);
+      }
       if (searchClear) {
         setBlankInputError(false);
       } else if (
@@ -263,7 +253,7 @@ const AdminPanel = () => {
       } else {
         setBlankInputError(false);
         setCurrentPage(1);
-        fetchData();
+        // fetchData();
       }
     },
   });
@@ -411,7 +401,8 @@ const AdminPanel = () => {
 
   const handleFormClear = () => {
     setSearchClear(true);
-    removeValuesLocalStorage();
+    const newUrl = `${window.location.pathname}?page=${currentPage}`;
+    window.history.replaceState({}, "", newUrl);
     window.location.reload();
   };
 

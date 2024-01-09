@@ -24,17 +24,17 @@ const ResultPrePage = ({
         placeholder="Result Per Page"
         value={selectedPerPageResult}
       >
-        <option className="text-center" value="2">
-          2
+        <option className="text-center" value="10">
+          10
         </option>
-        <option className="text-center " value="3">
-          3
+        <option className="text-center " value="20">
+          20
         </option>
-        <option className="text-center" value="4">
-          4
+        <option className="text-center" value="30">
+          30
         </option>
-        <option className="text-center" value="5">
-          5
+        <option className="text-center" value="50">
+          50
         </option>
       </select>
     </>

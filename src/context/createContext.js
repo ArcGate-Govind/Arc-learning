@@ -12,10 +12,23 @@ const UserDetailsProvider = (props) => {
   const urlString = isLocalStorageAvailable ? window.location.href : null;
   let pageValue = null;
   let perPageValue = null;
+  let searchValuesObj = {};
   if (urlString) {
     try {
       const url = new URL(urlString);
       pageValue = url.searchParams.get("page");
+
+      searchValuesObj = {
+        employeeId: url.searchParams.get("employee_id")
+          ? url.searchParams.get("employee_id")
+          : "",
+        employeeName: url.searchParams.get("full_name")
+          ? url.searchParams.get("full_name")
+          : "",
+        status: url.searchParams.get("status")
+          ? url.searchParams.get("status")
+          : "",
+      };
     } catch (error) {
       console.error("Error parsing URL:", error);
     }
@@ -31,20 +44,16 @@ const UserDetailsProvider = (props) => {
   const pageValueAsNumber = parseInt(pageValue);
   const [currentPage, setCurrentPage] = useState(pageValueAsNumber || 1);
   const [selectedPerPageResult, setShowSelectedPerPageResult] = useState(
-    perPageResult || 2
+    perPageResult || 1
   );
+  const [selectedSearchValues, setShowSelectedSearchValues] =
+    useState(searchValuesObj);
 
   useEffect(() => {
     if (isLocalStorageAvailable) {
       localStorage.setItem("resultPerPage", JSON.parse(selectedPerPageResult));
     }
   }, [selectedPerPageResult]);
-
-  useEffect(() => {
-    if (isLocalStorageAvailable) {
-      localStorage.setItem("currentPage", JSON.parse(currentPage));
-    }
-  }, [currentPage]);
   return (
     <userDetailsContext.Provider
       value={{
@@ -52,6 +61,10 @@ const UserDetailsProvider = (props) => {
         selectedPerPageResultContext: [
           selectedPerPageResult,
           setShowSelectedPerPageResult,
+        ],
+        selectedSearchValuesContext: [
+          selectedSearchValues,
+          setShowSelectedSearchValues,
         ],
       }}
     >

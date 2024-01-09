@@ -60,21 +60,3 @@ export const setProjectName = (projectname) => {
     expires: expirationDate,
   });
 };
-
-export const getLocalStorageValues = () => {
-  return isLocalStorageAvailable
-    ? JSON.parse(localStorage.getItem("values"))
-    : null;
-};
-
-export const removeValuesLocalStorage = () => {
-  isLocalStorageAvailable ? localStorage.removeItem("values") : null;
-};
-
-export const removeCurrentPageValues = () => {
-  isLocalStorageAvailable ? localStorage.removeItem("currentPage") : null;
-};
-
-export const setLocalStoragevalues = (values) => {
-  localStorage.setItem("values", JSON.stringify(values));
-};
