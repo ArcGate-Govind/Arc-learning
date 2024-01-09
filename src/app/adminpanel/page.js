@@ -67,22 +67,16 @@ const AdminPanel = () => {
       setLoading(true);
       const queryParams = [];
       if (selectedSearchValues != null) {
-        if (
-          selectedSearchValues.employeeId ||
-          selectedSearchValues.employeeName ||
-          selectedSearchValues.status
-        ) {
-          if (selectedSearchValues.employeeId) {
-            queryParams.push(`employee_id=${selectedSearchValues.employeeId}`);
-          }
-          if (selectedSearchValues.employeeName) {
-            queryParams.push(`full_name=${selectedSearchValues.employeeName}`);
-          }
-          if (selectedSearchValues.status) {
-            const statusText =
-              selectedSearchValues.status === "Active" ? "true" : "false";
-            queryParams.push(`status=${statusText}`);
-          }
+        if (selectedSearchValues.employeeId) {
+          queryParams.push(`employee_id=${selectedSearchValues.employeeId}`);
+        }
+        if (selectedSearchValues.employeeName) {
+          queryParams.push(`full_name=${selectedSearchValues.employeeName}`);
+        }
+        if (selectedSearchValues.status) {
+          const statusText =
+            selectedSearchValues.status === "true" ? "true" : "false";
+          queryParams.push(`status=${statusText}`);
         }
       }
       queryParams.push(`page=${currentPage}`);
@@ -401,7 +395,7 @@ const AdminPanel = () => {
     window.history.replaceState({}, "", newUrl);
     window.location.reload();
   };
-
+  console.log("selectedSearchValues", selectedSearchValues);
   const sortedData = data.sort((a, b) => {
     return a?.employee_id.localeCompare(b?.employee_id);
   });
@@ -441,8 +435,8 @@ const AdminPanel = () => {
                 <option value="" className="text-[#C5C6C8]">
                   Select Status
                 </option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
               </select>
             </div>
             <div className="text-center md:text-left mr-3 md:mr-0">
