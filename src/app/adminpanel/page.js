@@ -63,9 +63,6 @@ const AdminPanel = () => {
 
   const accessToken = getAccessToken();
   async function fetchData() {
-    const currentURL = window.location.href;
-    const queryStringUrl = currentURL.split("?")[1];
-
     try {
       setLoading(true);
       const queryParams = [];
@@ -253,7 +250,6 @@ const AdminPanel = () => {
       } else {
         setBlankInputError(false);
         setCurrentPage(1);
-        // fetchData();
       }
     },
   });

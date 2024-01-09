@@ -44,7 +44,7 @@ const UserDetailsProvider = (props) => {
   const pageValueAsNumber = parseInt(pageValue);
   const [currentPage, setCurrentPage] = useState(pageValueAsNumber || 1);
   const [selectedPerPageResult, setShowSelectedPerPageResult] = useState(
-    perPageResult || 1
+    perPageResult || 10
   );
   const [selectedSearchValues, setShowSelectedSearchValues] =
     useState(searchValuesObj);
