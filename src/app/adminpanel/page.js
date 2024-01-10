@@ -71,10 +71,10 @@ const AdminPanel = () => {
       } else if (values != null) {
         if (values.employeeId || values.employeeName || values.status) {
           if (values.employeeId) {
-            queryParams.push(`employee_id=${values.employeeId}`);
+            queryParams.push(`employee_id=${values.employeeId.trim()}`);
           }
           if (values.employeeName) {
-            queryParams.push(`full_name=${values.employeeName}`);
+            queryParams.push(`full_name=${values.employeeName.trim()}`);
           }
           if (values.status) {
             const statusText = values.status === "Active" ? "true" : "false";
@@ -87,7 +87,6 @@ const AdminPanel = () => {
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const newUrl = `${window.location.pathname}${queryString}`;
       window.history.replaceState({}, "", newUrl);
-
       if (cachedData[queryString]) {
         setData(cachedData[queryString]);
         setLoading(false);
@@ -231,7 +230,6 @@ const AdminPanel = () => {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      fetchData();
       setCurrentPage(1);
     }
   };
@@ -283,6 +281,8 @@ const AdminPanel = () => {
         setBlankInputError(true);
       } else {
         setBlankInputError(false);
+        setCurrentPage(1);
+        // fetchData();
         const queryParams = [];
         if (values.employeeId)
           queryParams.push(`employee_id=${values.employeeId}`);
@@ -295,11 +295,36 @@ const AdminPanel = () => {
   });
 
   const handlePermissionUpdate = (index, field, value) => {
-    const updatedData = [...data];
-    updatedData[index].permissions[field] = value;
-    updatedData[index].unsavedChanges = true;
-    setData(updatedData);
-    setUnsavedChanges(true);
+    const allReadChecked = [];
+    data.map((item) => {
+      allReadChecked.push(item.permissions.read);
+    });
+    if (field == "read" && allReadChecked[index] == true) {
+      const updatedData = [...data];
+      updatedData[index].permissions["delete"] = value;
+      updatedData[index].permissions["update"] = value;
+      updatedData[index].unsavedChanges = true;
+      setData(updatedData);
+      setUnsavedChanges(true);
+    }
+
+    if (field == "read") {
+      const updatedData = [...data];
+      updatedData[index].permissions[field] = value;
+      updatedData[index].unsavedChanges = value;
+      setData(updatedData);
+      setUnsavedChanges(true);
+    } else {
+      if (field != "read" && allReadChecked[index] == true) {
+        const updatedData = [...data];
+        updatedData[index].permissions[field] = value;
+        updatedData[index].unsavedChanges = true;
+        setData(updatedData);
+        setUnsavedChanges(true);
+      }
+    }
+
+
   };
 
   const handleToggleAllPermissions = (checked) => {
@@ -328,47 +353,69 @@ const AdminPanel = () => {
 
   const handleToggleAllReadPermissions = () => {
     const allReadChecked = data.every((item) => item.permissions.read);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permissions: {
-        ...user.permissions,
-        read: !allReadChecked,
-      },
-      unsavedChanges: true,
-    }));
-    setData(updatedData);
-    setReadPermissionAll(!allReadChecked);
-    setUnsavedChanges(true);
+    if (allReadChecked == true) {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          read: false,
+          delete: false,
+          update: false,
+        },
+        unsavedChanges: true,
+      }));
+      setData(updatedData);
+      setReadPermissionAll(!allReadChecked);
+      setUnsavedChanges(true);
+    } else {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          read: !allReadChecked,
+        },
+        unsavedChanges: false,
+      }));
+      setData(updatedData);
+      setReadPermissionAll(!allReadChecked);
+      setUnsavedChanges(true);
+    }
   };
 
   const handleToggleAllUpdatePermissions = () => {
     const allUpdateChecked = data.every((item) => item.permissions.update);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permissions: {
-        ...user.permissions,
-        update: !allUpdateChecked,
-      },
-      unsavedChanges: true,
-    }));
-    setData(updatedData);
-    setUpdatePermissionAll(!allUpdateChecked);
-    setUnsavedChanges(true);
+    const allReadChecked = data.every((item) => item.permissions.read);
+    if (allReadChecked == true) {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          update: !allUpdateChecked,
+        },
+        unsavedChanges: true,
+      }));
+      setData(updatedData);
+      setUpdatePermissionAll(!allUpdateChecked);
+      setUnsavedChanges(true);
+    }
   };
 
   const handleToggleAllDeletePermissions = () => {
     const allDeleteChecked = data.every((item) => item.permissions.delete);
-    const updatedData = data.map((user) => ({
-      ...user,
-      permissions: {
-        ...user.permissions,
-        delete: !allDeleteChecked,
-      },
-      unsavedChanges: true,
-    }));
-    setData(updatedData);
-    setDeletePermissionAll(!allDeleteChecked);
-    setUnsavedChanges(true);
+    const allReadChecked = data.every((item) => item.permissions.read);
+    if (allReadChecked == true) {
+      const updatedData = data.map((user) => ({
+        ...user,
+        permissions: {
+          ...user.permissions,
+          delete: !allDeleteChecked,
+        },
+        unsavedChanges: true,
+      }));
+      setData(updatedData);
+      setDeletePermissionAll(!allDeleteChecked);
+      setUnsavedChanges(true);
+    }
   };
 
   useEffect(() => {
@@ -496,7 +543,7 @@ const AdminPanel = () => {
             <button
               name="Save Changes"
               data-testid="save-changes-button"
-              className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#466EA1] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
+              className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#728daf] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
               type="button"
               onClick={() => {
                 if (unsavedChanges) {
@@ -557,8 +604,10 @@ const AdminPanel = () => {
                   <span className="md:mr-2">Update</span>
                   <input
                     type="checkbox"
-                    className="w-4 h-4 ml-1"
-                    checked={updatePermissionAll}
+                    className={`${
+                      readPermissionAll ? "" : "cursor-not-allowed"
+                    } w-4 h-4 ml-1`}
+                    checked={readPermissionAll ? updatePermissionAll : false}
                     onChange={handleToggleAllUpdatePermissions}
                     data-testid="update-checkbox"
                   />
@@ -569,8 +618,10 @@ const AdminPanel = () => {
                   <span className="md:mr-2">Delete</span>
                   <input
                     type="checkbox"
-                    className="w-4 h-4 ml-1"
-                    checked={deletePermissionAll}
+                    className={`${
+                      readPermissionAll ? "" : "cursor-not-allowed"
+                    } w-4 h-4 ml-1`}
+                    checked={readPermissionAll ? deletePermissionAll : false}
                     onChange={handleToggleAllDeletePermissions}
                     data-testid="delete-checkbox"
                   />
@@ -667,11 +718,17 @@ const AdminPanel = () => {
                       </div>
                     </td>
                     <td className="md:w-36 h-12">
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center ">
                         <input
                           type="checkbox"
-                          className="w-4 h-4"
-                          checked={item.permissions.update}
+                          className={`${
+                            item.permissions.read ? "" : "cursor-not-allowed"
+                          } w-4 h-4`}
+                          checked={
+                            item.permissions.read
+                              ? item.permissions.update
+                              : false
+                          }
                           onChange={(e) =>
                             handlePermissionUpdate(
                               index,
@@ -686,8 +743,14 @@ const AdminPanel = () => {
                       <div className="flex items-center justify-center">
                         <input
                           type="checkbox"
-                          className="w-4 h-4"
-                          checked={item.permissions.delete}
+                          className={`${
+                            item.permissions.read ? "" : "cursor-not-allowed"
+                          } w-4 h-4`}
+                          checked={
+                            item.permissions.read
+                              ? item.permissions.delete
+                              : false
+                          }
                           onChange={(e) =>
                             handlePermissionUpdate(
                               index,
@@ -710,7 +773,7 @@ const AdminPanel = () => {
                         <button
                           data-testid="disable-save-button"
                           disabled
-                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed"
+                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed disabled:hover:bg-[#728daf] "
                         >
                           Save
                         </button>
