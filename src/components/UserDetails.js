@@ -6,7 +6,6 @@ import { API_URL } from "../../constant";
 import { getAccessToken, setProjectName } from "@/utils/common";
 
 const UserDetails = (id) => {
-    console.log("id",id?.id?.params.id);
   const [userInfo, setUserInfo] = useState([]);
   const [checkedAllRead, setCheckedAllRead] = useState(false);
   const [checkedAllUpdate, setCheckedAllUpdate] = useState(false);
@@ -445,3 +444,4 @@ const UserDetails = (id) => {
 };
 
 export default UserDetails;
+

@@ -34,3 +34,4 @@ const PopupModal = ({ closeModal, confirmModal }) => {
 };
 
 export default PopupModal;
+

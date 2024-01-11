@@ -23,3 +23,4 @@ function ModalBox({ onClose, children }) {
 }
 
 export default ModalBox;
+

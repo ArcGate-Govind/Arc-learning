@@ -64,7 +64,6 @@ const Login = () => {
           return response.json();
         })
         .then((data) => {
-          console.log(data,"Bbb");
           const token = data.token;
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
@@ -97,7 +96,6 @@ const Login = () => {
   };
 
   const handleOpenPopup = (path) => {
-    console.log(path,"path");
     router.push(path);
   };
 
@@ -159,3 +157,4 @@ const Login = () => {
 };
 
 export default Login;
+

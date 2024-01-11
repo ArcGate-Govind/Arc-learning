@@ -37,7 +37,6 @@ const TwoFaverify = () => {
             faStatus: true,
           }),
         });
-       console.log(response,"response");
         const data = await response.json();
 
         if (response.ok) {
@@ -96,3 +95,4 @@ const TwoFaverify = () => {
 };
 
 export default TwoFaverify;
+

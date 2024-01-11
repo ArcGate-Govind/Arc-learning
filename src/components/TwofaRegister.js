@@ -52,3 +52,4 @@ const TwofaRegister = ({data}) => {
 };
 
 export default TwofaRegister;
+

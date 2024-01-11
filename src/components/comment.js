@@ -112,3 +112,4 @@ const Comment = ({ onClose }) => {
 };
 
 export default Comment;
+

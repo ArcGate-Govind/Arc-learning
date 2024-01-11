@@ -3,7 +3,6 @@ import UserDetails from '@/components/UserDetails'
 import React from 'react'
 
 const page = (params) => {
-  console.log(params,"ss");
   
   return (
     <>

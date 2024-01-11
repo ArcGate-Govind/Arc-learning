@@ -25,7 +25,7 @@ const Header = () => {
     setIsClient(true);
   }, []);
 
-  console.log(pathName)
+
 
   const handleLogout = async () => {
     try {
@@ -97,3 +97,4 @@ const Header = () => {
 };
 
 export default Header;
+
