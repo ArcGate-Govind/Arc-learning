@@ -192,7 +192,6 @@ const UserProfile = (params) => {
 
   const handleAllSaveChanges = async () => {
     try {
-      // const updatedData = data;
       let updatedData = data.filter((user) => user.unsavedChanges);
       const response = await fetch(`${API_URL}user/update/`, {
         method: "PUT",
@@ -207,6 +206,7 @@ const UserProfile = (params) => {
       if (json.code == 200) {
         setShowPopupMessage(json.message);
         setShowPopup(true);
+        setUnsavedChanges(false);
         setTimeout(() => {
           setShowPopup(false);
         }, 1000);
