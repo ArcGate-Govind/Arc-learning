@@ -15,4 +15,3 @@ const PopupMessage = ({ showPopupMessage }) => {
 };
 
 export default PopupMessage;
-

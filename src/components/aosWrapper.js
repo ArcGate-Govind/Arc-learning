@@ -12,4 +12,3 @@ const AOSWrapper = ({ children }) => {
 };
 
 export default AOSWrapper;
-

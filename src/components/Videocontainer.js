@@ -269,7 +269,7 @@ const VideoContainer = () => {
 
   return (
     <AOSWrapper>
-      <Dashboard dashboardData={data}/>
+      <Dashboard dashboardData={data} />
       <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
         <form
           className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
@@ -380,4 +380,3 @@ const VideoContainer = () => {
 };
 
 export default VideoContainer;
-

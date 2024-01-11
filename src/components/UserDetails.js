@@ -444,4 +444,3 @@ const UserDetails = (id) => {
 };
 
 export default UserDetails;
-

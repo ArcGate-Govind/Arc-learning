@@ -325,4 +325,3 @@ const Questions = ({ paramsId, onClose }) => {
 };
 
 export default Questions;
-

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -17,7 +17,6 @@ const VideoUploadForm = ({ onClose }) => {
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
-  
   useEffect(() => {
     (async () => {
       try {
@@ -75,7 +74,6 @@ const VideoUploadForm = ({ onClose }) => {
           setTimeout(() => {
             setShowPopup(false);
           }, 1000);
-         
         }
       } catch (error) {
         console.error("Error uploading video:", error);
@@ -248,4 +246,3 @@ const VideoUploadForm = ({ onClose }) => {
 };
 
 export default VideoUploadForm;
-

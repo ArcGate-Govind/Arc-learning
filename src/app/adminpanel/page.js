@@ -1,18 +1,18 @@
-import AdminPanel from '@/components/AdminPanel'
-import React from 'react'
+import AdminPanel from "@/components/AdminPanel";
+import React from "react";
 
 const page = () => {
   return (
     <>
-     <AdminPanel/>
+      <AdminPanel />
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;
 
-export function generateMetadata({params}) {
-  return{
-    title:"Admin Panel"
-  }
+export function generateMetadata({ params }) {
+  return {
+    title: "Admin Panel",
+  };
 }

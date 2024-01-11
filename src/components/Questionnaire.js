@@ -80,8 +80,7 @@ const Questionnaire = () => {
       assessmentSearch: "",
     },
     validationSchema,
-    onSubmit: (values) => {
-    },
+    onSubmit: (values) => {},
   });
 
   return (
@@ -146,4 +145,3 @@ const Questionnaire = () => {
 };
 
 export default Questionnaire;
-

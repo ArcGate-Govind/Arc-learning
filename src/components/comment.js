@@ -83,7 +83,7 @@ const Comment = ({ onClose }) => {
               <div className="flex items-center">
                 <p className="mb-1 line-clamp-2 flex-grow mr-2">{comment}</p>
                 <button
-                 data-testid="Edit"
+                  data-testid="Edit"
                   onClick={() => handleEdit(comment, index)}
                   className="mr-4 text-lg"
                 >
@@ -91,7 +91,7 @@ const Comment = ({ onClose }) => {
                 </button>
 
                 <button
-                 data-testid="Delete"
+                  data-testid="Delete"
                   onClick={() => handleDelete(index)}
                   className="text-lg "
                 >
@@ -112,4 +112,3 @@ const Comment = ({ onClose }) => {
 };
 
 export default Comment;
-

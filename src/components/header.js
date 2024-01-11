@@ -10,13 +10,13 @@ import {
   getAccessToken,
   removeUserSession,
 } from "@/utils/common";
-import { useRouter ,usePathname} from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { API_URL } from "../../constant";
 
 const Header = () => {
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
-  const pathName = usePathname()
+  const pathName = usePathname();
   const userName = getUser();
   const accessToken = getAccessToken();
   const refresh = getToken();
@@ -24,8 +24,6 @@ const Header = () => {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-
 
   const handleLogout = async () => {
     try {
@@ -55,9 +53,7 @@ const Header = () => {
     router.push("/adminpanel");
   };
 
-
-  if(pathName !== "/"){
-
+  if (pathName !== "/") {
     return (
       <>
         <div className="header bg-[#1D2E3E] p-4 flex items-center justify-between">
@@ -68,7 +64,7 @@ const Header = () => {
             width={30}
             src={Backbutton}
           />
-  
+
           <div className="logo w-36 md:w-32 text-center md:text-left md:m-auto">
             <Image
               src={Logo}
@@ -93,8 +89,6 @@ const Header = () => {
       </>
     );
   }
-
 };
 
 export default Header;
-

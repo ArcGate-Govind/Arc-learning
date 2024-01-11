@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -67,9 +67,7 @@ const TwoFaverify = () => {
         <div className="flex justify-center mt-4">
           <input
             className={`py-2 px-3 bg-[#FFFFFF] cursor-pointer shadow-md outline-none border-solid border-2 border-black ${
-              formik.touched.otp && formik.errors.otp
-                ? "border-red-500"
-                : ""
+              formik.touched.otp && formik.errors.otp ? "border-red-500" : ""
             }`}
             type="text"
             placeholder="Enter OTP"
@@ -77,7 +75,9 @@ const TwoFaverify = () => {
           />
         </div>
         {formik.touched.otp && formik.errors.otp && (
-          <div className="text-red-500 flex justify-center item-center">{formik.errors.otp}</div>
+          <div className="text-red-500 flex justify-center item-center">
+            {formik.errors.otp}
+          </div>
         )}
         <div className="flex justify-center mt-10">
           <button
@@ -95,4 +95,3 @@ const TwoFaverify = () => {
 };
 
 export default TwoFaverify;
-

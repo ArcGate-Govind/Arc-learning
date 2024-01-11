@@ -178,4 +178,3 @@ const VideoPopup = ({ onClose, data }) => {
 };
 
 export default VideoPopup;
-
