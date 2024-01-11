@@ -6,7 +6,7 @@ function middleware(req) {
 
   if (verify == undefined && pathname != "/") {
     return NextResponse.redirect(new URL("/", req.url));
-  } else if (verify != undefined && pathname == "/"  ) {
+  } else if (verify != undefined && pathname == "/") {
     return NextResponse.redirect(new URL("/adminpanel", req.url));
   }
 }

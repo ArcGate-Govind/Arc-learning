@@ -1,5 +1,8 @@
 import Cookies from "js-cookie";
 
+const isLocalStorageAvailable =
+  typeof window !== "undefined" && window.localStorage;
+
 export const getUser = () => {
   const userStr = Cookies.get("user");
   if (userStr) return JSON.parse(userStr);
@@ -20,7 +23,7 @@ export const removeUserSession = () => {
   Cookies.remove("accessToken");
 };
 
-export const setUserSession = (refreshToken, accessToken, user,) => {
+export const setUserSession = (refreshToken, accessToken, user) => {
   const expirationTimeInSeconds = 30 * 60;
 
   const expirationDate = new Date();
