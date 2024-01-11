@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -17,7 +17,6 @@ const VideoUploadForm = ({ onClose }) => {
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
-  
   useEffect(() => {
     (async () => {
       try {
@@ -28,7 +27,6 @@ const VideoUploadForm = ({ onClose }) => {
         });
         const data = await response?.json();
         setProjects(data);
-        console.log(data, "data");
       } catch (error) {
         console.error("Error:", error);
       }
@@ -59,8 +57,6 @@ const VideoUploadForm = ({ onClose }) => {
         formData.append("username", values.username);
         formData.append("projectName", values.projectName);
 
-        console.log(formData, "formdata");
-
         const response = await axios.post(
           `${API_URL}dashboard/upload/`,
           formData,
@@ -78,7 +74,6 @@ const VideoUploadForm = ({ onClose }) => {
           setTimeout(() => {
             setShowPopup(false);
           }, 1000);
-          console.log("response", response);
         }
       } catch (error) {
         console.error("Error uploading video:", error);
