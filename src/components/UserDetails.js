@@ -6,7 +6,7 @@ import { API_URL } from "../../constant";
 import { getAccessToken, setProjectName } from "@/utils/common";
 import { LOADING_MESSAGE } from "../../message";
 
-const UserProfile = ({ params }) => {
+const UserProfile = (params) => {
   const [data, setData] = useState([]);
   const [readPermissionAll, setReadPermissionAll] = useState(false);
   const [permissionAll, setPermissionAll] = useState(false);
@@ -16,8 +16,7 @@ const UserProfile = ({ params }) => {
   const [showPopupMessage, setShowPopupMessage] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(true);
- 
-
+  const userDetailsId = params.id.params.id;
   const accessToken = getAccessToken();
   const router = useRouter();
   useEffect(() => {
@@ -43,7 +42,7 @@ const UserProfile = ({ params }) => {
 
   async function fetchData() {
     try {
-      const response = await fetch(`${API_URL}user/${params.id}/`, {
+      const response = await fetch(`${API_URL}user/${userDetailsId}/`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
