@@ -191,8 +191,8 @@ const UserProfile = (params) => {
 
   const handleAllSaveChanges = async () => {
     try {
-      const updatedData = data;
-
+      // const updatedData = data;
+      let updatedData = data.filter((user) => user.unsavedChanges);
       const response = await fetch(`${API_URL}user/update/`, {
         method: "PUT",
         headers: {
@@ -243,8 +243,13 @@ const UserProfile = (params) => {
           setCurrentPage={setCurrentPage}
         /> */}
         <button
+          className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
+            !unsavedChanges
+              ? "cursor-not-allowed disabled:hover:bg-[#728daf] disabled"
+              : ""
+          }`}
+          disabled={!unsavedChanges}
           onClick={handleAllSaveChanges}
-          className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#728daf] rounded-md md:text-lg uppercase hover:bg-[#1D2E3E]"
         >
           Save Changes
         </button>
