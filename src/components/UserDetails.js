@@ -187,6 +187,7 @@ const UserProfile = (params) => {
     user.permissions.delete = permission;
     user.unsavedChanges = true;
     setData(updatedData);
+    setUnsavedChanges(true);
   };
 
   const handleAllSaveChanges = async () => {
