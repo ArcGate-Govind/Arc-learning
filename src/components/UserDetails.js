@@ -2,9 +2,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
-import { API_URL } from "../../../../constant";
+import { API_URL } from "../../constant";
 import { getAccessToken, setProjectName } from "@/utils/common";
-import { LOADING_MESSAGE } from "../../../../message";
+import { LOADING_MESSAGE } from "../../message";
 
 const UserProfile = ({ params }) => {
   const [data, setData] = useState([]);
