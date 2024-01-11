@@ -23,6 +23,7 @@ const page = ({data}) => {
           }
         );
         const data = await response?.json();
+        console.log("Data",data);
         setOtpUrl(data.otp_url);
       } catch (error) {
         console.error("Error:", error);
