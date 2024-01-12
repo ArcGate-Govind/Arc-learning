@@ -1,19 +1,18 @@
-import TwofaRegister from '@/components/TwofaRegister'
-import React from 'react'
+import TwofaRegister from "@/components/TwofaRegister";
+import React from "react";
 
 const page = () => {
   return (
     <>
-      <TwofaRegister/>
+      <TwofaRegister />
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;
 
-
-export function generateMetadata({params}) {
-  return{
-    title:"GA Register"
-  }
+export function generateMetadata({ params }) {
+  return {
+    title: "GA Register",
+  };
 }

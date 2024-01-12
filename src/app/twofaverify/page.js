@@ -1,18 +1,18 @@
-import TwoFaverify from '@/components/TwoFaverify'
-import React from 'react'
+import TwoFaverify from "@/components/TwoFaverify";
+import React from "react";
 
 const page = () => {
   return (
     <>
-      <TwoFaverify/>
+      <TwoFaverify />
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;
 
-export function generateMetadata({params}) {
-  return{
-    title:"GA"
-  }
+export function generateMetadata({ params }) {
+  return {
+    title: "GA",
+  };
 }
