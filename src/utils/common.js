@@ -1,7 +1,5 @@
 import Cookies from "js-cookie";
-
-const isLocalStorageAvailable =
-  typeof window !== "undefined" && window.localStorage;
+import { accessTokenAPI } from "./auth";
 
 export const getUser = () => {
   const userStr = Cookies.get("user");
@@ -24,7 +22,7 @@ export const removeUserSession = () => {
 };
 
 export const setUserSession = (refreshToken, accessToken, user) => {
-  const expirationTimeInSeconds = 30 * 60;
+  const expirationTimeInSeconds = 2 * 60;
 
   const expirationDate = new Date();
   expirationDate.setTime(
@@ -37,6 +35,12 @@ export const setUserSession = (refreshToken, accessToken, user) => {
   Cookies.set("accessToken", accessToken, {
     expires: expirationDate,
   });
+
+  const accessTokenExpiry = Math.floor(expirationDate.getTime() / 1000);
+  Cookies.set("accessToken_expiration", accessTokenExpiry, {
+    expires: expirationDate,
+  });
+
   Cookies.set("refreshToken", refreshToken, {
     expires: expirationDate,
   });
@@ -60,3 +64,14 @@ export const setProjectName = (projectname) => {
     expires: expirationDate,
   });
 };
+
+export const accessTokenExpiryCheck = () => {
+  const accessTokenExpiry = parseInt(Cookies.get("accessToken_expiration"));
+  const timeUntilExpiry = accessTokenExpiry - Math.floor(Date.now() / 1000);
+
+  if (60 >= timeUntilExpiry && timeUntilExpiry > 0) {
+    accessTokenAPI();
+  }
+};
+
+setInterval(accessTokenExpiryCheck, 60000);
