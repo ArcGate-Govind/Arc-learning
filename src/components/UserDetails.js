@@ -238,11 +238,6 @@ const UserProfile = (params) => {
   return (
     <div className="md:w-[90%] sm:tabel mt-10 ">
       <div className="w-[92%] my-4 flex justify-end ">
-        {/* <ResultPrePage
-          setShowSelectedPerPageResult={setShowSelectedPerPageResult}
-          selectedPerPageResult={selectedPerPageResult}
-          setCurrentPage={setCurrentPage}
-        /> */}
         <button
           className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
             !unsavedChanges
