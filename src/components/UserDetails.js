@@ -7,7 +7,9 @@ import { getAccessToken, setProjectName } from "@/utils/common";
 import { LOADING_MESSAGE } from "../../message";
 import NotFound from "@/app/not-found";
 
+// UserProfile component
 const UserProfile = (params) => {
+  // State variables to manage data and component behavior
   const [data, setData] = useState([]);
   const [readPermissionAll, setReadPermissionAll] = useState(false);
   const [permissionAll, setPermissionAll] = useState(false);
@@ -18,13 +20,18 @@ const UserProfile = (params) => {
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dataNotFound, setDataNotFound] = useState(false);
+
+  // Extract user details ID from params
   const userDetailsId = params.id.params.id;
   const accessToken = getAccessToken();
   const router = useRouter();
+
+  // Fetch user profile data
   useEffect(() => {
     fetchData();
   }, []);
 
+  // Effect to update permission's status when data changes
   useEffect(() => {
     const allReadChecked =
       data.length > 0 && data.every((item) => item.permissions.read);
@@ -42,6 +49,7 @@ const UserProfile = (params) => {
     setPermissionAll(allPermissionAll);
   }, [data]);
 
+  // Function to fetch user profile data
   async function fetchData() {
     try {
       const response = await fetch(`${API_URL}user/${userDetailsId}/`, {
@@ -66,11 +74,14 @@ const UserProfile = (params) => {
       setLoading(false);
     }
   }
+
+  // Function to navigate to project's dashboard
   const getProjectName = (project) => {
     setProjectName(project);
     router.push(`/dashboard/videocontainer`);
   };
 
+  // Function to handle individual permission updates
   const handlePermissionUpdate = (index, field, value) => {
     const allReadChecked = [];
     data.map((item) => {
@@ -99,6 +110,7 @@ const UserProfile = (params) => {
     }
   };
 
+  // Function to handle toggling all read permissions
   const handleToggleAllReadPermissions = () => {
     const allReadChecked = data.every((item) => item.permissions.read);
     if (allReadChecked == true) {
@@ -130,6 +142,7 @@ const UserProfile = (params) => {
     }
   };
 
+  // Function to handle toggling all update permissions
   const handleToggleAllUpdatePermissions = () => {
     const allUpdateChecked = data.every((item) => item.permissions.update);
     const allReadChecked = data.every((item) => item.permissions.read);
@@ -148,6 +161,7 @@ const UserProfile = (params) => {
     }
   };
 
+  // Function to handle toggling all delete permissions
   const handleToggleAllDeletePermissions = () => {
     const allDeleteChecked = data.every((item) => item.permissions.delete);
     const allReadChecked = data.every((item) => item.permissions.read);
@@ -166,6 +180,7 @@ const UserProfile = (params) => {
     }
   };
 
+  // Function to handle toggling all permissions
   const handleToggleAllPermissions = (permission) => {
     const updatedData = data.map((user) => ({
       ...user,
@@ -185,6 +200,7 @@ const UserProfile = (params) => {
     setPermissionAll(permission);
   };
 
+  // Function to handle toggling all permissions by row
   const handleToggleAllpermissionByrow = (permission, index) => {
     const updatedData = [...data];
     const user = updatedData[index];
@@ -196,6 +212,7 @@ const UserProfile = (params) => {
     setUnsavedChanges(true);
   };
 
+  // Function to handle saving all unsaved changes
   const handleAllSaveChanges = async () => {
     try {
       let updatedData = data.filter((user) => user.unsavedChanges);
@@ -237,6 +254,7 @@ const UserProfile = (params) => {
     }
   };
 
+  // Sort data alphabetically by project name
   const sortedData = data.sort((a, b) => {
     return a?.project.localeCompare(b?.project);
   });

@@ -16,6 +16,7 @@ export default middleware;
 export const config = {
   matcher: [
     "/",
+    "/twofaverify",
     "/adminpanel",
     "/dashboard/documents",
     "/dashboard/videocontainer",
