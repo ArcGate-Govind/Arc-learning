@@ -1,17 +1,17 @@
-import Questionnaire from '@/components/Questionnaire'
-import React from 'react'
+import Questionnaire from "@/components/Questionnaire";
+import React from "react";
 
 const page = () => {
   return (
     <>
-      <Questionnaire/>
+      <Questionnaire />
     </>
-  )
-}
+  );
+};
 
-export default page
-export function generateMetadata({params}) {
-  return{
-    title:"Questionnaire"
-  }
+export default page;
+export function generateMetadata({ params }) {
+  return {
+    title: "Questionnaire",
+  };
 }

@@ -10,7 +10,6 @@ import "@testing-library/jest-dom";
 import UserProfile from "@/app/adminpanel/[id]/page";
 import userEvent from "@testing-library/user-event";
 
-
 const mockData = {
   message: "success",
   code: 200,

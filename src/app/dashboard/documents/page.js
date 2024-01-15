@@ -1,18 +1,18 @@
-import Documents from '@/components/Documents'
-import React from 'react'
+import Documents from "@/components/Documents";
+import React from "react";
 
 const page = () => {
   return (
     <>
-    <Documents/>
+      <Documents />
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;
 
-export function generateMetadata({params}) {
-  return{
-    title:"PDF Documents"
-  }
+export function generateMetadata({ params }) {
+  return {
+    title: "PDF Documents",
+  };
 }

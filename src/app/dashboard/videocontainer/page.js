@@ -1,18 +1,17 @@
-import VideoContainer from '@/components/Videocontainer'
-import React from 'react'
+import VideoContainer from "@/components/Videocontainer";
+import React from "react";
 
 const page = () => {
   return (
     <>
-    <VideoContainer/>
+      <VideoContainer />
     </>
-  )
-}
+  );
+};
 
-export default page
-export function generateMetadata({params}) {
-  return{
-    title:"VideoContainer"
-  }
+export default page;
+export function generateMetadata({ params }) {
+  return {
+    title: "VideoContainer",
+  };
 }
-
