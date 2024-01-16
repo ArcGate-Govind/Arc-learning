@@ -6,9 +6,20 @@ import { API_URL } from "../../constant";
 import { getAccessToken, setProjectName } from "@/utils/common";
 import { LOADING_MESSAGE } from "../../message";
 import NotFound from "@/app/not-found";
+import ResultPrePage from "./resultPrePage";
+import { userDetailsContext } from "@/context/createContext";
+import PopupModal from "./popupModal";
+import Pagination from "./pagination";
 
 // UserProfile component
 const UserProfile = (params) => {
+  // Context variables
+  const { currentPageContext, selectedPerPageResultContext } =
+    useContext(userDetailsContext);
+  // Destructuring context values
+  const [currentPage, setCurrentPage] = currentPageContext;
+  const [selectedPerPageResult, setShowSelectedPerPageResult] =
+    selectedPerPageResultContext;
   // State variables to manage data and component behavior
   const [data, setData] = useState([]);
   const [readPermissionAll, setReadPermissionAll] = useState(false);
@@ -20,6 +31,9 @@ const UserProfile = (params) => {
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dataNotFound, setDataNotFound] = useState(false);
+  const [isConfirmModal, setIsConfirmModal] = useState(true);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Extract user details ID from params
   const userDetailsId = params.id.params.id;
@@ -29,7 +43,7 @@ const UserProfile = (params) => {
   // Fetch user profile data
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, selectedPerPageResult]);
 
   // Effect to update permission's status when data changes
   useEffect(() => {
@@ -51,15 +65,31 @@ const UserProfile = (params) => {
 
   // Function to fetch user profile data
   async function fetchData() {
+    const queryParams = [];
+
+    queryParams.push(`page=${currentPage}`);
+    queryParams.push(`page_size=${selectedPerPageResult}`);
+
+    const queryString =
+      queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+    const newUrl = `${window.location.pathname}${queryString}`;
+    window.history.replaceState({}, "", newUrl);
+
     try {
-      const response = await fetch(`${API_URL}user/${userDetailsId}/`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}user/${userDetailsId}/${queryString}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       const responseData = await response?.json();
       if (responseData.code == 200) {
+        setTotalPages(
+          responseData.pagination ? responseData.pagination.total_pages : 2
+        );
         if (responseData.projects && responseData.projects.length > 0) {
           setData(responseData.projects);
         } else {
@@ -254,6 +284,24 @@ const UserProfile = (params) => {
     }
   };
 
+  // Handle confirmation modal for changes
+  const confirmModal = () => {
+    setIsOpenModal(false);
+    setIsConfirmModal(true);
+    setUnsavedChanges(false);
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Close modal (confirmation or general)
+  const closeModal = () => {
+    setIsOpenModal(false);
+    setIsConfirmModal(false);
+  };
+
   // Sort data alphabetically by project name
   const sortedData = data.sort((a, b) => {
     return a?.project.localeCompare(b?.project);
@@ -266,19 +314,27 @@ const UserProfile = (params) => {
       ) : (
         <>
           <div className="md:w-[90%] sm:tabel mt-10 ">
-            <div className="w-[92%] my-4 flex justify-end ">
-              <button
-                className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
-                  !unsavedChanges
-                    ? "cursor-not-allowed disabled:hover:bg-[#728daf] disabled"
-                    : ""
-                }`}
-                disabled={!unsavedChanges}
-                onClick={handleAllSaveChanges}
-              >
-                Save Changes
-              </button>
-            </div>
+            {/* Results per page and Save Changes button */}
+            {data.length > 0 && (
+              <div className="w-[92%] my-4 flex justify-end ">
+                <ResultPrePage
+                  setShowSelectedPerPageResult={setShowSelectedPerPageResult}
+                  selectedPerPageResult={selectedPerPageResult}
+                  setCurrentPage={setCurrentPage}
+                />
+                <button
+                  className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
+                    !unsavedChanges
+                      ? "cursor-not-allowed disabled:hover:bg-[#728daf] disabled"
+                      : ""
+                  }`}
+                  disabled={!unsavedChanges}
+                  onClick={handleAllSaveChanges}
+                >
+                  Save Changes
+                </button>
+              </div>
+            )}
             <div className="md:w-[90%] sm:tabel lg:flex lg:ml-auto md:flex md:ml-auto">
               <div className=" bg-[#F5F5F5] mt-2 h-48 md:w-[24%] w-full">
                 {sortedData?.map((item, index) => {
@@ -494,8 +550,22 @@ const UserProfile = (params) => {
                     )}
                   </tbody>
                 </table>
+                {/* Pagination */}
+                {data.length > 0 && totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    totalPages={totalPages}
+                    unsavedChanges={unsavedChanges}
+                    isConfirmModal={isConfirmModal}
+                    setIsOpenModal={setIsOpenModal}
+                  />
+                )}
               </div>
             </div>
+            {isOpenModal && (
+              <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
+            )}
             {showPopup && <PopupMessage showPopupMessage={showPopupMessage} />}
           </div>
         </>

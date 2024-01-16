@@ -7,6 +7,7 @@ const Pagination = ({
   totalPages, // Total number of pages
   unsavedChanges, // Flag indicating unsaved changes
   isConfirmModal, // Flag indicating the presence of a confirmation modal
+  setIsOpenModal, // Flag indicating the presence of a confirmation open-modal
 }) => {
   // Handle previous page button click
   const handlePrevPage = () => {
