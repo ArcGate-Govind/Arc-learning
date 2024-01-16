@@ -88,7 +88,7 @@ const UserProfile = (params) => {
       const responseData = await response?.json();
       if (responseData.code == 200) {
         setTotalPages(
-          responseData.pagination ? responseData.pagination.total_pages : 2
+          responseData.pagination ? responseData.pagination.total_pages : 1
         );
         if (responseData.projects && responseData.projects.length > 0) {
           setData(responseData.projects);
