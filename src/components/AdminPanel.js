@@ -13,7 +13,7 @@ import {
 import { API_URL } from "../../constant";
 import PopupModal from "@/components/popupModal";
 import PopupMessage from "@/components/popupMessage";
-import ResultPrePage from "@/components/resultPrePage";
+import ResultPerPage from "@/components/resultPerPage";
 import Pagination from "@/components/pagination";
 import { userDetailsContext } from "@/context/createContext";
 
@@ -495,7 +495,7 @@ const AdminPanel = () => {
           {/* Results per page and Save Changes button */}
           {data.length > 0 && (
             <div className="flex items-center justify-between">
-              <ResultPrePage
+              <ResultPerPage
                 setShowSelectedPerPageResult={setShowSelectedPerPageResult}
                 selectedPerPageResult={selectedPerPageResult}
                 setCurrentPage={setCurrentPage}

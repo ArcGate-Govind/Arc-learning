@@ -1,7 +1,7 @@
 import React from "react";
 
-// ResultPrePage component for selecting the number of results per page
-const ResultPrePage = ({
+// ResultPerPage component for selecting the number of results per page
+const ResultPerPage = ({
   selectedPerPageResult, // Currently selected results per page value
   setShowSelectedPerPageResult, // Function to set the selected results per page
   setCurrentPage, // Function to set the current page
@@ -51,4 +51,4 @@ const ResultPrePage = ({
   );
 };
 
-export default ResultPrePage;
+export default ResultPerPage;

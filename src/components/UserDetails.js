@@ -6,7 +6,7 @@ import { API_URL } from "../../constant";
 import { getAccessToken, setProjectName } from "@/utils/common";
 import { LOADING_MESSAGE } from "../../message";
 import NotFound from "@/app/not-found";
-import ResultPrePage from "./resultPrePage";
+import ResultPerPage from "./resultPerPage";
 import { userDetailsContext } from "@/context/createContext";
 import PopupModal from "./popupModal";
 import Pagination from "./pagination";
@@ -317,7 +317,7 @@ const UserProfile = (params) => {
             {/* Results per page and Save Changes button */}
             {data.length > 0 && (
               <div className="w-[92%] my-4 flex justify-end ">
-                <ResultPrePage
+                <ResultPerPage
                   setShowSelectedPerPageResult={setShowSelectedPerPageResult}
                   selectedPerPageResult={selectedPerPageResult}
                   setCurrentPage={setCurrentPage}
