@@ -18,16 +18,21 @@ import Pagination from "@/components/pagination";
 import { userDetailsContext } from "@/context/createContext";
 
 const AdminPanel = () => {
+  // Context variables
   const {
     currentPageContext,
     selectedPerPageResultContext,
     selectedSearchValuesContext,
   } = useContext(userDetailsContext);
+
+  // Destructuring context values
   const [currentPage, setCurrentPage] = currentPageContext;
   const [selectedPerPageResult, setShowSelectedPerPageResult] =
     selectedPerPageResultContext;
   const [selectedSearchValues, setShowSelectedSearchValues] =
     selectedSearchValuesContext;
+
+  // Other state variables
   const router = useRouter();
   const [data, setData] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -46,11 +51,13 @@ const AdminPanel = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [searchClear, setSearchClear] = useState(false);
 
+  // useEffect to initialize selectedUsers state
   useEffect(() => {
     const initialSelectedUsers = data.map(() => false);
     setSelectedUsers(initialSelectedUsers);
   }, []);
 
+  // useEffect to fetch data and update selectAllPermissionsMap based on currentPage
   useEffect(() => {
     fetchData();
     if (currentPage && !selectAllPermissionsMap[currentPage]) {
@@ -61,6 +68,7 @@ const AdminPanel = () => {
     }
   }, [currentPage, selectedPerPageResult, selectedSearchValues]);
 
+  // Fetch initial data and set up permissions map when the page loads or context changes
   const accessToken = getAccessToken();
   async function fetchData() {
     try {
@@ -114,6 +122,7 @@ const AdminPanel = () => {
     }
   }
 
+  // Handle confirmation modal for changes
   const confirmModal = () => {
     setIsOpenModal(false);
     setIsConfirmModal(true);
@@ -125,11 +134,13 @@ const AdminPanel = () => {
     }
   };
 
+  // Close modal (confirmation or general)
   const closeModal = () => {
     setIsOpenModal(false);
     setIsConfirmModal(false);
   };
 
+  // Save changes to the server (save button)
   const handleSaveChanges = async (user = null) => {
     setIsSaving(true);
     try {
@@ -189,6 +200,7 @@ const AdminPanel = () => {
     }
   };
 
+  // Handle form submission for search
   const handleFormSubmit = () => {
     if (
       !formik.values.employeeId &&
@@ -202,6 +214,7 @@ const AdminPanel = () => {
     }
   };
 
+  // Form validation schema using Yup
   const validationSchema = Yup.object()
     .shape({
       employeeId: Yup.string(),
@@ -212,6 +225,7 @@ const AdminPanel = () => {
       return !!values.employeeId || !!values.employeeName || !!values.status;
     });
 
+  // Formik form configuration
   const formik = useFormik({
     initialValues: {
       employeeId: selectedSearchValues.employeeId,
@@ -248,6 +262,7 @@ const AdminPanel = () => {
     },
   });
 
+  // Handle permission update for a specific user
   const handlePermissionUpdate = (index, field, value) => {
     const allReadChecked = [];
     data.map((item) => {
@@ -276,6 +291,7 @@ const AdminPanel = () => {
     }
   };
 
+  // Toggle all permissions for all users on the current page
   const handleToggleAllPermissions = (checked) => {
     const updatedSelectedUsers = {};
     data.forEach((user) => {
@@ -289,6 +305,7 @@ const AdminPanel = () => {
     setSelectAllPermissionsMap(updatedSelectAllPermissionsMap);
   };
 
+  // Toggle permissions for a specific user
   const handleToggleUserPermissions = (user_id, checked) => {
     const updatedSelectedUsers = { ...selectedUsers };
     updatedSelectedUsers[user_id] = checked;
@@ -300,6 +317,7 @@ const AdminPanel = () => {
     setSelectAllPermissionsMap(updatedSelectAllPermissionsMap);
   };
 
+  // Toggle read permissions for all users
   const handleToggleAllReadPermissions = () => {
     const allReadChecked = data.every((item) => item.permissions.read);
     if (allReadChecked == true) {
@@ -331,6 +349,7 @@ const AdminPanel = () => {
     }
   };
 
+  // Toggle update permissions for all users
   const handleToggleAllUpdatePermissions = () => {
     const allUpdateChecked = data.every((item) => item.permissions.update);
     const allReadChecked = data.every((item) => item.permissions.read);
@@ -349,6 +368,7 @@ const AdminPanel = () => {
     }
   };
 
+  // Toggle delete permissions for all users
   const handleToggleAllDeletePermissions = () => {
     const allDeleteChecked = data.every((item) => item.permissions.delete);
     const allReadChecked = data.every((item) => item.permissions.read);
@@ -367,6 +387,7 @@ const AdminPanel = () => {
     }
   };
 
+  // Update state variables when data changes
   useEffect(() => {
     const allReadChecked =
       data.length > 0 && data.every((item) => item.permissions.read);
@@ -381,6 +402,7 @@ const AdminPanel = () => {
     setDeletePermissionAll(allDeleteChecked);
   }, [data]);
 
+  // Handle status update for a specific user
   const handleUpdateStatus = (index, newStatus) => {
     const updatedData = [...data];
     updatedData[index].status = newStatus;
@@ -389,18 +411,23 @@ const AdminPanel = () => {
     setUnsavedChanges(true);
   };
 
+  // Clear the search form and reload the page
   const handleFormClear = () => {
     setSearchClear(true);
     const newUrl = `${window.location.pathname}?page=${currentPage}`;
     window.history.replaceState({}, "", newUrl);
     window.location.reload();
   };
+
+  // Sort data based on employee_id
   const sortedData = data.sort((a, b) => {
     return a?.employee_id.localeCompare(b?.employee_id);
   });
 
+  // Render the component
   return (
     <>
+      {/* Search form */}
       <form onSubmit={formik.handleSubmit}>
         <div className="bg-[#f5f5f5] text-center">
           <div className="block md:flex md:flex-row justify-center items-center md:h-24">
@@ -463,8 +490,10 @@ const AdminPanel = () => {
         </div>
       </form>
 
+      {/* Data table */}
       <div className="table mx-auto md:mt-5 mt-5">
         <div className="flex justify-end">
+          {/* Results per page and Save Changes button */}
           {data.length > 0 && (
             <div className="flex items-center justify-between">
               <ResultPrePage
@@ -501,11 +530,13 @@ const AdminPanel = () => {
           )}
         </div>
 
+        {/* Data table */}
         <table
           className="border-2 border-[#F5F5F5] shadow-lg"
           data-testid="admin-panel"
           data-data={JSON.stringify(data)}
         >
+          {/* Table Header */}
           <thead>
             <tr className="bg-[#E3F2FD] h-12">
               <th className="mr-1 md:w-20 h-12 flex justify-center items-center ml-1">
@@ -566,6 +597,7 @@ const AdminPanel = () => {
               </th>
             </tr>
           </thead>
+          {/* Table Body */}
           <tbody>
             {loading ? (
               <tr>
@@ -720,6 +752,7 @@ const AdminPanel = () => {
           </tbody>
         </table>
 
+        {/* Pagination */}
         {data.length > 0 && totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
@@ -730,6 +763,8 @@ const AdminPanel = () => {
           />
         )}
       </div>
+
+      {/* Modals */}
       {isOpenModal && (
         <PopupModal confirmModal={confirmModal} closeModal={closeModal} />
       )}

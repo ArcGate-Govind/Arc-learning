@@ -13,6 +13,7 @@ import {
   USERNAME_ERROR_MESSAGE,
 } from "../../message";
 
+// ErrorMessage component to display error messages
 const ErrorMessage = (props) => {
   return (
     <div className=" m-auto">
@@ -21,11 +22,13 @@ const ErrorMessage = (props) => {
   );
 };
 
+// Login component
 const Login = () => {
   const router = useRouter();
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showMessage, setShowMessage] = useState("");
 
+  // Form validation using Yup
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -50,6 +53,7 @@ const Login = () => {
         .required(ERROR_MESSAGE),
     }),
 
+    // Handle form submission
     onSubmit: async (values) => {
       let email = values.email;
       let password = values.password;
@@ -65,6 +69,8 @@ const Login = () => {
         })
         .then((data) => {
           const token = data.token;
+
+          // If login is successful, set user session and navigate to appropriate page
           if (data.token) {
             setUserSession(token.refresh, token.access, data.token.username);
             if (token.is_2fa === false) {
@@ -75,6 +81,7 @@ const Login = () => {
               handleOpenPopup("/twofaverify");
             }
           } else {
+            // If login fails, show error message and navigate to the login page
             handleShowErrorMessage(data.non_field_errors[0], "/");
           }
         })
@@ -87,21 +94,25 @@ const Login = () => {
     },
   });
 
+  // Function to show error message and navigate to a specified path
   const handleShowErrorMessage = (message, path) => {
     setShowMessage(message);
     setShowErrorMessage(true);
     router.push(path);
   };
 
+  // Function to navigate to a specified path
   const handleOpenPopup = (path) => {
     router.push(path);
   };
 
+  // Render the component
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen">
       <div className="login_back-ground absolute inset-0"></div>
       <div className="bg-white  sm:w-1/2 md:w-1/3 lg:w-1/3 p-6 md:p-12 rounded-lg shadow-lg relative z-1">
         {showErrorMessage && <ErrorMessage message={showMessage} />}
+        {/* Login Form */}
         <form className="form-content" onSubmit={formik.handleSubmit}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium">

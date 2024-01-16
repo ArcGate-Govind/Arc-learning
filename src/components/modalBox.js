@@ -1,5 +1,6 @@
 import React from "react";
 
+// ModalBox component
 function ModalBox({ onClose, children }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -8,7 +9,7 @@ function ModalBox({ onClose, children }) {
         <div className="modal-content py-2 text-left px-2">
           <div className="text-right mt-2">
             <button
-              className="hover:text-[#466EA1] bg-[#466EA1] hover:bg-gray-200 text-[#FFFFFF]  p-2 rounded-md px-4 rounded"
+              className="hover:text-[#466EA1] bg-[#466EA1] hover:bg-gray-200 text-[#FFFFFF] p-2 rounded-md px-4 rounded"
               onClick={onClose}
             >
               X
@@ -21,4 +22,5 @@ function ModalBox({ onClose, children }) {
   );
 }
 
+// Export the ModalBox component
 export default ModalBox;

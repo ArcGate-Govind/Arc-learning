@@ -12,6 +12,6 @@ const page = (params) => {
 export default page;
 export function generateMetadata({ params }) {
   return {
-    title: "User Detils",
+    title: "User Details",
   };
 }
