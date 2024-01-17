@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 import { useState, createContext } from "react";
 
 export const userDetailsContext = createContext();
@@ -14,6 +14,10 @@ const UserDetailsProvider = (props) => {
   let pageValue = null;
   let perPageValue = null;
   let searchValuesObj = {};
+  let videosearchValuesObj = {};
+  let videoPageValue = null;
+  let projectName = null;
+  let userPageValue = null;
 
   // Parse URL parameters if the URL string is available
   if (urlString) {
@@ -22,9 +26,17 @@ const UserDetailsProvider = (props) => {
 
       // Retrieve page and perPage values from URL parameters
       pageValue = url.searchParams.get("page");
+      userPageValue = url.searchParams.get("userpage");
       perPageValue = url.searchParams.get("page_size");
+      videoPageValue = url.searchParams.get("videopage");
+      projectName = url.searchParams.get("project");
 
       // Retrieve search values from URL parameters
+      videosearchValuesObj = {
+        projectSearch: url.searchParams.get("search")
+          ? url.searchParams.get("search")
+          : "",
+      };
       searchValuesObj = {
         employeeId: url.searchParams.get("employee_id")
           ? url.searchParams.get("employee_id")
@@ -44,9 +56,21 @@ const UserDetailsProvider = (props) => {
   // Convert Value to a number
   const perPageResult = parseInt(perPageValue);
   const pageValueAsNumber = parseInt(pageValue);
+  const videoPageValueAsNumber = parseInt(videoPageValue);
+  const userPageValueAsNumber = parseInt(userPageValue);
 
   // State to manage the current page
   const [currentPage, setCurrentPage] = useState(pageValueAsNumber || 1);
+
+  // State to manage the userDetails current page
+  const [userCurrentPage, setUserCurrentPage] = useState(
+    userPageValueAsNumber || 1
+  );
+
+  // State to manage the video current page
+  const [videoCurrentPage, setVideouCurrentPage] = useState(
+    videoPageValueAsNumber || 1
+  );
 
   // State to manage selected perPage result
   const [selectedPerPageResult, setShowSelectedPerPageResult] = useState(
@@ -57,10 +81,19 @@ const UserDetailsProvider = (props) => {
   const [selectedSearchValues, setShowSelectedSearchValues] =
     useState(searchValuesObj);
 
+  // State to manage selected video search values
+  const [selectedVideoSearchValues, setShowSelectedVideoSearchValues] =
+    useState(videosearchValuesObj);
+
+  // State to manage selected project values
+  const [selectedProject, setShowSelectedProject] = useState(projectName);
+
   return (
     <userDetailsContext.Provider
       value={{
         currentPageContext: [currentPage, setCurrentPage],
+        userCurrentPageContext: [userCurrentPage, setUserCurrentPage],
+        videoCurrentPageContext: [videoCurrentPage, setVideouCurrentPage],
         selectedPerPageResultContext: [
           selectedPerPageResult,
           setShowSelectedPerPageResult,
@@ -69,6 +102,11 @@ const UserDetailsProvider = (props) => {
           selectedSearchValues,
           setShowSelectedSearchValues,
         ],
+        selectedVideoSearchValuesContext: [
+          selectedVideoSearchValues,
+          setShowSelectedVideoSearchValues,
+        ],
+        selectedProjectContext: [selectedProject, setShowSelectedProject],
       }}
     >
       {props.children}

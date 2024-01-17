@@ -88,18 +88,20 @@ const AdminPanel = () => {
         }
       }
 
-      queryParams.push(`page=${currentPage}`);
       queryParams.push(`page_size=${selectedPerPageResult}`);
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
-      const newUrl = `${window.location.pathname}${queryString}`;
+      const newUrl = `${window.location.pathname}${queryString}&page=${currentPage}`;
       window.history.replaceState({}, "", newUrl);
 
-      const response = await fetch(`${API_URL}users/${queryString}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}users/${queryString}&page=${currentPage}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       const json = await response.json();
       let authorizationData;
       if (json.results.length > 0) {

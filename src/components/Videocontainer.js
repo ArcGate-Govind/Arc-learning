@@ -1,5 +1,5 @@
 "use client";
-import React, { createRef, useEffect, useRef } from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -10,110 +10,66 @@ import {
 } from "../../message";
 import { API_URL, Backend_Localhost_Path } from "../../constant";
 import VideoPopup from "@/components/videoPopup";
-import {
-  getAccessToken,
-  getProjectName,
-  removeUserSession,
-} from "@/utils/common";
-import { useRouter } from "next/navigation";
-
+import { getAccessToken } from "@/utils/common";
 import moment from "moment";
 import AOSWrapper from "@/components/aosWrapper";
 import Dashboard from "@/components/dashboard";
+import { userDetailsContext } from "@/context/createContext";
+import Pagination from "./pagination";
+import ResultPerPage from "./resultPerPage";
 
 const VideoContainer = () => {
-  const [videoSeen, setVideoSeen] = useState({});
+  // Destructuring context values
+  const {
+    selectedVideoSearchValuesContext,
+    videoCurrentPageContext,
+    selectedPerPageResultContext,
+    selectedProjectContext,
+  } = useContext(userDetailsContext);
+
+  // Extracting values from context
+  const [selectedVideoSearchValues, setShowSelectedVideoSearchValues] =
+    selectedVideoSearchValuesContext;
+  const [videoCurrentPage, setVideouCurrentPage] = videoCurrentPageContext;
+  const [selectedPerPageResult, setShowSelectedPerPageResult] =
+    selectedPerPageResultContext;
+  const [selectedProject, setShowSelectedProject] = selectedProjectContext;
+
+  // State variables
   const [blankInputError, setBlankInputError] = useState(false);
   const [searchClear, setSearchClear] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
-  const [showVideo, setShowVideo] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isPopoutOpen, setPopoutOpen] = useState(false);
   const [dataParams, setDataParams] = useState();
-
+  const [dashboardData, setdashboardData] = useState();
   const accessToken = getAccessToken();
-  const projectName = getProjectName();
-  const router = useRouter();
-  const videoRefs = useRef([]);
 
+  // useEffect to fetch data when dependencies change
   useEffect(() => {
     fetchData();
-  }, [currentPage]);
+  }, [videoCurrentPage, selectedVideoSearchValues, selectedPerPageResult]);
 
-  useEffect(() => {
-    updateTimeAfterSeenVideo();
-  }, [data]);
-
-  useEffect(() => {
-    updateTimeAfterSeenVideo();
-  }, [data]);
-
-  useEffect(() => {
-    updateTimeAfterSeenVideo();
-  }, [data]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScrollBar);
-    const storedVideoSeen = localStorage.getItem("videoSeen");
-    if (storedVideoSeen) {
-      setVideoSeen(JSON.parse(storedVideoSeen));
-    }
-
-    return () => {
-      window.removeEventListener("scroll", handleScrollBar);
-    };
-  }, []);
-
-  useEffect(() => {
-    const storedVideoSeen = localStorage.getItem("videoSeen");
-    if (storedVideoSeen) {
-      setVideoSeen(JSON.parse(storedVideoSeen));
-    }
-  }, [totalPages]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScrollBar);
-
-    return () => {
-      window.removeEventListener("scroll", handleScrollBar);
-    };
-  }, [totalPages, currentPage]);
-
-  useEffect(() => {
-    localStorage.setItem("videoSeen", JSON.stringify(videoSeen));
-    updateTimeAfterSeenVideo();
-  }, [videoSeen]);
-
-  useEffect(() => {
-    if (showVideo) {
-      updateTimeAfterSeenVideo();
-    }
-  }, [showVideo, isPopoutOpen]);
-
-  async function fetchData() {
+  // Async function to fetch data from the API
+  const fetchData = async () => {
     const queryParams = [];
-    const isLocalStorageAvailable =
-      typeof window !== "undefined" && window.localStorage;
-    let values = isLocalStorageAvailable
-      ? JSON.parse(localStorage.getItem("videoSearchValues"))
-      : null;
-    if (values != null) {
-      if (values.projectSearch) {
-        queryParams.push(`search=${values.projectSearch}`);
+
+    if (selectedVideoSearchValues != null) {
+      if (selectedVideoSearchValues.projectSearch) {
+        queryParams.push(`search=${selectedVideoSearchValues.projectSearch}`);
       }
     }
 
-    queryParams.push(`project=${projectName}`);
+    queryParams.push(`project=${selectedProject}`);
+    queryParams.push(`page_size=${selectedPerPageResult}`);
     const queryString =
       queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
-    const newUrl = `${window.location.pathname}${queryString}`;
+    const newUrl = `${window.location.pathname}${queryString}&videopage=${videoCurrentPage}`;
     window.history.replaceState({}, "", newUrl);
-    videoRefs.current = {};
 
     const response = await fetch(
-      `${API_URL}dashboard/media-list/${queryString}&page_size=5&page=${currentPage}`,
+      `${API_URL}dashboard/media-list/${queryString}&page=${videoCurrentPage}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -122,35 +78,24 @@ const VideoContainer = () => {
     );
     const json = await response.json();
     if (json.code == 200) {
+      let arrDashboard = {};
+      arrDashboard = {
+        username: json.usernames,
+        project: json.project,
+      };
+      setdashboardData(arrDashboard);
       if (json.results.length > 0) {
-        json.results.forEach((project) => {
-          videoRefs.current[project.id] = createRef();
-        });
-
-        if (currentPage != 1) {
-          setData((prev) => [...prev, ...json.results]);
-        } else {
-          setData(json.results);
-        }
+        setData(json.results);
       } else if (json.results.length == 0) {
         setData(json.results);
-      } else {
-        removeUserSession();
-        localStorage.removeItem("videoSearchValues");
-        router.push("/");
       }
 
       setLoading(false);
       setTotalPages(json.pagination.total_pages);
-      setShowVideo(true);
-    } else if (json.code == "token_not_valid") {
-      removeUserSession();
-      localStorage.removeItem("videoSearchValues");
-      router.push("/");
     }
+  };
 
-    // setLoading(false);
-  }
+  // Validation schema for formik
   const validationSchema = Yup.object()
     .shape({
       projectSearch: Yup.string(),
@@ -159,118 +104,66 @@ const VideoContainer = () => {
       return !!values.projectSearch;
     });
 
-  const isLocalStorageAvailable =
-    typeof window !== "undefined" && window.localStorage;
-  let searchValue = isLocalStorageAvailable
-    ? JSON.parse(localStorage.getItem("videoSearchValues"))
-    : null;
-  if (searchValue == null) {
-    searchValue = { projectSearch: "" };
-  }
-
+  // Formik configuration
   const formik = useFormik({
     initialValues: {
-      projectSearch: searchValue.projectSearch,
+      projectSearch: selectedVideoSearchValues.projectSearch,
     },
     validationSchema,
     onSubmit: (values) => {
-      let searchValues = {
-        projectSearch: "",
+      const trimedValue = {
+        projectSearch: values.projectSearch.trim(),
       };
-      localStorage.setItem(
-        "videoSearchValues",
-        JSON.stringify(searchClear ? searchValues : values)
-      );
+      if (trimedValue.projectSearch != "") {
+        setShowSelectedVideoSearchValues(trimedValue);
+      }
       if (searchClear) {
         setBlankInputError(false);
-      } else if (!values.projectSearch && !searchClear) {
+      } else if (!trimedValue.projectSearch && !searchClear) {
         setBlankInputError(true);
       } else {
         setBlankInputError(false);
-        const queryParams = [];
-        if (values.projectSearch)
-          queryParams.push(`projectSearch=${values.projectSearch}`);
-        fetchData();
       }
     },
   });
 
-  const handleScrollBar = () => {
-    const innerHeight = window.innerHeight;
-    const scrollTop = document.documentElement.scrollTop;
-    const scrollHeight = document.documentElement.scrollHeight;
-    if (innerHeight + scrollTop + 1 >= scrollHeight) {
-      loadMorePageData();
-    }
-  };
-  const loadMorePageData = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
+  // Function to handle form submission
   const handleFormSubmit = () => {
     if (!formik.values.projectSearch) {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      setCurrentPage(1);
+      setVideouCurrentPage(1);
     }
   };
 
-  const updateTimeAfterSeenVideo = () => {
-    let indexData = Object.keys(videoSeen).length;
-    let videoIdgetFromSData = [];
-    setShowVideo(false);
-    data.filter((projectDetail) => {
-      videoIdgetFromSData.push(projectDetail.id);
-    });
-    if (indexData > 0 && data.length > 0) {
-      for (var i = 0; i < indexData; i++) {
-        for (const key in videoSeen) {
-          videoIdgetFromSData.filter((projectId) => {
-            if (projectId == key) {
-              const videoElement = videoRefs.current[key];
-              if (videoElement && videoElement.current) {
-                const videoCurren = videoElement?.current;
-                videoCurren.currentTime = videoSeen[key];
-              }
-            }
-          });
-        }
-      }
-    }
-  };
-
+  // Function to handle form clear
   const handleFormClear = () => {
-    localStorage.removeItem("videoSearchValues");
     setSearchClear(true);
+    const newUrl = `${window.location.pathname}?project=${selectedProject}&videopage=${videoCurrentPage}`;
+    window.history.replaceState({}, "", newUrl);
     window.location.reload();
   };
 
-  const getCurrentTime = (projectID) => {
-    if (videoRefs.current[projectID]) {
-      setVideoSeen((prevVideoSeen) => ({
-        ...prevVideoSeen,
-        [projectID]: videoRefs.current[projectID].current.currentTime,
-      }));
-    }
-  };
-
+  // Function to open video popup
   const openPopup = (project) => {
     setDataParams(project);
     setPopoutOpen(true);
   };
 
+  // Function to close video popup
   const closePopup = () => {
     setPopoutOpen(false);
-    // window.location.reload();
   };
 
+  // Rendering JSX
   return (
     <AOSWrapper>
-      <Dashboard dashboardData={data} />
+      {/* Dashboard component displaying data */}
+      <Dashboard dashboardData={dashboardData} />
+
       <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
+        {/* Form  */}
         <form
           className="mx-5 md:mx-10 mt-10  p-2 md:p-4"
           onSubmit={formik.handleSubmit}
@@ -286,6 +179,7 @@ const VideoContainer = () => {
               onBlur={formik.handleBlur}
             />
 
+            {/* Button to submit search form */}
             <button
               className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
               type="submit"
@@ -293,6 +187,8 @@ const VideoContainer = () => {
             >
               Search
             </button>
+
+            {/* Button to clear search form */}
             <button
               className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
               type="submit"
@@ -300,20 +196,32 @@ const VideoContainer = () => {
             >
               Clear
             </button>
+
+            {/* Component to select results per page */}
+            <ResultPerPage
+              setShowSelectedPerPageResult={setShowSelectedPerPageResult}
+              selectedPerPageResult={selectedPerPageResult}
+              setCurrentPage={setVideouCurrentPage}
+            />
           </div>
+
+          {/* Display error message if there's a blank input */}
           {blankInputError && (
             <div className="text-red-500 block  text-center  pb-3 md:-mt-5">
               {SEARCH_FIELD_MESSAGE}
             </div>
           )}
         </form>
+
+        {/* Display loading message or video data */}
         {loading ? (
           <div className="text-black-600 text-center font-semibold py-3">
             {LOADING_MESSAGE}
           </div>
         ) : (
           <>
-            <div className="flex flex-wrap  ml-20 ">
+            {/* Display videos */}
+            <div className="flex flex-wrap ml-5">
               {data.length > 0 ? (
                 data.map((project, index) => {
                   let converTime = moment(project.created).fromNow();
@@ -324,13 +232,11 @@ const VideoContainer = () => {
                       key={index}
                       data-aos="fade-up"
                       data-aos-duration="1400"
-                      className="hover:scale-95  mb-0  md:w-3/12 sm:w-1/2 relative"
+                      className="hover:scale-95  mb-0  md:w-[20%] sm:w-1/2 relative"
                     >
                       <video
-                        ref={videoRefs.current[project.id]}
-                        className="py-2 w-3/4 custom-video-player"
+                        className="py-2 w-[90%] custom-video-player"
                         controls
-                        onPause={() => getCurrentTime(project.id)}
                         controlsList="nodownload"
                         disablePictureInPicture
                       >
@@ -341,7 +247,7 @@ const VideoContainer = () => {
                         className="cursor-pointer "
                         onClick={() => openPopup(project)}
                       >
-                        <div className="flex w-10/12 ">
+                        <div className="flex w-[90%] ">
                           <p
                             title={project.title}
                             className="font-medium  text-[#000000] w-3/4  line-clamp-2 text-xs"
@@ -354,7 +260,7 @@ const VideoContainer = () => {
                         </div>
                         <p
                           title={project.description}
-                          className={`font-medium text-[#000000] w-3/4  line-clamp-2 text-xs mb-1  mb-4`}
+                          className={`font-medium text-[#000000] w-[90%]  line-clamp-2 text-xs mb-1  mb-4`}
                         >
                           {project.description}
                         </p>
@@ -363,12 +269,24 @@ const VideoContainer = () => {
                   );
                 })
               ) : (
+                // Display message if there are no search results
                 <div className="text-red-600 text-center py-3">
                   {SEARCH_RESULT_MESSAGE}
                 </div>
               )}
             </div>
 
+            {/* Display pagination if there are multiple pages */}
+            {data.length > 0 && totalPages > 1 && (
+              <Pagination
+                currentPage={videoCurrentPage}
+                setCurrentPage={setVideouCurrentPage}
+                totalPages={totalPages}
+                isConfirmModal={true}
+              />
+            )}
+
+            {/* Display video popup if it's open */}
             {isPopoutOpen && (
               <VideoPopup data={dataParams} onClose={closePopup} />
             )}

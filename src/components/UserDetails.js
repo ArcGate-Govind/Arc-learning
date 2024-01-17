@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import PopupMessage from "@/components/popupMessage";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../constant";
-import { getAccessToken, setProjectName } from "@/utils/common";
+import { getAccessToken } from "@/utils/common";
 import { LOADING_MESSAGE } from "../../message";
 import NotFound from "@/app/not-found";
 import ResultPerPage from "./resultPerPage";
@@ -14,12 +14,16 @@ import Pagination from "./pagination";
 // UserProfile component
 const UserProfile = (params) => {
   // Context variables
-  const { currentPageContext, selectedPerPageResultContext } =
-    useContext(userDetailsContext);
+  const {
+    userCurrentPageContext,
+    selectedPerPageResultContext,
+    selectedProjectContext,
+  } = useContext(userDetailsContext);
   // Destructuring context values
-  const [currentPage, setCurrentPage] = currentPageContext;
+  const [userCurrentPage, setUserCurrentPage] = userCurrentPageContext;
   const [selectedPerPageResult, setShowSelectedPerPageResult] =
     selectedPerPageResultContext;
+  const [selectedProject, setShowSelectedProject] = selectedProjectContext;
   // State variables to manage data and component behavior
   const [data, setData] = useState([]);
   const [readPermissionAll, setReadPermissionAll] = useState(false);
@@ -43,7 +47,7 @@ const UserProfile = (params) => {
   // Fetch user profile data
   useEffect(() => {
     fetchData();
-  }, [currentPage, selectedPerPageResult]);
+  }, [userCurrentPage, selectedPerPageResult]);
 
   // Effect to update permission's status when data changes
   useEffect(() => {
@@ -67,17 +71,16 @@ const UserProfile = (params) => {
   async function fetchData() {
     const queryParams = [];
 
-    queryParams.push(`page=${currentPage}`);
     queryParams.push(`page_size=${selectedPerPageResult}`);
 
     const queryString =
       queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
-    const newUrl = `${window.location.pathname}${queryString}`;
+    const newUrl = `${window.location.pathname}${queryString}&userpage=${userCurrentPage}`;
     window.history.replaceState({}, "", newUrl);
 
     try {
       const response = await fetch(
-        `${API_URL}user/${userDetailsId}/${queryString}`,
+        `${API_URL}user/${userDetailsId}/${queryString}&page=${userCurrentPage}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -107,7 +110,7 @@ const UserProfile = (params) => {
 
   // Function to navigate to project's dashboard
   const getProjectName = (project) => {
-    setProjectName(project);
+    setShowSelectedProject(project);
     router.push(`/dashboard/videocontainer`);
   };
 
@@ -289,10 +292,10 @@ const UserProfile = (params) => {
     setIsOpenModal(false);
     setIsConfirmModal(true);
     setUnsavedChanges(false);
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    } else if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+    if (userCurrentPage > 1) {
+      setUserCurrentPage(userCurrentPage - 1);
+    } else if (userCurrentPage < totalPages) {
+      setUserCurrentPage(userCurrentPage + 1);
     }
   };
 
@@ -320,7 +323,7 @@ const UserProfile = (params) => {
                 <ResultPerPage
                   setShowSelectedPerPageResult={setShowSelectedPerPageResult}
                   selectedPerPageResult={selectedPerPageResult}
-                  setCurrentPage={setCurrentPage}
+                  setUserCurrentPage={setUserCurrentPage}
                 />
                 <button
                   className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
@@ -553,8 +556,8 @@ const UserProfile = (params) => {
                 {/* Pagination */}
                 {data.length > 0 && totalPages > 1 && (
                   <Pagination
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
+                    currentPage={userCurrentPage}
+                    setCurrentPage={setUserCurrentPage}
                     totalPages={totalPages}
                     unsavedChanges={unsavedChanges}
                     isConfirmModal={isConfirmModal}

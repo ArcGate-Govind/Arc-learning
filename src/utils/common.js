@@ -46,25 +46,6 @@ export const setUserSession = (refreshToken, accessToken, user) => {
   });
 };
 
-export const getProjectName = () => {
-  const projectStr = Cookies.get("projectname");
-  if (projectStr) return JSON.parse(projectStr);
-  else return null;
-};
-
-export const setProjectName = (projectname) => {
-  const expirationTimeInSeconds = 30 * 60;
-
-  const expirationDate = new Date();
-  expirationDate.setTime(
-    expirationDate.getTime() + expirationTimeInSeconds * 1000
-  );
-
-  Cookies.set("projectname", JSON.stringify(projectname), {
-    expires: expirationDate,
-  });
-};
-
 export const accessTokenExpiryCheck = () => {
   const accessTokenExpiry = parseInt(Cookies.get("accessToken_expiration"));
   const timeUntilExpiry = accessTokenExpiry - Math.floor(Date.now() / 1000);
