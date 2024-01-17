@@ -16,7 +16,7 @@ const UserDetailsProvider = (props) => {
   let searchValuesObj = {};
   let VideosearchValuesObj = {};
   let videoPageValue = null;
-  let projectName = "test";
+  let projectName = null;
   let userPageValue = null;
 
   // Parse URL parameters if the URL string is available
