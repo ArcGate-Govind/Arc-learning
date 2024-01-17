@@ -16,7 +16,7 @@ const UserDetailsProvider = (props) => {
   let searchValuesObj = {};
   let VideosearchValuesObj = {};
   let videoPageValue = null;
-  let projectName = null;
+  let projectName = "test";
   let userPageValue = null;
 
   // Parse URL parameters if the URL string is available
@@ -28,8 +28,7 @@ const UserDetailsProvider = (props) => {
       pageValue = url.searchParams.get("page");
       userPageValue = url.searchParams.get("userpage");
       perPageValue = url.searchParams.get("page_size");
-      userPerPageValue;
-      videoPageValue = url.searchParams.get("page");
+      videoPageValue = url.searchParams.get("videopage");
       projectName = url.searchParams.get("project");
 
       // Retrieve search values from URL parameters
