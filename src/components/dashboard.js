@@ -38,10 +38,14 @@ const Dashboard = ({ dashboardData }) => {
       <div className="flex justify-between items-center bg-[#E3F2FD] my-3 mx-10 px-10">
         <div>
           <h1 className="text-xl md:text-4xl font-light">Welcome,</h1>
-          <p className="text-md md:text-lg">Username</p>
+          <p className="text-md md:text-lg uppercase">
+            {dashboardData?.username}
+          </p>
         </div>
         <div className="flex flex-col text-center">
-          <h1 className="text-xl md:text-2xl font-bold">Project Name</h1>
+          <h1 className="text-xl md:text-2xl font-bold">
+            {dashboardData?.project}
+          </h1>
           <p className="text-md md:text-lg">Role</p>
         </div>
         <div>

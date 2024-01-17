@@ -1,5 +1,5 @@
 "use client";
-import React, { createRef, useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -10,8 +10,7 @@ import {
 } from "../../message";
 import { API_URL, Backend_Localhost_Path } from "../../constant";
 import VideoPopup from "@/components/videoPopup";
-import { getAccessToken, removeUserSession } from "@/utils/common";
-import { useRouter } from "next/navigation";
+import { getAccessToken } from "@/utils/common";
 import moment from "moment";
 import AOSWrapper from "@/components/aosWrapper";
 import Dashboard from "@/components/dashboard";
@@ -37,57 +36,20 @@ const VideoContainer = () => {
   const [selectedProject, setShowSelectedProject] = selectedProjectContext;
 
   // State variables
-  const [videoSeen, setVideoSeen] = useState({});
   const [blankInputError, setBlankInputError] = useState(false);
   const [searchClear, setSearchClear] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
-  const [showVideo, setShowVideo] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [isPopoutOpen, setPopoutOpen] = useState(false);
   const [dataParams, setDataParams] = useState();
+  const [dashboardData, setdashboardData] = useState();
   const accessToken = getAccessToken();
-  const router = useRouter();
-  const videoRefs = useRef([]);
 
   // useEffect to fetch data when dependencies change
   useEffect(() => {
     fetchData();
   }, [videoCurrentPage, selectedVideoSearchValues, selectedPerPageResult]);
-
-  // useEffect to update time after seeing a video
-  useEffect(() => {
-    updateTimeAfterSeenVideo();
-  }, [data]);
-
-  // useEffect to load stored videoSeen from localStorage
-  useEffect(() => {
-    const storedVideoSeen = localStorage.getItem("videoSeen");
-    if (storedVideoSeen) {
-      setVideoSeen(JSON.parse(storedVideoSeen));
-    }
-  }, []);
-
-  // useEffect to update videoSeen when totalPages change
-  useEffect(() => {
-    const storedVideoSeen = localStorage.getItem("videoSeen");
-    if (storedVideoSeen) {
-      setVideoSeen(JSON.parse(storedVideoSeen));
-    }
-  }, [totalPages]);
-
-  // useEffect to save videoSeen to localStorage and update time after seeing a video
-  useEffect(() => {
-    localStorage.setItem("videoSeen", JSON.stringify(videoSeen));
-    updateTimeAfterSeenVideo();
-  }, [videoSeen]);
-
-  // useEffect to update time after seeing a video when showVideo or isPopoutOpen changes
-  useEffect(() => {
-    if (showVideo) {
-      updateTimeAfterSeenVideo();
-    }
-  }, [showVideo, isPopoutOpen]);
 
   // Async function to fetch data from the API
   const fetchData = async () => {
@@ -105,7 +67,6 @@ const VideoContainer = () => {
       queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
     const newUrl = `${window.location.pathname}${queryString}&videopage=${videoCurrentPage}`;
     window.history.replaceState({}, "", newUrl);
-    videoRefs.current = {};
 
     const response = await fetch(
       `${API_URL}dashboard/media-list/${queryString}&page=${videoCurrentPage}`,
@@ -117,26 +78,20 @@ const VideoContainer = () => {
     );
     const json = await response.json();
     if (json.code == 200) {
+      let arrDashboard = {};
+      arrDashboard = {
+        username: json.usernames,
+        project: json.project,
+      };
+      setdashboardData(arrDashboard);
       if (json.results.length > 0) {
-        json.results.forEach((project) => {
-          videoRefs.current[project.id] = createRef();
-        });
         setData(json.results);
       } else if (json.results.length == 0) {
         setData(json.results);
-      } else {
-        removeUserSession();
-
-        router.push("/");
       }
 
       setLoading(false);
       setTotalPages(json.pagination.total_pages);
-      setShowVideo(true);
-    } else if (json.code == "token_not_valid") {
-      removeUserSession();
-
-      router.push("/");
     }
   };
 
@@ -182,47 +137,12 @@ const VideoContainer = () => {
     }
   };
 
-  // Function to update time after seeing a video
-  const updateTimeAfterSeenVideo = () => {
-    let indexData = Object.keys(videoSeen).length;
-    let videoIdgetFromSData = [];
-    setShowVideo(false);
-    data.filter((projectDetail) => {
-      videoIdgetFromSData.push(projectDetail.id);
-    });
-    if (indexData > 0 && data.length > 0) {
-      for (var i = 0; i < indexData; i++) {
-        for (const key in videoSeen) {
-          videoIdgetFromSData.filter((projectId) => {
-            if (projectId == key) {
-              const videoElement = videoRefs.current[key];
-              if (videoElement && videoElement.current) {
-                const videoCurren = videoElement?.current;
-                videoCurren.currentTime = videoSeen[key];
-              }
-            }
-          });
-        }
-      }
-    }
-  };
-
   // Function to handle form clear
   const handleFormClear = () => {
     setSearchClear(true);
-    const newUrl = `${window.location.pathname}?page=${videoCurrentPage}`;
+    const newUrl = `${window.location.pathname}?project=${selectedProject}&videopage=${videoCurrentPage}`;
     window.history.replaceState({}, "", newUrl);
     window.location.reload();
-  };
-
-  // Function to get current time of a video
-  const getCurrentTime = (projectID) => {
-    if (videoRefs.current[projectID]) {
-      setVideoSeen((prevVideoSeen) => ({
-        ...prevVideoSeen,
-        [projectID]: videoRefs.current[projectID].current.currentTime,
-      }));
-    }
   };
 
   // Function to open video popup
@@ -240,7 +160,7 @@ const VideoContainer = () => {
   return (
     <AOSWrapper>
       {/* Dashboard component displaying data */}
-      <Dashboard dashboardData={data} />
+      <Dashboard dashboardData={dashboardData} />
 
       <div className=" mx-5 md:mx-10 my-10 bg-[#F8F8F8] ">
         {/* Form  */}
@@ -301,7 +221,7 @@ const VideoContainer = () => {
         ) : (
           <>
             {/* Display videos */}
-            <div className="flex flex-wrap  ml-20 ">
+            <div className="flex flex-wrap ml-5">
               {data.length > 0 ? (
                 data.map((project, index) => {
                   let converTime = moment(project.created).fromNow();
@@ -312,13 +232,11 @@ const VideoContainer = () => {
                       key={index}
                       data-aos="fade-up"
                       data-aos-duration="1400"
-                      className="hover:scale-95  mb-0  md:w-3/12 sm:w-1/2 relative"
+                      className="hover:scale-95  mb-0  md:w-[20%] sm:w-1/2 relative"
                     >
                       <video
-                        ref={videoRefs.current[project.id]}
-                        className="py-2 w-3/4 custom-video-player"
+                        className="py-2 w-[90%] custom-video-player"
                         controls
-                        onPause={() => getCurrentTime(project.id)}
                         controlsList="nodownload"
                         disablePictureInPicture
                       >
@@ -329,7 +247,7 @@ const VideoContainer = () => {
                         className="cursor-pointer "
                         onClick={() => openPopup(project)}
                       >
-                        <div className="flex w-10/12 ">
+                        <div className="flex w-[90%] ">
                           <p
                             title={project.title}
                             className="font-medium  text-[#000000] w-3/4  line-clamp-2 text-xs"
@@ -342,7 +260,7 @@ const VideoContainer = () => {
                         </div>
                         <p
                           title={project.description}
-                          className={`font-medium text-[#000000] w-3/4  line-clamp-2 text-xs mb-1  mb-4`}
+                          className={`font-medium text-[#000000] w-[90%]  line-clamp-2 text-xs mb-1  mb-4`}
                         >
                           {project.description}
                         </p>
