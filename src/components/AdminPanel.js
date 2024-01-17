@@ -13,7 +13,7 @@ import {
 import { API_URL } from "../../constant";
 import PopupModal from "@/components/popupModal";
 import PopupMessage from "@/components/popupMessage";
-import ResultPrePage from "@/components/resultPrePage";
+import ResultPerPage from "@/components/resultPerPage";
 import Pagination from "@/components/pagination";
 import { userDetailsContext } from "@/context/createContext";
 
@@ -87,20 +87,19 @@ const AdminPanel = () => {
           queryParams.push(`status=${statusText}`);
         }
       }
+
       queryParams.push(`page=${currentPage}`);
+      queryParams.push(`page_size=${selectedPerPageResult}`);
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const newUrl = `${window.location.pathname}${queryString}`;
       window.history.replaceState({}, "", newUrl);
 
-      const response = await fetch(
-        `${API_URL}users/${queryString}&page_size=${selectedPerPageResult}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}users/${queryString}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       const json = await response.json();
       let authorizationData;
       if (json.results.length > 0) {
@@ -496,7 +495,7 @@ const AdminPanel = () => {
           {/* Results per page and Save Changes button */}
           {data.length > 0 && (
             <div className="flex items-center justify-between">
-              <ResultPrePage
+              <ResultPerPage
                 setShowSelectedPerPageResult={setShowSelectedPerPageResult}
                 selectedPerPageResult={selectedPerPageResult}
                 setCurrentPage={setCurrentPage}
@@ -760,6 +759,7 @@ const AdminPanel = () => {
             totalPages={totalPages}
             unsavedChanges={unsavedChanges}
             isConfirmModal={isConfirmModal}
+            setIsOpenModal={setIsOpenModal}
           />
         )}
       </div>
