@@ -14,7 +14,7 @@ const UserDetailsProvider = (props) => {
   let pageValue = null;
   let perPageValue = null;
   let searchValuesObj = {};
-  let VideosearchValuesObj = {};
+  let videosearchValuesObj = {};
   let videoPageValue = null;
   let projectName = null;
   let userPageValue = null;
@@ -32,7 +32,7 @@ const UserDetailsProvider = (props) => {
       projectName = url.searchParams.get("project");
 
       // Retrieve search values from URL parameters
-      VideosearchValuesObj = {
+      videosearchValuesObj = {
         projectSearch: url.searchParams.get("search")
           ? url.searchParams.get("search")
           : "",
@@ -83,7 +83,7 @@ const UserDetailsProvider = (props) => {
 
   // State to manage selected video search values
   const [selectedVideoSearchValues, setShowSelectedVideoSearchValues] =
-    useState(VideosearchValuesObj);
+    useState(videosearchValuesObj);
 
   // State to manage selected project values
   const [selectedProject, setShowSelectedProject] = useState(projectName);
