@@ -316,42 +316,48 @@ const UserProfile = (params) => {
         <NotFound />
       ) : (
         <>
-          <div className="md:w-[90%] sm:tabel mt-10 ">
-            {/* Results per page and Save Changes button */}
-            {data.length > 0 && (
-              <div className="w-[92%] my-4 flex justify-end ">
-                <ResultPerPage
-                  setShowSelectedPerPageResult={setShowSelectedPerPageResult}
-                  selectedPerPageResult={selectedPerPageResult}
-                  setUserCurrentPage={setUserCurrentPage}
-                />
-                <button
-                  className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
-                    !unsavedChanges
-                      ? "cursor-not-allowed disabled:hover:bg-[#728daf] disabled"
-                      : ""
-                  }`}
-                  disabled={!unsavedChanges}
-                  onClick={handleAllSaveChanges}
-                >
-                  Save Changes
-                </button>
-              </div>
-            )}
-            <div className="md:w-[90%] sm:tabel lg:flex lg:ml-auto md:flex md:ml-auto">
-              <div className=" bg-[#F5F5F5] mt-2 h-48 md:w-[24%] w-full">
+          <div className="w-full md:w-3/4 mt-10 md:mx-auto">
+            <div className="md:w-3/4 mx-auto flex justify-end">
+              {/* Results per page and Save Changes button */}
+              {data.length > 0 && (
+                <div className="w-[92%] md:my-4 flex justify-end ">
+                  <ResultPerPage
+                    setShowSelectedPerPageResult={setShowSelectedPerPageResult}
+                    selectedPerPageResult={selectedPerPageResult}
+                    setUserCurrentPage={setUserCurrentPage}
+                  />
+                  <button
+                    className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
+                      !unsavedChanges
+                        ? "cursor-not-allowed disabled:hover:bg-[#728daf] disabled"
+                        : ""
+                    }`}
+                    disabled={!unsavedChanges}
+                    onClick={handleAllSaveChanges}
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5">
+              <div className="w-full bg-[#F5F5F5] md:w-3/4 md:mx-auto">
                 {sortedData?.map((item, index) => {
                   return (
                     <div key={index}>
                       {index == 0 && (
-                        <div className=" md:mt-6 lg:mt-6" key={item.user_id}>
-                          <div className="flex items-center">
-                            <h3 className="text-sm font-semibold md:text-base px-4 py-2">
+                        <div
+                          className="md:p-3 flex justify-around"
+                          key={item.user_id}
+                        >
+                          <div className="text-center md:flex md:items-center">
+                            <h3 className="text-sm font-semibold md:text-base p-2">
                               Employee id:
                             </h3>
                             <p>{item?.employee_id}</p>
                           </div>
-                          <div className="flex items-center ">
+                          <div className="text-center md:flex md:items-center">
                             <h3 className="text-sm font-semibold md:text-base px-4 py-2">
                               Employee:
                             </h3>
@@ -359,8 +365,7 @@ const UserProfile = (params) => {
                               {item?.full_name ? item?.full_name : "Emp-Name "}
                             </p>
                           </div>
-
-                          <div className="flex items-center">
+                          <div className="text-center md:flex md:items-center">
                             <h3 className="text-sm font-semibold md:text-base px-4 py-2">
                               Status:
                             </h3>
@@ -373,11 +378,11 @@ const UserProfile = (params) => {
                 })}
               </div>
 
-              <div className="m-2 w-full lg:w-[100%] overflow-x-auto">
-                <table className="border-2 border-[#F5F5F5] shadow-lg">
+              <div className="w-full md:w-3/4 mt-3 mx-auto overflow-x-auto">
+                <table className="border-2 border-[#F5F5F5] w-full shadow-lg">
                   <thead>
                     <tr className="bg-[#E3F2FD] h-12">
-                      <th className="mr-1 w-20 h-12 flex justify-center items-center ml-1">
+                      <th className="mr-1 h-12 flex justify-center items-center ml-1">
                         <input
                           type="checkbox"
                           data-testid="read-checkbox"
@@ -388,12 +393,10 @@ const UserProfile = (params) => {
                           }
                         />
                       </th>
-                      <th className="text-sm w-44 md:text-base">
-                        Project Name
-                      </th>
-                      <th className="md:w-52 text-sm md:text-base">Role</th>
+                      <th className="text-sm md:text-base">Project Name</th>
+                      <th className="text-sm md:text-base">Role</th>
 
-                      <th className="w-36 h-12 text-center text-sm md:text-base">
+                      <th className="h-12 text-center text-sm md:text-base">
                         <div className="flex items-center justify-center mr-2">
                           <span className="md:mr-2">Read</span>
                           <input
@@ -404,7 +407,7 @@ const UserProfile = (params) => {
                           />
                         </div>
                       </th>
-                      <th className="w-36 h-12 text-center text-sm md:text-base">
+                      <th className="h-12 text-center text-sm md:text-base">
                         <div className="flex items-center justify-center mr-2">
                           <span className="md:mr-2">Update</span>
                           <input
@@ -419,7 +422,7 @@ const UserProfile = (params) => {
                           />
                         </div>
                       </th>
-                      <th className="w-36 h-12 text-center text-sm md:text-base">
+                      <th className="h-12 text-center text-sm md:text-base">
                         <div className="flex items-center justify-center">
                           <span className="md:mr-2">Delete</span>
                           <input
@@ -455,7 +458,7 @@ const UserProfile = (params) => {
                             className="border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0 "
                             key={index}
                           >
-                            <td className="w-20 h-12 flex justify-center items-center">
+                            <td className="h-12 flex justify-center items-center">
                               <input
                                 type="checkbox"
                                 className="w-4 h-4"
@@ -472,7 +475,7 @@ const UserProfile = (params) => {
                                 }
                               />
                             </td>
-                            <td className="text-center text-sm md:text-base md:w-40 h-12 md:px-5">
+                            <td className="text-center text-sm md:text-base h-12 md:px-5">
                               <div
                                 onClick={() => getProjectName(item.project)}
                                 className="cursor-pointer font-semibold hover:underline"
@@ -480,10 +483,10 @@ const UserProfile = (params) => {
                                 {item.project}
                               </div>
                             </td>
-                            <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
+                            <td className="capitalize md:text-center h-12 md:px-5 text-sm md:text-base px-2">
                               {item.role}
                             </td>
-                            <td className="w-36 h-12">
+                            <td className="h-12">
                               <div className="flex items-center justify-center">
                                 <input
                                   type="checkbox"
@@ -499,7 +502,7 @@ const UserProfile = (params) => {
                                 />
                               </div>
                             </td>
-                            <td className="w-36 h-12">
+                            <td className="h-12">
                               <div className="flex items-center justify-center">
                                 <input
                                   type="checkbox"
@@ -523,7 +526,7 @@ const UserProfile = (params) => {
                                 />
                               </div>
                             </td>
-                            <td className="w-36 h-12">
+                            <td className="h-12">
                               <div className="flex items-center justify-center">
                                 <input
                                   type="checkbox"
