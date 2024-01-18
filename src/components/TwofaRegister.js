@@ -4,6 +4,7 @@ import { getAccessToken } from "@/utils/common";
 import QRCode from "qrcode.react";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../constant";
+import { api } from "@/utils/helper";
 
 let accessToken = getAccessToken();
 
@@ -17,20 +18,18 @@ const TwofaRegister = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch(`${API_URL}otp-verification/`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+        const response = await api.get(`${API_URL}otp-verification/`, {
         });
-
-        const data = await response?.json();
-
+    
+        const data = response.data;
+    
         // Set the OTP URL in the component state
         setOtpUrl(data.otp_url);
       } catch (error) {
         console.error("Error:", error);
       }
     })();
+    
   }, []);
   // Render the UI for the TwofaRegister component
   return (

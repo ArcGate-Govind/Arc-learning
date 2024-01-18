@@ -5,6 +5,7 @@ import Logo from "@/image/arcgate-logo.png";
 import LogoutImage from "@/image/logout.png";
 import Backbutton from "@/image/backbutton.png";
 import { usePathname } from "next/navigation";
+import { api } from "@/utils/helper";
 import {
   getToken,
   getUser,
@@ -13,6 +14,7 @@ import {
 } from "@/utils/common";
 import { useRouter } from "next/navigation";
 import { API_URL } from "../../constant";
+
 
 // Header component
 const Header = () => {
@@ -30,17 +32,11 @@ const Header = () => {
   // Logout handler function
   const handleLogout = async () => {
     try {
-      const response = await fetch(`${API_URL}logout/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ refresh }),
+      const response = await api.post(`${API_URL}logout/`, { refresh }, {
       });
-
+    
       // If logout is successful, remove user session and navigate to the homepage
-      if (response.status == 200) {
+      if (response.status === 200) {
         removeUserSession();
         localStorage.removeItem("currentPage");
         localStorage.removeItem("values");
@@ -51,6 +47,7 @@ const Header = () => {
     } catch (error) {
       console.error(error);
     }
+    
   };
 
   // Navigate back function
