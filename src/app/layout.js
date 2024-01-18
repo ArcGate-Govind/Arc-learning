@@ -12,12 +12,10 @@ export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <div className="w-fit md:w-auto">
-          <UserDetailsProvider>
-            <Header />
-            {children}
-          </UserDetailsProvider>
-        </div>
+        <UserDetailsProvider>
+          <Header />
+          {children}
+        </UserDetailsProvider>
       </body>
     </html>
   );

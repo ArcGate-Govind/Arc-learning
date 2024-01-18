@@ -71,7 +71,7 @@ const Header = () => {
     return (
       <>
         {/* Header layout */}
-        <div className="header bg-[#1D2E3E] p-4 flex items-center justify-between">
+        <div className="header bg-[#1D2E3E] p-2 md:p-4 flex items-center justify-between">
           {/* Render back button if not on admin panel, OTP, or QR page */}
           {!isOnAdminPanel && !isOTP && !isQR && (
             <Image

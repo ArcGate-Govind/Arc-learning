@@ -492,11 +492,11 @@ const AdminPanel = () => {
       </form>
 
       {/* Data table */}
-      <div className="table mx-auto md:mt-5 mt-5">
-        <div className="flex justify-end">
+      <div className="mx-auto md:mt-5 mt-5 overflow-x-auto">
+        <div className="mx-auto md:w-3/4">
           {/* Results per page and Save Changes button */}
           {data.length > 0 && (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center md:justify-end">
               <ResultPerPage
                 setShowSelectedPerPageResult={setShowSelectedPerPageResult}
                 selectedPerPageResult={selectedPerPageResult}
@@ -505,7 +505,7 @@ const AdminPanel = () => {
               <button
                 name="Save Changes"
                 data-testid="save-changes-button"
-                className="text-[#fff] bg-[#466EA1] px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#728daf] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
+                className="text-[#fff] bg-[#466EA1] px-[2px] md:px-2 py-1 disabled:cursor-not-allowed disabled:hover:bg-[#728daf] rounded-md md:text-lg uppercase my-4 hover:bg-[#1D2E3E]"
                 type="button"
                 onClick={() => {
                   if (unsavedChanges) {
@@ -532,226 +532,230 @@ const AdminPanel = () => {
         </div>
 
         {/* Data table */}
-        <table
-          className="border-2 border-[#F5F5F5] shadow-lg"
-          data-testid="admin-panel"
-          data-data={JSON.stringify(data)}
-        >
-          {/* Table Header */}
-          <thead>
-            <tr className="bg-[#E3F2FD] h-12">
-              <th className="mr-1 md:w-20 h-12 flex justify-center items-center ml-1">
-                <input
-                  data-testid="toggle-all-permissions-checkbox"
-                  type="checkbox"
-                  className="w-4 h-4"
-                  checked={selectAllPermissionsMap[currentPage] || false}
-                  onChange={(e) => handleToggleAllPermissions(e.target.checked)}
-                  name="Toggle All Permissions"
-                />
-              </th>
-              <th className="text-sm md:w-44 md:text-base">Employee Id</th>
-              <th className="md:w-52 text-sm md:text-base">Employee Name</th>
-              <th className="md:w-44 text-sm md:text-base">Status</th>
-              <th className="md:w-36 h-12 text-center text-sm md:text-base">
-                <div className="flex items-center justify-center mr-2">
-                  <span className="md:mr-2">Read</span>
+        <div className="md:flex md:justify-center">
+          <table
+            className="border-2 border-[#F5F5F5] shadow-lg md:w-3/4"
+            data-testid="admin-panel"
+            data-data={JSON.stringify(data)}
+          >
+            {/* Table Header */}
+            <thead>
+              <tr className="bg-[#E3F2FD] h-12">
+                <th className="mr-1 h-12 flex justify-center items-center ml-1">
                   <input
+                    data-testid="toggle-all-permissions-checkbox"
                     type="checkbox"
-                    className="w-4 h-4 ml-1"
-                    checked={readPermissionAll}
-                    onChange={handleToggleAllReadPermissions}
-                    data-testid="read-checkbox"
+                    className="w-4 h-4"
+                    checked={selectAllPermissionsMap[currentPage] || false}
+                    onChange={(e) =>
+                      handleToggleAllPermissions(e.target.checked)
+                    }
+                    name="Toggle All Permissions"
                   />
-                </div>
-              </th>
-              <th className="md:w-36 h-12 text-center text-sm md:text-base">
-                <div className="flex items-center justify-center mr-2">
-                  <span className="md:mr-2">Update</span>
-                  <input
-                    type="checkbox"
-                    className={`${
-                      readPermissionAll ? "" : "cursor-not-allowed"
-                    } w-4 h-4 ml-1`}
-                    checked={readPermissionAll ? updatePermissionAll : false}
-                    onChange={handleToggleAllUpdatePermissions}
-                    data-testid="update-checkbox"
-                  />
-                </div>
-              </th>
-              <th className="md:w-36 h-12 text-center text-sm md:text-base">
-                <div className="flex items-center justify-center">
-                  <span className="md:mr-2">Delete</span>
-                  <input
-                    type="checkbox"
-                    className={`${
-                      readPermissionAll ? "" : "cursor-not-allowed"
-                    } w-4 h-4 ml-1`}
-                    checked={readPermissionAll ? deletePermissionAll : false}
-                    onChange={handleToggleAllDeletePermissions}
-                    data-testid="delete-checkbox"
-                  />
-                </div>
-              </th>
-              <th className="md:w-36">
-                <p>Save Changes</p>
-              </th>
-            </tr>
-          </thead>
-          {/* Table Body */}
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  data-testid="loading-row"
-                  colSpan="8"
-                  className="text-black-600 text-center font-semibold py-3"
-                >
-                  {LOADING_MESSAGE}
-                </td>
+                </th>
+                <th className="text-sm md:text-base">Employee Id</th>
+                <th className=" text-sm md:text-base">Employee Name</th>
+                <th className=" text-sm md:text-base">Status</th>
+                <th className=" h-12 text-center text-sm md:text-base">
+                  <div className="flex items-center justify-center mr-2">
+                    <span className="md:mr-2">Read</span>
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 ml-1"
+                      checked={readPermissionAll}
+                      onChange={handleToggleAllReadPermissions}
+                      data-testid="read-checkbox"
+                    />
+                  </div>
+                </th>
+                <th className=" h-12 text-center text-sm md:text-base">
+                  <div className="flex items-center justify-center mr-2">
+                    <span className="md:mr-2">Update</span>
+                    <input
+                      type="checkbox"
+                      className={`${
+                        readPermissionAll ? "" : "cursor-not-allowed"
+                      } w-4 h-4 ml-1`}
+                      checked={readPermissionAll ? updatePermissionAll : false}
+                      onChange={handleToggleAllUpdatePermissions}
+                      data-testid="update-checkbox"
+                    />
+                  </div>
+                </th>
+                <th className=" h-12 text-center text-sm md:text-base">
+                  <div className="flex items-center justify-center">
+                    <span className="md:mr-2">Delete</span>
+                    <input
+                      type="checkbox"
+                      className={`${
+                        readPermissionAll ? "" : "cursor-not-allowed"
+                      } w-4 h-4 ml-1`}
+                      checked={readPermissionAll ? deletePermissionAll : false}
+                      onChange={handleToggleAllDeletePermissions}
+                      data-testid="delete-checkbox"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <p>Save Changes</p>
+                </th>
               </tr>
-            ) : data.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="text-red-600 text-center py-3">
-                  {SEARCH_RESULT_MESSAGE}
-                </td>
-              </tr>
-            ) : (
-              sortedData.map((item, index) => {
-                const isSelected = selectedUsers[item.user_id];
-
-                return (
-                  <tr
-                    key={index}
-                    className={`border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0 ${
-                      isSelected ? "bg-[#f5f5f5] border-b-[#ffff]" : ""
-                    }`}
+            </thead>
+            {/* Table Body */}
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    data-testid="loading-row"
+                    colSpan="8"
+                    className="text-black-600 text-center font-semibold py-3"
                   >
-                    <td className="md:w-20 h-12 flex justify-center items-center">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4"
-                        checked={selectedUsers[item.user_id] || false}
-                        onChange={(e) =>
-                          handleToggleUserPermissions(
-                            item.user_id,
-                            e.target.checked
-                          )
-                        }
-                        data-testid={`user-checkbox-${item.user_id}`}
-                      />
-                    </td>
-                    <td
-                      className="text-center text-sm md:text-base md:w-40 h-12 md:px-5"
-                      key={item.user_id}
+                    {LOADING_MESSAGE}
+                  </td>
+                </tr>
+              ) : data.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="text-red-600 text-center py-3">
+                    {SEARCH_RESULT_MESSAGE}
+                  </td>
+                </tr>
+              ) : (
+                sortedData.map((item, index) => {
+                  const isSelected = selectedUsers[item.user_id];
+
+                  return (
+                    <tr
+                      key={index}
+                      className={`border border-b-[#f5f5f5] border-t-0 border-r-0 border-l-0 ${
+                        isSelected ? "bg-[#f5f5f5] border-b-[#ffff]" : ""
+                      }`}
                     >
-                      <Link
-                        href={`adminpanel/${item.user_id}`}
-                        className="font-semibold hover:underline"
-                      >
-                        {item.employee_id}
-                      </Link>
-                    </td>
-                    <td className="capitalize md:text-center md:w-48 h-12 md:px-5 text-sm md:text-base px-2">
-                      {item.full_name}
-                    </td>
-                    <td className="text-center md:w-44 flex justify-center h-12 text-sm md:text-base">
-                      <select
-                        data-testid={`status-dropdown-${item.user_id}`}
-                        className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
-                        value={item.status}
-                        onChange={(e) =>
-                          handleUpdateStatus(index, e.target.value === "true")
-                        }
-                      >
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
-                      </select>
-                    </td>
-                    <td className="md:w-36 h-12">
-                      <div className="flex items-center justify-center">
+                      <td className="h-12 flex justify-center items-center">
                         <input
                           type="checkbox"
                           className="w-4 h-4"
-                          checked={item.permissions.read}
+                          checked={selectedUsers[item.user_id] || false}
                           onChange={(e) =>
-                            handlePermissionUpdate(
-                              index,
-                              "read",
+                            handleToggleUserPermissions(
+                              item.user_id,
                               e.target.checked
                             )
                           }
+                          data-testid={`user-checkbox-${item.user_id}`}
                         />
-                      </div>
-                    </td>
-                    <td className="md:w-36 h-12">
-                      <div className="flex items-center justify-center ">
-                        <input
-                          type="checkbox"
-                          className={`${
-                            item.permissions.read ? "" : "cursor-not-allowed"
-                          } w-4 h-4`}
-                          checked={
-                            item.permissions.read
-                              ? item.permissions.update
-                              : false
-                          }
-                          onChange={(e) =>
-                            handlePermissionUpdate(
-                              index,
-                              "update",
-                              e.target.checked
-                            )
-                          }
-                        />
-                      </div>
-                    </td>
-                    <td className="md:w-36 h-12">
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="checkbox"
-                          className={`${
-                            item.permissions.read ? "" : "cursor-not-allowed"
-                          } w-4 h-4`}
-                          checked={
-                            item.permissions.read
-                              ? item.permissions.delete
-                              : false
-                          }
-                          onChange={(e) =>
-                            handlePermissionUpdate(
-                              index,
-                              "delete",
-                              e.target.checked
-                            )
-                          }
-                        />
-                      </div>
-                    </td>
-                    <td className="flex justify-center">
-                      {item.unsavedChanges ? (
-                        <button
-                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover-bg-[#1D2E3E]"
-                          onClick={() => handleSaveChanges(item)}
+                      </td>
+                      <td
+                        className="text-center text-sm md:text-base h-12 md:px-5"
+                        key={item.user_id}
+                      >
+                        <Link
+                          href={`adminpanel/${item.user_id}`}
+                          className="font-semibold hover:underline"
                         >
-                          Save
-                        </button>
-                      ) : (
-                        <button
-                          data-testid="disable-save-button"
-                          disabled
-                          className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed disabled:hover:bg-[#728daf] "
+                          {item.employee_id}
+                        </Link>
+                      </td>
+                      <td className="capitalize md:text-center h-12 md:px-5 text-sm md:text-base px-2">
+                        {item.full_name}
+                      </td>
+                      <td className="text-center flex justify-center h-12 text-sm md:text-base">
+                        <select
+                          data-testid={`status-dropdown-${item.user_id}`}
+                          className="md:w-36 h-9 px-3 flex justify-center border border-b-[#C5C6C8] border-t-0 border-r-0 border-l-0 bg-[#fff]"
+                          value={item.status}
+                          onChange={(e) =>
+                            handleUpdateStatus(index, e.target.value === "true")
+                          }
                         >
-                          Save
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                          <option value="true">Active</option>
+                          <option value="false">Inactive</option>
+                        </select>
+                      </td>
+                      <td className="h-12">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={item.permissions.read}
+                            onChange={(e) =>
+                              handlePermissionUpdate(
+                                index,
+                                "read",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="h-12">
+                        <div className="flex items-center justify-center ">
+                          <input
+                            type="checkbox"
+                            className={`${
+                              item.permissions.read ? "" : "cursor-not-allowed"
+                            } w-4 h-4`}
+                            checked={
+                              item.permissions.read
+                                ? item.permissions.update
+                                : false
+                            }
+                            onChange={(e) =>
+                              handlePermissionUpdate(
+                                index,
+                                "update",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="h-12">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            className={`${
+                              item.permissions.read ? "" : "cursor-not-allowed"
+                            } w-4 h-4`}
+                            checked={
+                              item.permissions.read
+                                ? item.permissions.delete
+                                : false
+                            }
+                            onChange={(e) =>
+                              handlePermissionUpdate(
+                                index,
+                                "delete",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="flex justify-center">
+                        {item.unsavedChanges ? (
+                          <button
+                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto hover-bg-[#1D2E3E]"
+                            onClick={() => handleSaveChanges(item)}
+                          >
+                            Save
+                          </button>
+                        ) : (
+                          <button
+                            data-testid="disable-save-button"
+                            disabled
+                            className="text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-md uppercase my-4 mx-auto disabled:cursor-not-allowed disabled:hover:bg-[#728daf] "
+                          >
+                            Save
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Pagination */}
         {data.length > 0 && totalPages > 1 && (
