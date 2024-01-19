@@ -6,6 +6,7 @@ import ModalBox from "./modalBox";
 import { API_URL, Backend_Localhost_Path } from "../../constant";
 import { getAccessToken } from "@/utils/common";
 import Comment from "./comment";
+import { api } from "@/utils/helper";
 
 const VideoPopup = ({ onClose, data }) => {
   const [dataParams, setDataParams] = useState();
@@ -21,28 +22,30 @@ const VideoPopup = ({ onClose, data }) => {
   }, [data]);
 
   const fetchData = async () => {
-    const response = await fetch(`${Backend_Localhost_Path}${data.file}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    if (response.status == 200) {
-      const videoBlob = await response.blob();
-      const videoUrl = URL.createObjectURL(videoBlob);
-      setShowVideo(videoUrl);
-      setDataParams(data);
+    try {
+      const response = await api.get(`${Backend_Localhost_Path}${data.file}`, {
+        responseType: 'blob', // Specify the response type as 'blob' for binary data
+      });
+  
+      if (response.status === 200) {
+        const videoBlob = response.data;
+        const videoUrl = URL.createObjectURL(videoBlob);
+        setShowVideo(videoUrl);
+        setDataParams(data);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+  
 
   const handleLikeUpdate = async (totalLike, projectId, isLiked) => {
     if (!isLiked && !showLike) {
-      const response = await fetch(`${API_URL}dashboard/likes/${projectId}/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const response = await api.post(`${API_URL}dashboard/likes/${projectId}/`, null, {
       });
+      
       const json = await response.json();
 
       if (totalLike >= 0 && json.status == 200) {

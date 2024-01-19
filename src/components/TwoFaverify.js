@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import PopupMessage from "@/components/popupMessage";
 import { getAccessToken } from "@/utils/common";
 import { API_URL } from "../../constant";
-
-const accessToken = getAccessToken();
+import { api } from "@/utils/helper";
 
 const TwoFaverify = () => {
   const router = useRouter();
@@ -28,41 +27,37 @@ const TwoFaverify = () => {
     onSubmit: async (values) => {
       try {
         setLoading(true);
-
+      
         // Send OTP verification request to the server
-        const response = await fetch(`${API_URL}otp-verification/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
+        const response = await api.post(`${API_URL}otp-verification/`, {
+          data: {
             otp: values.otp,
             faStatus: true,
-          }),
+          },
         });
-
-        const data = await response.json();
-
+        const data = response.data;
+      
         // Check if the response is OK
-        if (response.ok) {
+        if (response.status === 200) {
           setPopupMessage(data?.message);
           router.push("/adminpanel");
         } else {
           setPopupMessage(data?.message);
         }
-
+      
         // Show the popup message
         setShowPopup(true);
-
+      
         // Hide the popup message after 3 seconds
         setTimeout(() => {
           setShowPopup(false);
         }, 3000);
       } catch (error) {
+        console.error("Error:", error);
       } finally {
         setLoading(false);
       }
+      
     },
   });
 

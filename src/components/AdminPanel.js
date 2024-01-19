@@ -16,6 +16,7 @@ import PopupMessage from "@/components/popupMessage";
 import ResultPerPage from "@/components/resultPerPage";
 import Pagination from "@/components/pagination";
 import { userDetailsContext } from "@/context/createContext";
+import { api } from "@/utils/helper";
 
 const AdminPanel = () => {
   // Context variables
@@ -87,28 +88,23 @@ const AdminPanel = () => {
           queryParams.push(`status=${statusText}`);
         }
       }
-
+    
       queryParams.push(`page_size=${selectedPerPageResult}`);
-      const queryString =
-        queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+      const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const newUrl = `${window.location.pathname}${queryString}&page=${currentPage}`;
       window.history.replaceState({}, "", newUrl);
-
-      const response = await fetch(
+    
+      const response = await api.get(
         `${API_URL}users/${queryString}&page=${currentPage}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
       );
-      const json = await response.json();
+    
+      const json = response.data;
       let authorizationData;
       if (json.results.length > 0) {
         authorizationData = json.results ? json.results : [];
         setLoading(false);
         setTotalPages(json.pagination.total_pages);
-      } else if (json.results.length == 0) {
+      } else if (json.results.length === 0) {
         authorizationData = json.results ? json.results : [];
         setTotalPages(json.pagination ? json.pagination.total_pages : 0);
       } else {
@@ -119,8 +115,9 @@ const AdminPanel = () => {
       setData(authorizationData);
       setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
+    
   }
 
   // Handle confirmation modal for changes
@@ -146,11 +143,11 @@ const AdminPanel = () => {
     setIsSaving(true);
     try {
       let updatedData = data.filter((user) => user.unsavedChanges);
-
+    
       if (Object.keys(selectedUsers).length > 0) {
         updatedData = updatedData.filter((user) => selectedUsers[user.user_id]);
       }
-
+    
       if (user) {
         if (Array.isArray(user)) {
           updatedData = user;
@@ -158,10 +155,11 @@ const AdminPanel = () => {
           updatedData = [user];
         }
       }
+    
       if (Object.keys(selectedUsers).length > 0) {
         updatedData = updatedData.filter((user) => selectedUsers[user.user_id]);
       }
-
+    
       if (user) {
         if (Array.isArray(user)) {
           updatedData = user;
@@ -169,18 +167,13 @@ const AdminPanel = () => {
           updatedData = [user];
         }
       }
-
+    
       if (updatedData.length > 0) {
-        const response = await fetch(`${API_URL}user/update/`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(updatedData),
+        const response = await api.put(`${API_URL}user/update/`, updatedData, {
         });
-        const json = await response.json();
-
+    
+        const json = response.data;
+    
         if (json.code === 200) {
           setUnsavedChanges(false);
           setShowPopupMessage(json.message);
@@ -199,6 +192,7 @@ const AdminPanel = () => {
     } finally {
       setIsSaving(false);
     }
+    
   };
 
   // Handle form submission for search

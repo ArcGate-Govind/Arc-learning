@@ -17,6 +17,7 @@ import Dashboard from "@/components/dashboard";
 import { userDetailsContext } from "@/context/createContext";
 import Pagination from "./pagination";
 import ResultPerPage from "./resultPerPage";
+import { api } from "@/utils/helper";
 
 const VideoContainer = () => {
   // Destructuring context values
@@ -68,31 +69,28 @@ const VideoContainer = () => {
     const newUrl = `${window.location.pathname}${queryString}&videopage=${videoCurrentPage}`;
     window.history.replaceState({}, "", newUrl);
 
-    const response = await fetch(
+    const response = await api.get(
       `${API_URL}dashboard/media-list/${queryString}&page=${videoCurrentPage}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
     );
-    const json = await response.json();
-    if (json.code == 200) {
-      let arrDashboard = {};
-      arrDashboard = {
+    
+    const json = response.data;
+    if (json.code === 200) {
+      let arrDashboard = {
         username: json.usernames,
         project: json.project,
       };
       setdashboardData(arrDashboard);
+    
       if (json.results.length > 0) {
         setData(json.results);
-      } else if (json.results.length == 0) {
+      } else if (json.results.length === 0) {
         setData(json.results);
       }
-
+    
       setLoading(false);
       setTotalPages(json.pagination.total_pages);
     }
+    
   };
 
   // Validation schema for formik

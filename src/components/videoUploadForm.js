@@ -9,6 +9,7 @@ import { API_URL } from "../../constant";
 import Image from "next/image";
 import videoUpload from "@/image/video.png";
 import PopupMessage from "@/components/popupMessage";
+import { api } from "@/utils/helper";
 
 const accessToken = getAccessToken();
 
@@ -20,12 +21,9 @@ const VideoUploadForm = ({ onClose }) => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch(`${API_URL}projects/`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+        const response = await api.get(`${API_URL}projects/`, {
         });
-        const data = await response?.json();
+        const data = response.data;
         setProjects(data);
       } catch (error) {
         console.error("Error:", error);

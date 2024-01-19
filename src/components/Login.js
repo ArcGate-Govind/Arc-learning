@@ -12,6 +12,7 @@ import {
   PASSWORD_ERROR_MESSAGE,
   USERNAME_ERROR_MESSAGE,
 } from "../../message";
+import axios from "axios";
 
 // ErrorMessage component to display error messages
 const ErrorMessage = (props) => {
@@ -57,41 +58,42 @@ const Login = () => {
     onSubmit: async (values) => {
       let email = values.email;
       let password = values.password;
-      await fetch(`${API_URL}login/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
-        .then((response) => {
-          return response.json();
-        })
-        .then((data) => {
-          const token = data.token;
-
-          // If login is successful, set user session and navigate to appropriate page
-          if (data.token) {
-            setUserSession(token.refresh, token.access, data.token.username);
-            if (token.is_2fa === false) {
-              handleOpenPopup(token.message, "/twofaregister");
-              handleOpenPopup("/twofaregister");
-            } else {
-              handleOpenPopup(token.message, "/twofaverify");
-              handleOpenPopup("/twofaverify");
-            }
-          } else {
-            // If login fails, show error message and navigate to the login page
-            handleShowErrorMessage(data.non_field_errors[0], "/");
-          }
-        })
-        .catch((error) => {
-          removeUserSession();
-          localStorage.removeItem("currentPage");
-          localStorage.removeItem("values");
-          handleShowErrorMessage(LOGIN_FAILED_MESSAGE, "/");
+    
+      try {
+        const response = await axios.post(`${API_URL}login/`, {
+          email,
+          password,
+        }, {
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
+    
+        const data = response.data;
+        const token = data.token;
+    
+        // If login is successful, set user session and navigate to the appropriate page
+        if (data.token) {
+          setUserSession(token.refresh, token.access, data.token.username);
+          if (token.is_2fa === false) {
+            handleOpenPopup(token.message, "/twofaregister");
+            handleOpenPopup("/twofaregister");
+          } else {
+            handleOpenPopup(token.message, "/twofaverify");
+            handleOpenPopup("/twofaverify");
+          }
+        } else {
+          // If login fails, show error message and navigate to the login page
+          handleShowErrorMessage(data.non_field_errors[0], "/");
+        }
+      } catch (error) {
+        removeUserSession();
+        localStorage.removeItem("currentPage");
+        localStorage.removeItem("values");
+        handleShowErrorMessage(LOGIN_FAILED_MESSAGE, "/");
+      }
     },
+    
   });
 
   // Function to show error message and navigate to a specified path

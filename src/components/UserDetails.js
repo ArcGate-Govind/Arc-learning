@@ -10,6 +10,7 @@ import ResultPerPage from "./resultPerPage";
 import { userDetailsContext } from "@/context/createContext";
 import PopupModal from "./popupModal";
 import Pagination from "./pagination";
+import { api } from "@/utils/helper";
 
 // UserProfile component
 const UserProfile = (params) => {
@@ -79,7 +80,7 @@ const UserProfile = (params) => {
     window.history.replaceState({}, "", newUrl);
 
     try {
-      const response = await fetch(
+      const response = await api.get(
         `${API_URL}user/${userDetailsId}/${queryString}&page=${userCurrentPage}`,
         {
           headers: {
@@ -87,9 +88,9 @@ const UserProfile = (params) => {
           },
         }
       );
-
-      const responseData = await response?.json();
-      if (responseData.code == 200) {
+    
+      const responseData = response.data;
+      if (responseData.code === 200) {
         setTotalPages(
           responseData.pagination ? responseData.pagination.total_pages : 1
         );
@@ -106,6 +107,7 @@ const UserProfile = (params) => {
     } finally {
       setLoading(false);
     }
+    
   }
 
   // Function to navigate to project's dashboard
@@ -249,17 +251,15 @@ const UserProfile = (params) => {
   const handleAllSaveChanges = async () => {
     try {
       let updatedData = data.filter((user) => user.unsavedChanges);
-      const response = await fetch(`${API_URL}user/update/`, {
-        method: "PUT",
+      const response = await api.put(`${API_URL}user/update/`, updatedData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-
-        body: JSON.stringify(updatedData),
       });
-      const json = await response.json();
-      if (json.code == 200) {
+    
+      const json = response.data;
+      if (json.code === 200) {
         setShowPopupMessage(json.message);
         setShowPopup(true);
         setUnsavedChanges(false);
@@ -273,8 +273,8 @@ const UserProfile = (params) => {
           setShowPopup(false);
         }, 1000);
       }
-
-      if (!response.ok) {
+    
+      if (!response.status === 200) {
         console.error(
           "Error updating user data:",
           response.status,
@@ -285,6 +285,7 @@ const UserProfile = (params) => {
     } catch (error) {
       console.error("An error occurred while updating user data:", error);
     }
+    
   };
 
   // Handle confirmation modal for changes
