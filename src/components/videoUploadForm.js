@@ -21,8 +21,7 @@ const VideoUploadForm = ({ onClose }) => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await api.get(`${API_URL}projects/`, {
-        });
+        const response = await api.get(`${API_URL}projects/`, {});
         const data = response.data;
         setProjects(data);
       } catch (error) {
@@ -71,6 +70,7 @@ const VideoUploadForm = ({ onClose }) => {
           setShowPopup(true);
           setTimeout(() => {
             setShowPopup(false);
+            onClose();
           }, 1000);
         }
       } catch (error) {
@@ -213,6 +213,7 @@ const VideoUploadForm = ({ onClose }) => {
                 type="file"
                 id="video"
                 name="video"
+                accept=".mp4, .avi, .mov"
                 onChange={(event) => {
                   formik.setFieldValue("video", event.currentTarget.files[0]);
                 }}

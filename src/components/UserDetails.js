@@ -88,7 +88,7 @@ const UserProfile = (params) => {
           },
         }
       );
-    
+
       const responseData = response.data;
       if (responseData.code === 200) {
         setTotalPages(
@@ -107,7 +107,6 @@ const UserProfile = (params) => {
     } finally {
       setLoading(false);
     }
-    
   }
 
   // Function to navigate to project's dashboard
@@ -257,7 +256,7 @@ const UserProfile = (params) => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-    
+
       const json = response.data;
       if (json.code === 200) {
         setShowPopupMessage(json.message);
@@ -273,7 +272,7 @@ const UserProfile = (params) => {
           setShowPopup(false);
         }, 1000);
       }
-    
+
       if (!response.status === 200) {
         console.error(
           "Error updating user data:",
@@ -285,7 +284,6 @@ const UserProfile = (params) => {
     } catch (error) {
       console.error("An error occurred while updating user data:", error);
     }
-    
   };
 
   // Handle confirmation modal for changes
@@ -478,8 +476,16 @@ const UserProfile = (params) => {
                             </td>
                             <td className="text-center text-sm md:text-base h-12 md:px-5">
                               <div
-                                onClick={() => getProjectName(item.project)}
-                                className="cursor-pointer font-semibold hover:underline"
+                                onClick={() => {
+                                  if (item.permissions.read) {
+                                    getProjectName(item.project);
+                                  }
+                                }}
+                                className={`${
+                                  item.permissions.read
+                                    ? "cursor-pointer hover:underline font-semibold"
+                                    : ""
+                                }  `}
                               >
                                 {item.project}
                               </div>

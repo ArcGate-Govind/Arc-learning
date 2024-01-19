@@ -10,7 +10,6 @@ import {
 } from "../../message";
 import { API_URL, Backend_Localhost_Path } from "../../constant";
 import VideoPopup from "@/components/videoPopup";
-import { getAccessToken } from "@/utils/common";
 import moment from "moment";
 import AOSWrapper from "@/components/aosWrapper";
 import Dashboard from "@/components/dashboard";
@@ -45,7 +44,6 @@ const VideoContainer = () => {
   const [isPopoutOpen, setPopoutOpen] = useState(false);
   const [dataParams, setDataParams] = useState();
   const [dashboardData, setdashboardData] = useState();
-  const accessToken = getAccessToken();
 
   // useEffect to fetch data when dependencies change
   useEffect(() => {
@@ -70,9 +68,9 @@ const VideoContainer = () => {
     window.history.replaceState({}, "", newUrl);
 
     const response = await api.get(
-      `${API_URL}dashboard/media-list/${queryString}&page=${videoCurrentPage}`,
+      `${API_URL}dashboard/media-list/${queryString}&page=${videoCurrentPage}`
     );
-    
+
     const json = response.data;
     if (json.code === 200) {
       let arrDashboard = {
@@ -80,17 +78,16 @@ const VideoContainer = () => {
         project: json.project,
       };
       setdashboardData(arrDashboard);
-    
+
       if (json.results.length > 0) {
         setData(json.results);
       } else if (json.results.length === 0) {
         setData(json.results);
       }
-    
+
       setLoading(false);
       setTotalPages(json.pagination.total_pages);
     }
-    
   };
 
   // Validation schema for formik
@@ -223,46 +220,41 @@ const VideoContainer = () => {
               {data.length > 0 ? (
                 data.map((project, index) => {
                   let converTime = moment(project.created).fromNow();
-                  let videoPath = `${Backend_Localhost_Path}${project.file}`;
+                  let videoImagePath = `${Backend_Localhost_Path}${project.screenshot}`;
 
                   return (
                     <div
                       key={index}
+                      onClick={() => openPopup(project)}
                       data-aos="fade-up"
                       data-aos-duration="1400"
-                      className="hover:scale-95  mb-0  md:w-[20%] sm:w-1/2 relative"
+                      className="hover:scale-95 cursor-pointer  mb-0  md:w-[20%] sm:w-1/2 relative"
                     >
                       <video
+                        poster={videoImagePath}
                         className="py-2 w-[90%] custom-video-player"
                         controls
                         controlsList="nodownload"
                         disablePictureInPicture
-                      >
-                        <source src={videoPath} type="video/mp4" />
-                      </video>
+                      />
 
-                      <div
-                        className="cursor-pointer "
-                        onClick={() => openPopup(project)}
-                      >
-                        <div className="flex w-[90%] ">
-                          <p
-                            title={project.title}
-                            className="font-medium  text-[#000000] w-3/4  line-clamp-2 text-xs"
-                          >
-                            {project.title}
-                          </p>
-                          <p className="font-medium text-[#000000] w-3/4  line-clamp-2 text-xs">
-                            {converTime}
-                          </p>
-                        </div>
+                      <div className="flex w-[90%] ">
                         <p
-                          title={project.description}
-                          className={`font-medium text-[#000000] w-[90%]  line-clamp-2 text-xs mb-1  mb-4`}
+                          title={project.title}
+                          className="font-medium  text-[#000000] w-3/4  line-clamp-2 text-xs"
                         >
-                          {project.description}
+                          {project.title}
+                        </p>
+                        <p className="font-medium text-[#000000] w-3/4  line-clamp-2 text-xs">
+                          {converTime}
                         </p>
                       </div>
+                      <p
+                        title={project.description}
+                        className={`font-medium text-[#000000] w-[90%]  line-clamp-2 text-xs mb-1  mb-4`}
+                      >
+                        {project.description}
+                      </p>
                     </div>
                   );
                 })
