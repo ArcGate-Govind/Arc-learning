@@ -8,7 +8,6 @@ function middleware(req) {
 
   if (!verify) {
     if (
-      !verify &&
       pathname != "/" &&
       pathname != "/twofaregister" &&
       pathname != "/twofaverify"
@@ -22,11 +21,7 @@ function middleware(req) {
       return NextResponse.redirect(new URL("/twofaverify", req.url));
     }
   } else {
-    if (!verify && pathname != "/") {
-      return NextResponse.redirect(new URL("/", req.url));
-    } else if (verify && pathname == "/") {
-      return NextResponse.redirect(new URL("/adminpanel", req.url));
-    } else if (
+    if (
       verify &&
       (pathname == "/" ||
         pathname == "/twofaregister" ||
