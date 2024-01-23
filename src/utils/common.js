@@ -1,6 +1,35 @@
 import Cookies from "js-cookie";
 import { accessTokenAPI } from "./auth";
 
+export const setURLSession = (URL) => {
+  Cookies.set("URL", JSON.stringify(URL));
+};
+
+export const getURL = () => {
+  const urlStr = Cookies.get("URL");
+  if (urlStr) return JSON.parse(urlStr);
+  else return null;
+};
+
+export const removeURLSession = () => {
+  Cookies.remove("URL");
+};
+
+
+export const setSecretSession = (secretKey) => {
+  Cookies.set("SecretKey", JSON.stringify(secretKey));
+};
+
+export const getSecret = () => {
+  const urlStr = Cookies.get("SecretKey");
+  if (urlStr) return JSON.parse(urlStr);
+  else return null;
+};
+
+export const removeSecretSession = () => {
+  Cookies.remove("SecretKey");
+};
+
 export const getUser = () => {
   const userStr = Cookies.get("user");
   if (userStr) return JSON.parse(userStr);

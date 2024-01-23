@@ -1,12 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { getAccessToken } from "@/utils/common";
+import { getURL, removeURLSession } from "@/utils/common";
 import QRCode from "qrcode.react";
 import { useRouter } from "next/navigation";
-import { API_URL } from "../../constant";
-import { api } from "@/utils/helper";
-
-let accessToken = getAccessToken();
 
 const TwofaRegister = () => {
   const router = useRouter();
@@ -16,22 +12,15 @@ const TwofaRegister = () => {
 
   // Fetch OTP URL from the server on component mount
   useEffect(() => {
-    (async () => {
-      try {
-        const response = await api.get(`${API_URL}otp-verification/`, {
-        });
-    
-        const data = response.data;
-    
-        // Set the OTP URL in the component state
-        setOtpUrl(data.otp_url);
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    })();
-    
+    let otpVerifyUrl = getURL();
+    setOtpUrl(otpVerifyUrl);
   }, []);
   // Render the UI for the TwofaRegister component
+
+  const handleNextPage = (path) => {
+    router.push(path);
+    removeURLSession();
+  };
   return (
     <>
       {/* Display the OTP QR Code in a centered container */}
@@ -46,8 +35,7 @@ const TwofaRegister = () => {
         <button
           className="bg-[#466EA1] text-white py-2 px-4 rounded-md cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
           onClick={() => {
-            // Navigate to the TwofaVerify page on button click
-            router.push("/twofaverify");
+            handleNextPage("/twofaverify");
           }}
         >
           Done
