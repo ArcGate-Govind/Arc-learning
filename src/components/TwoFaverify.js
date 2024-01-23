@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import PopupMessage from "@/components/popupMessage";
-import { getAccessToken } from "@/utils/common";
+import { getSecret, removeSecretSession, setUserSession } from "@/utils/common";
 import { API_URL } from "../../constant";
 import { api } from "@/utils/helper";
 
@@ -26,28 +26,30 @@ const TwoFaverify = () => {
     }),
     onSubmit: async (values) => {
       try {
+        let secret = getSecret();
         setLoading(true);
-      
+
         // Send OTP verification request to the server
         const response = await api.post(`${API_URL}otp-verification/`, {
-          data: {
-            otp: values.otp,
-            faStatus: true,
-          },
+          secret: secret,
+          otp: values.otp,
         });
         const data = response.data;
-      
         // Check if the response is OK
         if (response.status === 200) {
-          setPopupMessage(data?.message);
+          removeSecretSession();
+          setUserSession(
+            data.token.refresh,
+            data.token.access,
+            data.token.username
+          );
           router.push("/adminpanel");
         } else {
+          // Show the popup message
+          setShowPopup(true);
           setPopupMessage(data?.message);
         }
-      
-        // Show the popup message
-        setShowPopup(true);
-      
+
         // Hide the popup message after 3 seconds
         setTimeout(() => {
           setShowPopup(false);
@@ -57,7 +59,6 @@ const TwoFaverify = () => {
       } finally {
         setLoading(false);
       }
-      
     },
   });
 

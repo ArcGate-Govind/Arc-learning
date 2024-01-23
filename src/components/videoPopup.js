@@ -4,29 +4,30 @@ import React, { useEffect, useState } from "react";
 import { LOADING_MESSAGE } from "../../message";
 import ModalBox from "./modalBox";
 import { API_URL, Backend_Localhost_Path } from "../../constant";
-import { getAccessToken } from "@/utils/common";
 import Comment from "./comment";
 import { api } from "@/utils/helper";
 
 const VideoPopup = ({ onClose, data }) => {
+  // State to manage
   const [dataParams, setDataParams] = useState();
   const [loading, setLoading] = useState(true);
   const [likeData, setLikeData] = useState(1);
   const [showLike, setShowLike] = useState(false);
   const [showVideo, setShowVideo] = useState(null);
   const [showCommentMessage, setShowCommentMessage] = useState(false);
-  const accessToken = getAccessToken();
 
+  // Fetch video data and initialize component on mount or when data changes
   useEffect(() => {
     fetchData();
   }, [data]);
 
+  // Function to fetch video data from the server
   const fetchData = async () => {
     try {
       const response = await api.get(`${Backend_Localhost_Path}${data.file}`, {
-        responseType: 'blob', // Specify the response type as 'blob' for binary data
+        responseType: "blob", // Specify the response type as 'blob' for binary data
       });
-  
+
       if (response.status === 200) {
         const videoBlob = response.data;
         const videoUrl = URL.createObjectURL(videoBlob);
@@ -34,27 +35,26 @@ const VideoPopup = ({ onClose, data }) => {
         setDataParams(data);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
-  
 
+  // Function to handle like updates for the video
   const handleLikeUpdate = async (totalLike, projectId, isLiked) => {
     if (!isLiked && !showLike) {
-      const response = await api.post(`${API_URL}dashboard/likes/${projectId}/`, null, {
-      });
-      
-      const json = await response.json();
-
-      if (totalLike >= 0 && json.status == 200) {
+      const response = await api.post(
+        `${API_URL}dashboard/likes/${projectId}/`
+      );
+      if (totalLike >= 0 && response.status == 200) {
         setLikeData(totalLike + 1);
-        setShowLike(!isLiked);
+        setShowLike(true);
       }
     }
   };
 
+  // Function to handle comment section visibility
   const handleUpdateComment = (value) => {
     if (value) {
       setShowCommentMessage(false);
@@ -63,10 +63,12 @@ const VideoPopup = ({ onClose, data }) => {
     }
   };
 
+  // Render the video popup component
   return (
     <>
       <ModalBox onClose={onClose}>
         {loading ? (
+          // Display loading message while fetching data
           <div className="text-black-600 text-center font-semibold py-3">
             {LOADING_MESSAGE}
           </div>
@@ -74,6 +76,7 @@ const VideoPopup = ({ onClose, data }) => {
           <div className="m-auto mb-0 mt-2 w-full">
             {dataParams && (
               <div className="flex flex-col items-center justify-center mb-4">
+                {/* Video player */}
                 <video
                   className="py-4 px-4 w-full h-full mx-auto"
                   alt="videoImage"
@@ -85,7 +88,7 @@ const VideoPopup = ({ onClose, data }) => {
                 <p className="font-medium text-[#000000] w-11/12 line-clamp-2 text-xs mb-1 ">
                   {data.id}____ {dataParams.description}
                 </p>
-
+                {/* Like and comment section */}
                 <div className="flex w-11/12 ">
                   <span
                     data-testid="like-button"
@@ -119,6 +122,7 @@ const VideoPopup = ({ onClose, data }) => {
                 </div>
               </div>
             )}
+            {/* Display comment section if showCommentMessage is true */}
             {showCommentMessage && (
               <Comment
                 videoId={dataParams.id}

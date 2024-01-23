@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { removeUserSession, setUserSession } from "../utils/common";
+import { setSecretSession, setURLSession } from "../utils/common";
 import { API_URL } from "../../constant";
 import {
   ERROR_MESSAGE,
@@ -58,28 +58,31 @@ const Login = () => {
     onSubmit: async (values) => {
       let email = values.email;
       let password = values.password;
-    
+
       try {
-        const response = await axios.post(`${API_URL}login/`, {
-          email,
-          password,
-        }, {
-          headers: {
-            "Content-Type": "application/json",
+        const response = await axios.post(
+          `${API_URL}login/`,
+          {
+            email,
+            password,
           },
-        });
-    
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
         const data = response.data;
         const token = data.token;
-    
         // If login is successful, set user session and navigate to the appropriate page
-        if (data.token) {
-          setUserSession(token.refresh, token.access, data.token.username);
-          if (token.is_2fa === false) {
-            handleOpenPopup(token.message, "/twofaregister");
+        if (data.code == 200) {
+          if (data?.otp_url) {
+            setURLSession(data.otp_url);
+            setSecretSession(data.secret_key);
             handleOpenPopup("/twofaregister");
           } else {
-            handleOpenPopup(token.message, "/twofaverify");
+            setSecretSession(data.secret_key);
             handleOpenPopup("/twofaverify");
           }
         } else {
@@ -87,13 +90,9 @@ const Login = () => {
           handleShowErrorMessage(data.non_field_errors[0], "/");
         }
       } catch (error) {
-        removeUserSession();
-        localStorage.removeItem("currentPage");
-        localStorage.removeItem("values");
         handleShowErrorMessage(LOGIN_FAILED_MESSAGE, "/");
       }
     },
-    
   });
 
   // Function to show error message and navigate to a specified path

@@ -28,7 +28,7 @@ const ResultPerPage = ({
       {/* Dropdown to select the number of results per page */}
       <select
         name="resultPerPage"
-        className="w-20 p-2 md:w-20 h-10 md:h-10 px-3 bg-[#fff] mx-4 md:mx-8 text-[#9CA4B4] border-[#C5C6C8] border rounded-md"
+        className=" cursor-pointer w-20 p-2 md:w-20 h-10 md:h-10 px-3 bg-[#fff] mx-4 md:mx-8 text-[#9CA4B4] border-[#C5C6C8] border rounded-md"
         onChange={handleChangeSelectValue}
         placeholder="Result Per Page"
         value={selectedPerPageResult}
