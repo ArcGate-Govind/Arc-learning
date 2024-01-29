@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Image from "next/image";
 import questionnaireLogo from "@/image/questionnaire.png";
 import Questions from "@/components/questionnairePopup";
@@ -7,12 +7,44 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { SEARCH_INPUT_MESSAGE } from "../../message";
 import AOSWrapper from "@/components/aosWrapper";
+import Dashboard from "./dashboard";
+import ResultPerPage from "./resultPerPage";
+import { userDetailsContext } from "@/context/createContext";
+import Pagination from "./pagination";
 
 const Questionnaire = () => {
+  // Destructuring context values
+  const {
+    selectedQuestionnaireSearchValuesContext,
+    questionnaireCurrentPageContext,
+    selectedPerPageResultContext,
+    selectedProjectContext,
+  } = useContext(userDetailsContext);
+
+  // Extracting values from context
+  const [
+    selectedQuestionnaireSearchValues,
+    setShowSelectedQuestionnaireSearchValues,
+  ] = selectedQuestionnaireSearchValuesContext;
+  const [questionnaireCurrentPage, setQuestionnaireCurrentPage] =
+    questionnaireCurrentPageContext;
+  const [selectedPerPageResult, setShowSelectedPerPageResult] =
+    selectedPerPageResultContext;
+  const [selectedProject, setShowSelectedProject] = selectedProjectContext;
+
   const [params, setParams] = useState();
   const [popupOpen, setPopupOpen] = useState(false);
   const [blankInputError, setBlankInputError] = useState(false);
   const [searchClear, setSearchClear] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    fetchData();
+  }, [
+    questionnaireCurrentPage,
+    selectedQuestionnaireSearchValues,
+    selectedPerPageResult,
+  ]);
 
   const questionnaireData = [
     { id: 1, title: "Assessment-1" },
@@ -41,33 +73,41 @@ const Questionnaire = () => {
     setPopupOpen(false);
   };
 
+  const fetchData = async () => {
+    const queryParams = [];
+
+    if (selectedQuestionnaireSearchValues != null) {
+      if (selectedQuestionnaireSearchValues.assessmentSearch) {
+        queryParams.push(
+          `assessmentSearch=${selectedQuestionnaireSearchValues.assessmentSearch}`
+        );
+      }
+    }
+
+    queryParams.push(`project=${selectedProject}`);
+    queryParams.push(`page_size=${selectedPerPageResult}`);
+    const queryString =
+      queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+    const newUrl = `${window.location.pathname}${queryString}&questionnairePage=${questionnaireCurrentPage}`;
+    window.history.replaceState({}, "", newUrl);
+
+    setTotalPages(3);
+  };
+
   const handleFormSubmit = () => {
     if (!formik.values.assessmentSearch) {
       setBlankInputError(true);
     } else {
       setBlankInputError(false);
-      localStorage.setItem(
-        "questionnaireSearchValue",
-        formik.values.assessmentSearch
-      );
+      setQuestionnaireCurrentPage(1);
     }
   };
 
-  useEffect(() => {
-    const storedSearchValue = localStorage.getItem("questionnaireSearchValue");
-    if (storedSearchValue) {
-      formik.setValues({
-        ...formik.values,
-        assessmentSearch: storedSearchValue,
-      });
-    }
-  }, []);
-
+  // Function to handle form clear
   const handleFormClear = () => {
     setSearchClear(true);
-    setBlankInputError(false);
-    formik.setValues({ ...formik.values, assessmentSearch: "" });
-    localStorage.removeItem("questionnaireSearchValue");
+    const newUrl = `${window.location.pathname}?project=${selectedProject}&questionnairePage=${questionnaireCurrentPage}`;
+    window.history.replaceState({}, "", newUrl);
     window.location.reload();
   };
 
@@ -75,16 +115,32 @@ const Questionnaire = () => {
     assessmentSearch: Yup.string().required(SEARCH_INPUT_MESSAGE),
   });
 
+  // Formik configuration
   const formik = useFormik({
     initialValues: {
-      assessmentSearch: "",
+      assessmentSearch: selectedQuestionnaireSearchValues.assessmentSearch,
     },
     validationSchema,
-    onSubmit: (values) => {},
+    onSubmit: (values) => {
+      const trimedValue = {
+        assessmentSearch: values.assessmentSearch.trim(),
+      };
+      if (trimedValue.assessmentSearch != "") {
+        setShowSelectedQuestionnaireSearchValues(trimedValue);
+      }
+      if (searchClear) {
+        setBlankInputError(false);
+      } else if (!trimedValue.assessmentSearch && !searchClear) {
+        setBlankInputError(true);
+      } else {
+        setBlankInputError(false);
+      }
+    },
   });
 
   return (
     <AOSWrapper>
+      <Dashboard />
       <div className="mx-5 md:mx-10 my-10 bg-[#F8F8F8] p-4">
         <form onSubmit={formik.handleSubmit}>
           <div className="flex justify-center gap-x-3">
@@ -98,19 +154,25 @@ const Questionnaire = () => {
               value={formik.values.assessmentSearch}
             />
             <button
-              type="button"
+              type="submit"
               onClick={handleFormSubmit}
               className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
             >
               Search
             </button>
             <button
-              type="button"
+              type="submit"
               onClick={handleFormClear}
               className="p-2 bg-[#466EA1] text-[#FFFFFF] rounded cursor-pointer hover:bg-gray-200 hover:text-[#466EA1]"
             >
               Clear
             </button>
+
+            <ResultPerPage
+              setShowSelectedPerPageResult={setShowSelectedPerPageResult}
+              selectedPerPageResult={selectedPerPageResult}
+              setCurrentPage={setQuestionnaireCurrentPage}
+            />
           </div>
           {blankInputError && (
             <div className="text-red-500 text-center">
@@ -138,6 +200,16 @@ const Questionnaire = () => {
             </div>
           ))}
         </div>
+
+        {/* Display pagination if there are multiple pages */}
+        {questionnaireData.length > 0 && totalPages > 1 && (
+          <Pagination
+            currentPage={questionnaireCurrentPage}
+            setCurrentPage={setQuestionnaireCurrentPage}
+            totalPages={totalPages}
+            isConfirmModal={true}
+          />
+        )}
         {popupOpen && <Questions paramsId={params} onClose={onClose} />}
       </div>
     </AOSWrapper>
