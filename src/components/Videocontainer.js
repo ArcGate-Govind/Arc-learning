@@ -44,6 +44,7 @@ const VideoContainer = () => {
   const [isPopoutOpen, setPopoutOpen] = useState(false);
   const [dataParams, setDataParams] = useState();
   const [dashboardData, setdashboardData] = useState();
+  const [dataIndex, setDataIndex] = useState();
 
   // useEffect to fetch data when dependencies change
   useEffect(() => {
@@ -79,12 +80,9 @@ const VideoContainer = () => {
       };
       setdashboardData(arrDashboard);
 
-      if (json.results.length > 0) {
-        setData(json.results);
-      } else if (json.results.length === 0) {
+      if (json.results.length >= 0) {
         setData(json.results);
       }
-
       setLoading(false);
       setTotalPages(json.pagination.total_pages);
     }
@@ -141,9 +139,10 @@ const VideoContainer = () => {
   };
 
   // Function to open video popup
-  const openPopup = (project) => {
+  const openPopup = (project, index) => {
     setDataParams(project);
     setPopoutOpen(true);
+    setDataIndex(index);
   };
 
   // Function to close video popup
@@ -225,7 +224,7 @@ const VideoContainer = () => {
                   return (
                     <div
                       key={index}
-                      onClick={() => openPopup(project)}
+                      onClick={() => openPopup(project, index)}
                       data-aos="fade-up"
                       data-aos-duration="1400"
                       className="hover:scale-95 cursor-pointer  mb-0  md:w-[20%] sm:w-1/2 relative"
@@ -278,7 +277,13 @@ const VideoContainer = () => {
 
             {/* Display video popup if it's open */}
             {isPopoutOpen && (
-              <VideoPopup data={dataParams} onClose={closePopup} />
+              <VideoPopup
+                updatedData={data}
+                setUpdatedData={setData}
+                data={dataParams}
+                onClose={closePopup}
+                dataIndex={dataIndex}
+              />
             )}
           </>
         )}
