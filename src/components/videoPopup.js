@@ -1,25 +1,47 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { createRef, useEffect, useRef, useState } from "react";
 import { LOADING_MESSAGE } from "../../message";
 import ModalBox from "./modalBox";
 import { API_URL, Backend_Localhost_Path } from "../../constant";
 import Comment from "./comment";
 import { api } from "@/utils/helper";
 
-const VideoPopup = ({ onClose, data }) => {
+const VideoPopup = ({
+  onClose,
+  data,
+  updatedData,
+  setUpdatedData,
+  dataIndex,
+}) => {
   // State to manage
   const [dataParams, setDataParams] = useState();
   const [loading, setLoading] = useState(true);
-  const [likeData, setLikeData] = useState(1);
-  const [showLike, setShowLike] = useState(false);
   const [showVideo, setShowVideo] = useState(null);
   const [showCommentMessage, setShowCommentMessage] = useState(false);
+  const [videoSeen, setVideoSeen] = useState({});
 
+  const videoRefs = useRef([]);
   // Fetch video data and initialize component on mount or when data changes
   useEffect(() => {
+    const storedVideoSeen = localStorage.getItem("videoSeen");
+    if (storedVideoSeen) {
+      setVideoSeen(JSON.parse(storedVideoSeen));
+    }
     fetchData();
+    updateTimeAfterSeenVideo();
   }, [data]);
+
+  useEffect(() => {
+    localStorage.setItem("videoSeen", JSON.stringify(videoSeen));
+    updateTimeAfterSeenVideo();
+  }, [videoSeen]);
+
+  useEffect(() => {
+    if (showVideo) {
+      updateTimeAfterSeenVideo();
+    }
+  }, [showVideo]);
 
   // Function to fetch video data from the server
   const fetchData = async () => {
@@ -32,6 +54,8 @@ const VideoPopup = ({ onClose, data }) => {
         const videoBlob = response.data;
         const videoUrl = URL.createObjectURL(videoBlob);
         setShowVideo(videoUrl);
+        videoRefs.current = {};
+        videoRefs.current[data.id] = createRef();
         setDataParams(data);
       }
     } catch (error) {
@@ -42,14 +66,26 @@ const VideoPopup = ({ onClose, data }) => {
   };
 
   // Function to handle like updates for the video
-  const handleLikeUpdate = async (totalLike, projectId, isLiked) => {
-    if (!isLiked && !showLike) {
+  const handleLikeUpdate = async (totalLike, projectId) => {
+    if (data.is_liked == false) {
       const response = await api.post(
         `${API_URL}dashboard/likes/${projectId}/`
       );
       if (totalLike >= 0 && response.status == 200) {
-        setLikeData(totalLike + 1);
-        setShowLike(true);
+        const updateData = [...updatedData];
+        updateData[dataIndex].is_liked = true;
+        updateData[dataIndex].total_likes = totalLike + 1;
+        setUpdatedData(updateData);
+      }
+    } else {
+      const response = await api.post(
+        `${API_URL}dashboard/likes/${projectId}/`
+      );
+      if (totalLike > 0 && response.status == 200) {
+        const updateData = [...updatedData];
+        updateData[dataIndex].is_liked = false;
+        updateData[dataIndex].total_likes = totalLike - 1;
+        setUpdatedData(updateData);
       }
     }
   };
@@ -60,6 +96,32 @@ const VideoPopup = ({ onClose, data }) => {
       setShowCommentMessage(false);
     } else {
       setShowCommentMessage(true);
+    }
+  };
+
+  const getCurrentTime = (projectID) => {
+    if (videoRefs.current[projectID]) {
+      setVideoSeen((prevVideoSeen) => ({
+        ...prevVideoSeen,
+        [projectID]: videoRefs.current[projectID].current.currentTime,
+      }));
+    }
+  };
+
+  const updateTimeAfterSeenVideo = () => {
+    let indexData = Object.keys(videoSeen).length;
+    setShowVideo(false);
+
+    if (indexData > 0 && dataParams) {
+      for (var i = 0; i < indexData; i++) {
+        for (const key in videoSeen) {
+          if (data.id == key) {
+            const videoElement = videoRefs.current[key];
+            const videoCurren = videoElement?.current;
+            videoCurren.currentTime = videoSeen[key];
+          }
+        }
+      }
     }
   };
 
@@ -78,12 +140,14 @@ const VideoPopup = ({ onClose, data }) => {
               <div className="flex flex-col items-center justify-center mb-4">
                 {/* Video player */}
                 <video
+                  ref={videoRefs.current[dataParams?.id]}
                   className="py-4 px-4 w-full h-full mx-auto"
                   alt="videoImage"
                   controlsList="nodownload"
                   controls
+                  onPause={() => getCurrentTime(dataParams?.id)}
                 >
-                  <source src={showVideo} type="video/mp4" />
+                  <source src={showVideo ? showVideo : ""} type="video/mp4" />
                 </video>
                 <p className="font-medium text-[#000000] w-11/12 line-clamp-2 text-xs mb-1 ">
                   {data.id}____ {dataParams.description}
@@ -103,14 +167,14 @@ const VideoPopup = ({ onClose, data }) => {
                   >
                     <i
                       className={`${
-                        showLike || dataParams.is_liked
-                          ? " fa fa-thumbs-up cursor-not-allowed"
+                        dataParams.is_liked
+                          ? " fa fa-thumbs-up cursor-pointer"
                           : " fa fa-thumbs-o-up cursor-pointer"
                       }`}
                     ></i>
                   </span>
                   <p className="font-medium text-[#000000] line-clamp-2 sm:text-sm md:text-lg mr-8">
-                    {showLike ? likeData : dataParams.total_likes}
+                    {dataParams.total_likes}
                   </p>
 
                   <span

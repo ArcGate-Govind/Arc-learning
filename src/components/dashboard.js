@@ -23,7 +23,7 @@ const Dashboard = ({ dashboardData }) => {
 
   // Function to handle selecting different tabs
   const selectedData = (data) => {
-    router.push(`/dashboard/${data}?projectname=${selectedProject}`);
+    router.push(`/dashboard/${data}?project=${selectedProject}`);
     setSelectedTab(data);
   };
 

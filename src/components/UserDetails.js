@@ -323,7 +323,7 @@ const UserProfile = (params) => {
                   <ResultPerPage
                     setShowSelectedPerPageResult={setShowSelectedPerPageResult}
                     selectedPerPageResult={selectedPerPageResult}
-                    setUserCurrentPage={setUserCurrentPage}
+                    setCurrentPage={setUserCurrentPage}
                   />
                   <button
                     className={`text-[#fff] bg-[#466EA1] px-2 py-1 rounded-md md:text-lg uppercase hover:bg-[#1D2E3E] ${
