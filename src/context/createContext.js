@@ -15,9 +15,11 @@ const UserDetailsProvider = (props) => {
   let perPageValue = null;
   let searchValuesObj = {};
   let videosearchValuesObj = {};
+  let questionnaireSearchValuesObj = {};
   let videoPageValue = null;
   let projectName = null;
   let userPageValue = null;
+  let questionnairePageValue = null;
 
   // Parse URL parameters if the URL string is available
   if (urlString) {
@@ -30,11 +32,17 @@ const UserDetailsProvider = (props) => {
       perPageValue = url.searchParams.get("page_size");
       videoPageValue = url.searchParams.get("videopage");
       projectName = url.searchParams.get("project");
+      questionnairePageValue = url.searchParams.get("questionnairePage");
 
       // Retrieve search values from URL parameters
       videosearchValuesObj = {
         projectSearch: url.searchParams.get("search")
           ? url.searchParams.get("search")
+          : "",
+      };
+      questionnaireSearchValuesObj = {
+        assessmentSearch: url.searchParams.get("assessmentSearch")
+          ? url.searchParams.get("assessmentSearch")
           : "",
       };
       searchValuesObj = {
@@ -58,6 +66,7 @@ const UserDetailsProvider = (props) => {
   const pageValueAsNumber = parseInt(pageValue);
   const videoPageValueAsNumber = parseInt(videoPageValue);
   const userPageValueAsNumber = parseInt(userPageValue);
+  const questionnairePageValueNumber = parseInt(questionnairePageValue);
 
   // State to manage the current page
   const [currentPage, setCurrentPage] = useState(pageValueAsNumber || 1);
@@ -85,8 +94,19 @@ const UserDetailsProvider = (props) => {
   const [selectedVideoSearchValues, setShowSelectedVideoSearchValues] =
     useState(videosearchValuesObj);
 
+  // State to manage selected questionnaire search values
+  const [
+    selectedQuestionnaireSearchValues,
+    setShowSelectedQuestionnaireSearchValues,
+  ] = useState(questionnaireSearchValuesObj);
+
   // State to manage selected project values
   const [selectedProject, setShowSelectedProject] = useState(projectName);
+
+  // State to manage the questionnaire current page
+  const [questionnaireCurrentPage, setQuestionnaireCurrentPage] = useState(
+    questionnairePageValueNumber || 1
+  );
 
   return (
     <userDetailsContext.Provider
@@ -94,6 +114,10 @@ const UserDetailsProvider = (props) => {
         currentPageContext: [currentPage, setCurrentPage],
         userCurrentPageContext: [userCurrentPage, setUserCurrentPage],
         videoCurrentPageContext: [videoCurrentPage, setVideouCurrentPage],
+        questionnaireCurrentPageContext: [
+          questionnaireCurrentPage,
+          setQuestionnaireCurrentPage,
+        ],
         selectedPerPageResultContext: [
           selectedPerPageResult,
           setShowSelectedPerPageResult,
@@ -105,6 +129,10 @@ const UserDetailsProvider = (props) => {
         selectedVideoSearchValuesContext: [
           selectedVideoSearchValues,
           setShowSelectedVideoSearchValues,
+        ],
+        selectedQuestionnaireSearchValuesContext: [
+          selectedQuestionnaireSearchValues,
+          setShowSelectedQuestionnaireSearchValues,
         ],
         selectedProjectContext: [selectedProject, setShowSelectedProject],
       }}
